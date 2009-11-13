@@ -5,7 +5,7 @@
 TEMPLATE = app
 # TARGET = "Chemical Metabolism Simulator"
 TARGET = "metabolism"
-RESOURCES = resources.qrc
+# RESOURCES = resources.qrc
 DEPENDPATH += .
 INCLUDEPATH += ../SFMT
 DEFINES += MEXP=132049
