@@ -1,0 +1,24 @@
+Chemical Metabolism Simulator
+=============================
+
+Chemical Metabolism Simulator is a work in progress.  
+
+Dependencies
+============
+
+This project uses code developed by the Qt, Qwt, and SFMT projects. 
+
+To build this program, you will need to install the development tools for 
+Qt 4 (version 4.3 or later, available from www.trolltech.com) and the Qwt 
+libraries (available from qwt.sourceforge.net).  The SFMT libraries have
+been modified and are included with the source code, but the project page
+can be found at http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT ).
+
+Compilation Instructions
+========================
+This program uses the standard Qt build process run from the src directory:
+
+  cd src
+  qmake
+  make
+
