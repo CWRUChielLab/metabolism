@@ -1,17 +1,45 @@
 /* particle.cpp
  */
 
+#include <math.h>
 #include "particle.h"
 
-Particle::Particle( char *initName, int initColor, int initCharge )
+Particle::Particle( const char *initName, int initColor, int initCharge )
 {
+   // Calculate a unique prime number for the Particle key
+   static int prime = 1;
+   int temp = prime + 1;
+   int i = 2;
+   while( i <= sqrt(temp) )
+   {
+      if( temp % i == 0 )
+      {
+         temp++;
+         i = 2;
+      }
+      else
+      {
+         i++;
+      }
+   }
+   prime = temp;
+   key = prime;
+
+   // Copy constructor arguments
    name = initName;
    color = initColor;
    charge = initCharge;
 }
 
 
-char*
+int
+Particle::getKey()
+{
+   return key;
+}
+
+
+const char*
 Particle::getName()
 {
    return name;
@@ -19,7 +47,7 @@ Particle::getName()
 
 
 void
-Particle::setName( char *newName )
+Particle::setName( const char *newName )
 {
    name = newName;
 }

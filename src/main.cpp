@@ -11,8 +11,17 @@ main ( int argc, char *argv[] )
    // QCoreApplication *app;
    fprintf( stdout, "This is a test.\n" );
 
-   Particle *test = new Particle( (char*)("Anion"), 0xFF0000, -1 );
-   fprintf( stdout, "test:\n\tName: %s\n\tColor: %d\n\tCharge: %d\n", test->getName(), test->getColor(), test->getCharge() );
+   Particle *test = new Particle( "Anion", 0xFF0000, -1 );
+   fprintf( stdout, "test:\n\tKey: %d\n\tName: %s\n\tColor: %d\n\tCharge: %d\n", test->getKey(), test->getName(), test->getColor(), test->getCharge() );
+
+   int primes = 25;
+   Particle *list[primes];
+   for( int i = 0; i < primes; i++ )
+   {
+      list[i] = new Particle( "test", 0, 0 );
+      fprintf( stdout, "next key: %d\n", list[i]->getKey() );
+   }
+
    return 0;
 }
 
