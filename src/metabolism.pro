@@ -73,6 +73,6 @@ win32 {
 }
 
 # Input
-HEADERS +=
-SOURCES += main.cpp ../SFMT/SFMT.c
+HEADERS += particle.h
+SOURCES += main.cpp particle.cpp ../SFMT/SFMT.c
 
