@@ -8,13 +8,13 @@ Particle::Particle( const char *initName, int initColor, int initCharge )
 {
    // Calculate a unique prime number for the Particle key
    static int prime = 1;
-   int temp = prime + 1;
+   int candidate = prime + 1;
    int i = 2;
-   while( i <= sqrt(temp) )
+   while( i <= sqrt(candidate) )
    {
-      if( temp % i == 0 )
+      if( candidate % i == 0 )
       {
-         temp++;
+         candidate++;
          i = 2;
       }
       else
@@ -22,7 +22,7 @@ Particle::Particle( const char *initName, int initColor, int initCharge )
          i++;
       }
    }
-   prime = temp;
+   prime = candidate;
    key = prime;
 
    // Copy constructor arguments

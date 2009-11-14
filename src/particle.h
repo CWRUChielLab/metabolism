@@ -7,7 +7,7 @@
 class Particle
 {
    public:
-      // Constuctors
+      // Constructors
       Particle( const char *initName, int initColor, int initCharge = 0 );
       
       // Get and Set Functions
