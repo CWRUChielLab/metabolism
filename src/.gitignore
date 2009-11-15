@@ -2,6 +2,7 @@
 Makefile*
 *.o
 *~
+*.swp
 moc_*
 qrc_resources.cpp
 metabolism
