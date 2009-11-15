@@ -19,7 +19,7 @@ main ( int argc, char *argv[] )
    test->setCharge( 1 );
    fprintf( stdout, "test:\n\tKey: %d\n\tName: %s\n\tColor: %d\n\tCharge: %d\n", test->getKey(), test->getName(), test->getColor(), test->getCharge() );
 
-   int primes = 25;
+   int primes = 5;
    Particle *list[primes];
    for( int i = 0; i < primes; i++ )
    {
@@ -28,7 +28,6 @@ main ( int argc, char *argv[] )
    }
 
    Reaction::initList();
-   //Reaction::list[0][0] = 42;
    Reaction::printList();
 
    return 0;

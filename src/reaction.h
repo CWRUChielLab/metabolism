@@ -11,7 +11,8 @@ class Reaction
       static void printList();
 
    private:
-      //static int list[10][2];
+      static int list[5][2];
+      //static int *list;
 };
 
 #endif /* REACTION_H */
