@@ -82,7 +82,7 @@ Reaction::initList()
 void
 Reaction::printList()
 {
-   printf( "-----------\nKey: %d       %s", list[6]->key, list[6]->reactants[0] );
+   printf( "-----------\nKey: %d       %d", list[6]->key, list[6]->reactants[0] );
    for( int i = 1; i < list[6]->numReactants; i++ )
    {
       printf( " + %d", list[6]->reactants[i] );
