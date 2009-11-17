@@ -11,9 +11,11 @@
 Reaction **Reaction::list;
 
 
-// Private constructor
+// Constructor
 Reaction::Reaction( int* initReactants, int initNumReactants, int* initProducts, int initNumProducts, double initRate )
 {
+   static int listSize = 0;
+
    // Assign the key
    key = 1;
    for( int i = 0; i < initNumReactants; i++ )
@@ -35,21 +37,9 @@ Reaction::Reaction( int* initReactants, int initNumReactants, int* initProducts,
    }
    numProducts = initNumProducts;
    rate = initRate;
-}
-
-
-// Handles creating new Reactions and adding them
-// to the list, indexed by Reaction key
-void
-Reaction::addReaction( int* initReactants, int initNumReactants, int* initProducts, int initNumProducts, double initRate )
-{
-   static int listSize = 0;
-
-   // Create the new Reaction
-   Reaction *tempReaction = new Reaction( initReactants, initNumReactants, initProducts, initNumProducts, initRate );
 
    // Grow the list if there is not enough room for the new Reaction
-   while( tempReaction->getKey() >= listSize )
+   while( key >= listSize )
    {
       int newListSize = fmax( listSize * 2, 10 );
       Reaction **tempArray = (Reaction **)malloc( newListSize * sizeof( Reaction * ) );
@@ -62,7 +52,15 @@ Reaction::addReaction( int* initReactants, int initNumReactants, int* initProduc
    }
 
    // Place the new Reaction in the list, indexed by key
-   list[tempReaction->getKey()] = tempReaction;
+   list[key] = this;
+}
+
+
+// Returns the pointer to a Reaction from the list
+Reaction*
+Reaction::getReaction( int key )
+{
+   return list[key];
 }
 
 
@@ -72,17 +70,17 @@ Reaction::initList()
 {
    int p1[] = {2,3};
    int r1[] = {5,7};
-   addReaction( p1, 2, r1, 2, 0.02 );
+   new Reaction( p1, 2, r1, 2, 0.02 );
    int p2[] = {11,13};
    int r2[] = {17,19};
-   addReaction( p2, 2, r2, 2, 0.03 );
+   new Reaction( p2, 2, r2, 2, 0.03 );
 }
 
 
 void
 Reaction::printList()
 {
-   printf( "-----------\nKey: %d       %d", list[6]->key, list[6]->reactants[0] );
+   printf( "------\nKey: %d       %d", list[6]->key, list[6]->reactants[0] );
    for( int i = 1; i < list[6]->numReactants; i++ )
    {
       printf( " + %d", list[6]->reactants[i] );
@@ -104,7 +102,7 @@ Reaction::printList()
    {
       printf( " + %d", list[143]->products[i] );
    }
-   printf( "\n-----------\n" );
+   printf( "\n------\n" );
 }
 
 

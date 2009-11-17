@@ -7,8 +7,11 @@
 class Reaction
 {
    public:
+      // Constructor
+      Reaction( int* initReactants, int initNumReactants, int* initProducts, int initNumProducts, double initRate );
+      
       // Static functions
-      static void addReaction( int* initReactants, int initNumReactants, int* initProducts, int initNumProducts, double initRate );
+      static Reaction* getReaction( int key );
       static void initList();
       static void printList();
 
@@ -23,9 +26,6 @@ class Reaction
       void setRate( double newRate );
 
    private:
-      // Constructor
-      Reaction( int* initReactants, int initNumReactants, int* initProducts, int initNumProducts, double initRate );
-
       // Reaction attributes
       int key;
       int *reactants;

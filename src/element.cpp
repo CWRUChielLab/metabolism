@@ -12,9 +12,11 @@ Element **Element::list;
 int Element::lastPrime = 1;
 
 
-// Private constructor
+// Constructor
 Element::Element( const char *initName, int initColor, int initCharge )
 {
+   static int listSize = 0;
+   
    // Calculate a unique prime number for the Element key
    int candidate = lastPrime + 1;
    int i = 2;
@@ -37,21 +39,9 @@ Element::Element( const char *initName, int initColor, int initCharge )
    name = initName;
    color = initColor;
    charge = initCharge;
-}
-
-
-// Handles creating new Elements and adding them
-// to the list, indexed by Element key
-void
-Element::addElement( const char *initName, int initColor, int initCharge )
-{
-   static int listSize = 0;
-
-   // Create the new Element
-   Element *tempElement = new Element( initName, initColor, initCharge );
 
    // Grow the list if there is not room for the new Element
-   while( tempElement->getKey() >= listSize )
+   while( key >= listSize )
    {
       int newListSize = fmax( listSize * 2, 10 );
       Element **tempArray = (Element **)malloc( newListSize * sizeof( Element * ) );
@@ -64,7 +54,15 @@ Element::addElement( const char *initName, int initColor, int initCharge )
    }
 
    // Place the new Element in the list, indexed by key
-   list[tempElement->getKey()] = tempElement;
+   list[key] = this;
+}
+
+
+// Returns the pointer to an Element from the list
+Element*
+Element::getElement( int key )
+{
+   return list[key];
 }
 
 
@@ -72,14 +70,14 @@ Element::addElement( const char *initName, int initColor, int initCharge )
 void
 Element::initList()
 {
-   addElement( "A", 0, 0 );
-   addElement( "B", 0, 0 );
-   addElement( "C", 0, 0 );
-   addElement( "D", 0, 0 );
-   addElement( "E", 0, 0 );
-   addElement( "F", 0, 0 );
-   addElement( "G", 0, 0 );
-   addElement( "H", 0, 0 );
+   new Element( "A", 0, 0 );
+   new Element( "B", 0, 0 );
+   new Element( "C", 0, 0 );
+   new Element( "D", 0, 0 );
+   new Element( "E", 0, 0 );
+   new Element( "F", 0, 0 );
+   new Element( "G", 0, 0 );
+   new Element( "H", 0, 0 );
 }
 
 
@@ -105,7 +103,7 @@ Element::countElements()
    int count = 0;
    for( int i = 0; i <= lastPrime; i++ )
    {
-      if( list[i] != 0 )
+      if( list[i] != NULL )
       {
          count++;
       }

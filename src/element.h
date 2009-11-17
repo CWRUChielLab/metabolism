@@ -7,8 +7,11 @@
 class Element
 {
    public:
+      // Constructor
+      Element( const char* initName, int initColor, int initCharge = 0 );
+
       // Static functions
-      static void addElement( const char *initName, int initColor, int initCharge = 0 );
+      static Element* getElement( int key );
       static void initList();
       static void printList();
       static void countElements();
@@ -23,9 +26,6 @@ class Element
       void setCharge( int newCharge );
    
    private:
-      // Constructor
-      Element( const char *initName, int initColor, int initCharge = 0 );
-
       // Element attributes
       int key;
       const char *name;
