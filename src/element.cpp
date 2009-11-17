@@ -6,9 +6,13 @@
 #include <stdio.h>
 #include "element.h"
 
-int Element::lastPrime = 1;
-Element **Element::list;
 
+// Static members
+Element **Element::list;
+int Element::lastPrime = 1;
+
+
+// Private constructor
 Element::Element( const char *initName, int initColor, int initCharge )
 {
    // Calculate a unique prime number for the Element key
@@ -36,24 +40,21 @@ Element::Element( const char *initName, int initColor, int initCharge )
 }
 
 
+// Handles creating new Elements and adding them
+// to the list, indexed by Element key
 void
-Element::newElement( const char *initName, int initColor, int initCharge )
+Element::addElement( const char *initName, int initColor, int initCharge )
 {
    static int listSize = 0;
 
    // Create the new Element
    Element *tempElement = new Element( initName, initColor, initCharge );
 
-   fprintf( stdout, "-----------\n" );
-   fprintf( stdout, "tempElement->getKey() = %d\n", tempElement->getKey() );
-   fprintf( stdout, "listSize = %d\n", listSize );
-
    // Grow the list if there is not room for the new Element
    while( tempElement->getKey() >= listSize )
    {
-      Element **tempArray;
       int newListSize = fmax( listSize * 2, 10 );
-      tempArray = (Element **)malloc( newListSize * sizeof( Element * ) );
+      Element **tempArray = (Element **)malloc( newListSize * sizeof( Element * ) );
       for( int i = 0; i < listSize; i++ )
       {
          tempArray[i] = list[i];
@@ -62,21 +63,23 @@ Element::newElement( const char *initName, int initColor, int initCharge )
       listSize = newListSize;
    }
 
-   fprintf( stdout, "After growing, listSize = %d\n", listSize );
-   
    // Place the new Element in the list, indexed by key
    list[tempElement->getKey()] = tempElement;
 }
 
 
+// Create the initial set of Elements
 void
 Element::initList()
 {
-   newElement( "A", 0, 0 );
-   newElement( "B", 0, 0 );
-   newElement( "C", 0, 0 );
-   newElement( "D", 0, 0 );
-   newElement( "E", 0, 0 );
+   addElement( "A", 0, 0 );
+   addElement( "B", 0, 0 );
+   addElement( "C", 0, 0 );
+   addElement( "D", 0, 0 );
+   addElement( "E", 0, 0 );
+   addElement( "F", 0, 0 );
+   addElement( "G", 0, 0 );
+   addElement( "H", 0, 0 );
 }
 
 
@@ -89,6 +92,9 @@ Element::printList()
    fprintf( stdout, "list[5]  has name: %s\n", list[5]->getName() );
    fprintf( stdout, "list[7]  has name: %s\n", list[7]->getName() );
    fprintf( stdout, "list[11] has name: %s\n", list[11]->getName() );
+   fprintf( stdout, "list[13] has name: %s\n", list[13]->getName() );
+   fprintf( stdout, "list[17] has name: %s\n", list[17]->getName() );
+   fprintf( stdout, "list[19] has name: %s\n", list[19]->getName() );
    fprintf( stdout, "------\n" );
 }
 

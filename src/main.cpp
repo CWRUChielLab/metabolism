@@ -10,14 +10,12 @@ int
 main ( int argc, char *argv[] )
 {
    // QCoreApplication *app;
-   fprintf( stdout, "This is a test.\n" );
-
-   Reaction::initList();
-   Reaction::printList();
-
    Element::initList();
    Element::printList();
    Element::countElements();
+
+   Reaction::initList();
+   Reaction::printList();
 
    return 0;
 }

@@ -7,37 +7,34 @@
 class Element
 {
    public:
-      // Static Functions
-      static void newElement( const char *initName, int initColor, int initCharge = 0 );
+      // Static functions
+      static void addElement( const char *initName, int initColor, int initCharge = 0 );
       static void initList();
       static void printList();
       static void countElements();
       
-      // Get and Set Functions
+      // Get and set functions
       int getKey();
-
       const char* getName();
       void setName( const char *newName );
-
       int getColor();
       void setColor( int newColor );
-
       int getCharge();
       void setCharge( int newCharge );
    
    private:
       // Constructor
       Element( const char *initName, int initColor, int initCharge = 0 );
-      static int lastPrime;
 
-      // Element Attributes
+      // Element attributes
       int key;
       const char *name;
       int color;
       int charge;
 
-      // Table of Elements
+      // Static members
       static Element **list;
+      static int lastPrime;
 };
 
-#endif /* EMELEMT_H */
+#endif /* ELEMENT_H */
