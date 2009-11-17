@@ -2,7 +2,6 @@
  */
 
 // #include <QApplication>
-#include <stdio.h>
 #include "element.h"
 #include "reaction.h"
 

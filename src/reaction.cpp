@@ -22,21 +22,18 @@ Reaction::Reaction( int* initReactants, int initNumReactants, int* initProducts,
    }
 
    // Copy constructor arguments
-   reactants = initReactants;
+   reactants = new int[initNumReactants];
+   for( int i = 0; i < initNumReactants; i++ )
+   {
+      reactants[i] = initReactants[i];
+   }
    numReactants = initNumReactants;
-   fprintf( stdout, "-----------\n%d", reactants[0] );
-   for( int i = 1; i < numReactants; i++ )
+   products = new int[initNumProducts];
+   for( int i = 0; i < initNumProducts; i++ )
    {
-      fprintf( stdout, " + %d", reactants[i] );
+      products[i] = initProducts[i];
    }
-   products = initProducts;
    numProducts = initNumProducts;
-   fprintf( stdout, " -> %d", products[0] );
-   for( int i = 1; i < numProducts; i++ )
-   {
-      fprintf( stdout, " + %d", products[i] );
-   }
-   fprintf( stdout, "\n" );
    rate = initRate;
 }
 
@@ -66,31 +63,6 @@ Reaction::addReaction( int* initReactants, int initNumReactants, int* initProduc
 
    // Place the new Reaction in the list, indexed by key
    list[tempReaction->getKey()] = tempReaction;
-
-   
-   fprintf( stdout, "-----------\n%d", list[tempReaction->getKey()]->reactants[0] );
-   for( int i = 1; i < list[tempReaction->getKey()]->numReactants; i++ )
-   {
-      fprintf( stdout, " + %d", list[tempReaction->getKey()]->reactants[i] );
-   }
-   fprintf( stdout, " -> %d", list[tempReaction->getKey()]->products[0] );
-   for( int i = 1; i < list[tempReaction->getKey()]->numProducts; i++ )
-   {
-      fprintf( stdout, " + %d", list[tempReaction->getKey()]->products[i] );
-   }
-   fprintf( stdout, "\n" );
-
-   fprintf( stdout, "-----------\n%d", tempReaction->reactants[0] );
-   for( int i = 1; i < tempReaction->numReactants; i++ )
-   {
-      fprintf( stdout, " + %d", tempReaction->reactants[i] );
-   }
-   fprintf( stdout, " -> %d", tempReaction->products[0] );
-   for( int i = 1; i < tempReaction->numProducts; i++ )
-   {
-      fprintf( stdout, " + %d", tempReaction->products[i] );
-   }
-   fprintf( stdout, "\n" );
 }
 
 
@@ -110,48 +82,29 @@ Reaction::initList()
 void
 Reaction::printList()
 {
-   fprintf( stdout, "---------\n" );
-   fprintf( stdout, "Reaction 1:\n\tkey: %d\n", list[6]->getKey() );
-   fprintf( stdout,            "\treactants: %d, %d\n", list[6]->getReactants()[0], list[6]->getReactants()[1] );
-   fprintf( stdout,            "\tnumReactants: %d\n", list[6]->getNumReactants() );
-   int *p1 = list[6]->getReactants();
-   for( int i = 0; i < list[6]->getNumReactants(); i++ )
+   printf( "-----------\nKey: %d       %s", list[6]->key, list[6]->reactants[0] );
+   for( int i = 1; i < list[6]->numReactants; i++ )
    {
-      fprintf( stdout, "\t\tlist[6]->getReactants()[%d] = %d\n", i, list[6]->getReactants()[i] );
-      fprintf( stdout, "\t\tp1[%d] = %d\n", i, p1[i] );
+      printf( " + %d", list[6]->reactants[i] );
    }
-   /////////////////
-   fprintf( stdout,            "\tproducts: %d, %d\n", list[6]->getProducts()[0], list[6]->getProducts()[1] );
-   fprintf( stdout,            "\tnumProducts: %d\n", list[6]->getNumProducts() );
-   int *r1 = list[6]->getProducts();
-   for( int i = 0; i < list[6]->getNumProducts(); i++ )
+   printf( " -> %d", list[6]->products[0] );
+   for( int i = 1; i < list[6]->numProducts; i++ )
    {
-      //fprintf( stdout, "\t\tlist[6]->getProducts()[%d] = %d\n", i, list[6]->getProducts()[i] );
-      fprintf( stdout, "\t\tlist[6]->getProducts()[%d] = %d\n", i, list[6]->products[i] );
-      fprintf( stdout, "\t\tr1[%d] = %d\n", i, r1[i] );
+      printf( " + %d", list[6]->products[i] );
    }
-   fprintf( stdout,            "\trate: %f\n", list[6]->getRate() );
-   /////////////////////////////////////////////////
-   fprintf( stdout, "Reaction 2:\n\tkey: %d\n", list[143]->getKey() );
-   fprintf( stdout,            "\treactants: %d, %d\n", list[143]->getReactants()[0], list[143]->getReactants()[1] );
-   fprintf( stdout,            "\tnumReactants: %d\n", list[143]->getNumReactants() );
-   int *p2 = list[143]->getReactants();
-   for( int i = 0; i < list[143]->getNumReactants(); i++ )
+   printf( "\n" );
+
+   printf( "Key: %d     %d", list[143]->key, list[143]->reactants[0] );
+   for( int i = 1; i < list[143]->numReactants; i++ )
    {
-      fprintf( stdout, "\t\tlist[143]->getReactants()[%d] = %d\n", i, list[143]->getReactants()[i] );
-      fprintf( stdout, "\t\tp2[%d] = %d\n", i, p2[i] );
+      printf( " + %d", list[143]->reactants[i] );
    }
-   /////////////////
-   fprintf( stdout,            "\tproducts: %d, %d\n", list[143]->getProducts()[0], list[143]->getProducts()[1] );
-   fprintf( stdout,            "\tnumProducts: %d\n", list[143]->getNumProducts() );
-   int *r2 = list[143]->getProducts();
-   for( int i = 0; i < list[143]->getNumProducts(); i++ )
+   printf( " -> %d", list[143]->products[0] );
+   for( int i = 1; i < list[143]->numProducts; i++ )
    {
-      fprintf( stdout, "\t\tlist[143]->getProducts()[%d] = %d\n", i, list[143]->getProducts()[i] );
-      fprintf( stdout, "\t\tr2[%d] = %d\n", i, r2[i] );
+      printf( " + %d", list[143]->products[i] );
    }
-   fprintf( stdout,            "\trate: %f\n", list[143]->getRate() );
-   fprintf( stdout, "---------\n" ); 
+   printf( "\n-----------\n" );
 }
 
 
@@ -193,7 +146,11 @@ Reaction::getNumProducts()
 void
 Reaction::setProducts( int* newProducts, int newNumProducts )
 {
-   products = newProducts;
+   products = new int[newNumProducts];
+   for( int i = 0; i < newNumProducts; i++ )
+   {
+      products[i] = newProducts[i];
+   }
    numProducts = newNumProducts;
 }
 

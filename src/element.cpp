@@ -86,16 +86,16 @@ Element::initList()
 void
 Element::printList()
 {
-   fprintf( stdout, "------\n" );
-   fprintf( stdout, "list[2]  has name: %s\n", list[2]->getName() );
-   fprintf( stdout, "list[3]  has name: %s\n", list[3]->getName() );
-   fprintf( stdout, "list[5]  has name: %s\n", list[5]->getName() );
-   fprintf( stdout, "list[7]  has name: %s\n", list[7]->getName() );
-   fprintf( stdout, "list[11] has name: %s\n", list[11]->getName() );
-   fprintf( stdout, "list[13] has name: %s\n", list[13]->getName() );
-   fprintf( stdout, "list[17] has name: %s\n", list[17]->getName() );
-   fprintf( stdout, "list[19] has name: %s\n", list[19]->getName() );
-   fprintf( stdout, "------\n" );
+   printf( "------\n" );
+   printf( "list[2]  has name: %s\n", list[2]->getName() );
+   printf( "list[3]  has name: %s\n", list[3]->getName() );
+   printf( "list[5]  has name: %s\n", list[5]->getName() );
+   printf( "list[7]  has name: %s\n", list[7]->getName() );
+   printf( "list[11] has name: %s\n", list[11]->getName() );
+   printf( "list[13] has name: %s\n", list[13]->getName() );
+   printf( "list[17] has name: %s\n", list[17]->getName() );
+   printf( "list[19] has name: %s\n", list[19]->getName() );
+   printf( "------\n" );
 }
 
 
@@ -110,7 +110,7 @@ Element::countElements()
          count++;
       }
    }
-   fprintf( stdout, "count = %d\n", count );
+   printf( "count = %d\n", count );
 }
 
 
