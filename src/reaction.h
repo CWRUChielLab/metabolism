@@ -13,6 +13,7 @@ class Reaction
    private:
       static int list[5][2];
       //static int *list;
+      static Reaction *testlist;
 };
 
 #endif /* REACTION_H */

@@ -6,6 +6,7 @@
 
 int Reaction::list[5][2];
 //int *Reaction::list;
+Reaction *Reaction::testlist;
 
 enum
 {
