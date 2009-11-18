@@ -11,7 +11,6 @@ main ( int argc, char *argv[] )
    // QCoreApplication *app;
    Element::initList();
    Element::printList();
-   Element::countElements();
 
    Reaction::initList();
    Reaction::printList();

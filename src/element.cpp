@@ -8,13 +8,13 @@
 
 // Static members
 Element **Element::list;
-int Element::lastPrime = 1;
 
 
 // Constructor
 Element::Element( const char *initName, int initColor, int initCharge )
 {
    static int listSize = 0;
+   static int lastPrime = 1;
    
    // Calculate a unique prime number for the Element key
    int candidate = lastPrime + 1;
@@ -94,21 +94,6 @@ Element::printList()
    printf( "list[17] has name: %s\n", list[17]->getName() );
    printf( "list[19] has name: %s\n", list[19]->getName() );
    printf( "------\n" );
-}
-
-
-void
-Element::countElements()
-{
-   int count = 0;
-   for( int i = 0; i <= lastPrime; i++ )
-   {
-      if( list[i] != NULL )
-      {
-         count++;
-      }
-   }
-   printf( "count = %d\n", count );
 }
 
 

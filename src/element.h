@@ -14,7 +14,6 @@ class Element
       static Element* getElement( int key );
       static void initList();
       static void printList();
-      static void countElements();
       
       // Get and set functions
       int getKey();
@@ -34,7 +33,6 @@ class Element
 
       // Static members
       static Element **list;
-      static int lastPrime;
 };
 
 #endif /* ELEMENT_H */
