@@ -1,7 +1,6 @@
 /* reaction.cpp
  */
 
-#include <malloc.h>
 #include <math.h>
 #include <stdio.h>
 #include "reaction.h"
@@ -42,11 +41,12 @@ Reaction::Reaction( int* initReactants, int initNumReactants, int* initProducts,
    while( key >= listSize )
    {
       int newListSize = fmax( listSize * 2, 10 );
-      Reaction **tempArray = (Reaction **)malloc( newListSize * sizeof( Reaction * ) );
+      Reaction **tempArray = new Reaction*[newListSize];
       for( int i = 0; i < listSize; i++ )
       {
          tempArray[i] = list[i];
       }
+      delete [] list;
       list = tempArray;
       listSize = newListSize;
    }

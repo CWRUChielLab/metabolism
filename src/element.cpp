@@ -1,7 +1,6 @@
 /* element.cpp
  */
 
-#include <malloc.h>
 #include <math.h>
 #include <stdio.h>
 #include "element.h"
@@ -44,11 +43,12 @@ Element::Element( const char *initName, int initColor, int initCharge )
    while( key >= listSize )
    {
       int newListSize = fmax( listSize * 2, 10 );
-      Element **tempArray = (Element **)malloc( newListSize * sizeof( Element * ) );
+      Element **tempArray = new Element*[newListSize];
       for( int i = 0; i < listSize; i++ )
       {
          tempArray[i] = list[i];
       }
+      delete [] list;
       list = tempArray;
       listSize = newListSize;
    }
