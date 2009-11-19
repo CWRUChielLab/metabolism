@@ -2,6 +2,7 @@
  */
 
 // #include <QApplication>
+#include "atom.h"
 #include "element.h"
 #include "reaction.h"
 
@@ -14,6 +15,9 @@ main ( int argc, char *argv[] )
 
    Reaction::initList();
    Reaction::printList();
+
+   Atom::initWorld();
+   Atom::printWorld();
 
    return 0;
 }

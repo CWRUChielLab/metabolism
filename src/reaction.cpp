@@ -15,7 +15,7 @@ Reaction::Reaction( int* initReactants, int initNumReactants, int* initProducts,
 {
    static int listSize = 0;
 
-   // Assign the key
+   // Calculate the product of the reactant keys for the Reaction key
    key = 1;
    for( int i = 0; i < initNumReactants; i++ )
    {

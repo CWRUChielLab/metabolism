@@ -73,6 +73,6 @@ win32 {
 }
 
 # Input
-HEADERS += element.h reaction.h
-SOURCES += element.cpp main.cpp reaction.cpp ../SFMT/SFMT.c
+HEADERS += atom.h element.h reaction.h
+SOURCES += atom.cpp element.cpp main.cpp reaction.cpp ../SFMT/SFMT.c
 
