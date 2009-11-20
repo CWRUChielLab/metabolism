@@ -7,11 +7,11 @@
 
 
 // Static members
-Element **Element::list;
+Element** Element::list;
 
 
 // Constructor
-Element::Element( const char *initName, int initColor, int initCharge )
+Element::Element( const char* initName, int initColor, int initCharge )
 {
    static int listSize = 0;
    static int lastPrime = 1;
@@ -43,7 +43,7 @@ Element::Element( const char *initName, int initColor, int initCharge )
    while( key >= listSize )
    {
       int newListSize = fmax( listSize * 2, 10 );
-      Element **tempArray = new Element*[newListSize];
+      Element** tempArray = new Element*[newListSize];
       for( int i = 0; i < listSize; i++ )
       {
          tempArray[i] = list[i];
@@ -112,7 +112,7 @@ Element::getName()
 
 
 void
-Element::setName( const char *newName )
+Element::setName( const char* newName )
 {
    name = newName;
 }

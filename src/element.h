@@ -18,7 +18,7 @@ class Element
       // Get and set functions
       int getKey();
       const char* getName();
-      void setName( const char *newName );
+      void setName( const char* newName );
       int getColor();
       void setColor( int newColor );
       int getCharge();
@@ -27,12 +27,12 @@ class Element
    private:
       // Element attributes
       int key;
-      const char *name;
+      const char* name;
       int color;
       int charge;
 
       // Static members
-      static Element **list;
+      static Element** list;
 };
 
 #endif /* ELEMENT_H */

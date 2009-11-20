@@ -4,11 +4,13 @@
 #ifndef REACTION_H
 #define REACTION_H 
 
+#include "element.h"
+
 class Reaction
 {
    public:
       // Constructor
-      Reaction( int* initReactants, int initNumReactants, int* initProducts, int initNumProducts, double initRate );
+      Reaction( Element** initReactants, int initNumReactants, Element** initProducts, int initNumProducts, double initRate );
       
       // Static functions
       static Reaction* getReaction( int key );
@@ -17,25 +19,25 @@ class Reaction
 
       // Get and set functions
       int getKey();
-      int* getReactants();
+      Element** getReactants();
       int getNumReactants();
-      int* getProducts();
+      Element** getProducts();
       int getNumProducts();
-      void setProducts( int* newProducts, int newNumProducts );
+      void setProducts( Element** newProducts, int newNumProducts );
       double getRate();
       void setRate( double newRate );
 
    private:
       // Reaction attributes
       int key;
-      int *reactants;
+      Element** reactants;
       int numReactants;
-      int *products;
+      Element** products;
       int numProducts;
       double rate;
 
       // Static members
-      static Reaction **list;
+      static Reaction** list;
 };
 
 #endif /* REACTION_H */

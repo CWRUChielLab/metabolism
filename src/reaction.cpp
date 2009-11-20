@@ -7,11 +7,11 @@
 
 
 // Static members
-Reaction **Reaction::list;
+Reaction** Reaction::list;
 
 
 // Constructor
-Reaction::Reaction( int* initReactants, int initNumReactants, int* initProducts, int initNumProducts, double initRate )
+Reaction::Reaction( Element** initReactants, int initNumReactants, Element** initProducts, int initNumProducts, double initRate )
 {
    static int listSize = 0;
 
@@ -19,17 +19,17 @@ Reaction::Reaction( int* initReactants, int initNumReactants, int* initProducts,
    key = 1;
    for( int i = 0; i < initNumReactants; i++ )
    {
-      key *= initReactants[i];
+      key *= initReactants[i]->getKey();
    }
 
    // Copy constructor arguments
-   reactants = new int[initNumReactants];
+   reactants = new Element*[initNumReactants];
    for( int i = 0; i < initNumReactants; i++ )
    {
       reactants[i] = initReactants[i];
    }
    numReactants = initNumReactants;
-   products = new int[initNumProducts];
+   products = new Element*[initNumProducts];
    for( int i = 0; i < initNumProducts; i++ )
    {
       products[i] = initProducts[i];
@@ -41,7 +41,7 @@ Reaction::Reaction( int* initReactants, int initNumReactants, int* initProducts,
    while( key >= listSize )
    {
       int newListSize = fmax( listSize * 2, 10 );
-      Reaction **tempArray = new Reaction*[newListSize];
+      Reaction** tempArray = new Reaction*[newListSize];
       for( int i = 0; i < listSize; i++ )
       {
          tempArray[i] = list[i];
@@ -68,11 +68,11 @@ Reaction::getReaction( int key )
 void
 Reaction::initList()
 {
-   int p1[] = {2,3};
-   int r1[] = {5,7};
+   Element* p1[] = {Element::getElement(2), Element::getElement(3)};
+   Element* r1[] = {Element::getElement(5), Element::getElement(7)};
    new Reaction( p1, 2, r1, 2, 0.02 );
-   int p2[] = {11,13};
-   int r2[] = {17,19};
+   Element* p2[] = {Element::getElement(11), Element::getElement(13)};
+   Element* r2[] = {Element::getElement(17), Element::getElement(19)};
    new Reaction( p2, 2, r2, 2, 0.03 );
 }
 
@@ -80,27 +80,27 @@ Reaction::initList()
 void
 Reaction::printList()
 {
-   printf( "------\nKey: %d       %d", list[6]->key, list[6]->reactants[0] );
+   printf( "------\nKey: %d       %s", list[6]->key, list[6]->reactants[0]->getName() );
    for( int i = 1; i < list[6]->numReactants; i++ )
    {
-      printf( " + %d", list[6]->reactants[i] );
+      printf( " + %s", list[6]->reactants[i]->getName() );
    }
-   printf( " -> %d", list[6]->products[0] );
+   printf( " -> %s", list[6]->products[0]->getName() );
    for( int i = 1; i < list[6]->numProducts; i++ )
    {
-      printf( " + %d", list[6]->products[i] );
+      printf( " + %s", list[6]->products[i]->getName() );
    }
    printf( "\n" );
 
-   printf( "Key: %d     %d", list[143]->key, list[143]->reactants[0] );
+   printf( "Key: %d     %s", list[143]->key, list[143]->reactants[0]->getName() );
    for( int i = 1; i < list[143]->numReactants; i++ )
    {
-      printf( " + %d", list[143]->reactants[i] );
+      printf( " + %s", list[143]->reactants[i]->getName() );
    }
-   printf( " -> %d", list[143]->products[0] );
+   printf( " -> %s", list[143]->products[0]->getName() );
    for( int i = 1; i < list[143]->numProducts; i++ )
    {
-      printf( " + %d", list[143]->products[i] );
+      printf( " + %s", list[143]->products[i]->getName() );
    }
    printf( "\n------\n" );
 }
@@ -113,7 +113,7 @@ Reaction::getKey()
 }
 
 
-int*
+Element**
 Reaction::getReactants()
 {
    return reactants;
@@ -127,7 +127,7 @@ Reaction::getNumReactants()
 }
 
 
-int*
+Element**
 Reaction::getProducts()
 {
    return products;
@@ -142,9 +142,10 @@ Reaction::getNumProducts()
 
 
 void
-Reaction::setProducts( int* newProducts, int newNumProducts )
+Reaction::setProducts( Element** newProducts, int newNumProducts )
 {
-   products = new int[newNumProducts];
+   delete [] products;
+   products = new Element*[newNumProducts];
    for( int i = 0; i < newNumProducts; i++ )
    {
       products[i] = newProducts[i];

@@ -19,6 +19,12 @@ main ( int argc, char *argv[] )
    Atom::initWorld();
    Atom::printWorld();
 
+   for( int i = 0; i < 2; i++ )
+   {
+      Atom::moveAtoms();
+      Atom::printWorld();
+   }
+
    return 0;
 }
 

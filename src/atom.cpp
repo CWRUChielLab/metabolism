@@ -3,34 +3,34 @@
 
 #include <stdio.h>
 #include "atom.h"
-#include "element.h"
 
 
 // Static members
-Atom **Atom::world;
+Atom** Atom::world;
+int* Atom::claimed;
 int Atom::worldX;
 int Atom::worldY;
 
 
 // Constructor
-Atom::Atom( int initType, int initX, int initY, int initDx, int initDy )
+Atom::Atom( Element* initType, int initX, int initY, int initDx, int initDy )
 {
    // Copy constructor arguments
    type = initType;
-   x = initX;
-   y = initY;
+   x = initX % worldX;
+   y = initY % worldY;
    dx = initDx;
    dy = initDy;
 
    // Place the new Atom in the world
-   if( world[ x + y * worldX ] == NULL )
+   if( world[ getWorldIndex(x,y) ] == NULL )
    {
-      world[ x + y * worldX ] = this;
+      world[ getWorldIndex(x,y) ] = this;
    }
    else
    {
       printf( "Replacing atom at (%d,%d) with new atom.\n", x, y );
-      world[ x + y * worldX ] = this;
+      world[ getWorldIndex(x,y) ] = this;
    }
 }
 
@@ -39,7 +39,7 @@ Atom::Atom( int initType, int initX, int initY, int initDx, int initDy )
 Atom*
 Atom::getAtom( int x, int y )
 {
-   return world[ x + y * worldX ];
+   return world[ getWorldIndex(x,y) ];
 }
 
 
@@ -50,11 +50,12 @@ Atom::initWorld()
    worldX = 16;
    worldY = 16;
    world = new Atom*[ worldX * worldY ];
+   claimed = new int[ worldX * worldY ];
 
-   new Atom( 2, 4, 11 );
-   new Atom( 5, 7, 1 );
-   new Atom( 13, 8, 2 );
-   new Atom( 7, 8, 15 );
+   new Atom( Element::getElement(2),  4,  13 );
+   new Atom( Element::getElement(5),  10, 1  );
+   new Atom( Element::getElement(13), 11, 2  );
+   new Atom( Element::getElement(7),  8,  15 );
 }
 
 
@@ -65,24 +66,83 @@ Atom::printWorld()
    {
       for( int x = 0; x < worldX; x++ )
       {
-         if( world[ x + y * worldX ] == NULL )
+         if( world[ getWorldIndex(x,y) ] == NULL )
          {
             printf( ". " );
          }
          else
          {
-            printf( "%s ", Element::getElement( world[ x + y * worldX ]->getType() )->getName() );
+            printf( "%s ", world[ getWorldIndex(x,y) ]->getType()->getName() );
          }
       }
       printf( "\n" );
    }
+   printf( "\n" );
 }
 
 
-int
+void
+Atom::moveAtoms()
+{
+   // Clear all claimed flags
+   for( int y = 0; y < worldY; y++ )
+   {
+      for( int x = 0; x < worldX; x++ )
+      {
+         claimed[ getWorldIndex(x,y) ] = 0;
+      }
+   }
+
+   // Stake claims
+   for( int y = 0; y < worldY; y++ )
+   {
+      for( int x = 0; x < worldX; x++ )
+      {
+         if( world[ getWorldIndex(x,y) ] != NULL )
+         {
+            int newX = x - 1;
+            int newY = y + 1;
+            claimed[ getWorldIndex(x,y) ]++;
+            claimed[ getWorldIndex(newX,newY) ]++;
+         }
+      }
+   }
+
+   // Move if there are no collisions
+   for( int y = 0; y < worldY; y++ )
+   {
+      for( int x = 0; x < worldX; x++ )
+      {
+         if( world[ getWorldIndex(x,y) ] != NULL )
+         {
+            int newX = x - 1;
+            int newY = y + 1;
+            if( claimed[ getWorldIndex(x,y) ] == 1 && claimed[ getWorldIndex(newX,newY) ] == 1 )
+            {
+               world[ getWorldIndex(x,y) ]->setX(newX);
+               world[ getWorldIndex(x,y) ]->setY(newY);
+               world[ getWorldIndex(newX,newY) ] = world[ getWorldIndex(x,y) ];
+               world[ getWorldIndex(x,y) ] = NULL;
+               claimed[ getWorldIndex(x,y) ]++;
+               claimed[ getWorldIndex(newX,newY) ]++;
+            }
+         }
+      }
+   }
+}
+
+
+Element*
 Atom::getType()
 {
    return type;
+}
+
+
+void
+Atom::setType( Element* newType )
+{
+   type = newType;
 }
 
 
@@ -93,10 +153,24 @@ Atom::getX()
 }
 
 
+void
+Atom::setX( int newX )
+{
+   x = newX % worldX;
+}
+
+
 int
 Atom::getY()
 {
    return y;
+}
+
+
+void
+Atom::setY( int newY )
+{
+   y = newY % worldY;
 }
 
 
@@ -107,9 +181,30 @@ Atom::getDx()
 }
 
 
+void
+Atom::setDx( int newDx )
+{
+   dx = newDx;
+}
+
+
 int
 Atom::getDy()
 {
    return dy;
+}
+
+
+void
+Atom::setDy( int newDy )
+{
+   dy = newDy;
+}
+
+
+int
+Atom::getWorldIndex( int x, int y )
+{
+   return ( x + y * worldX ) % ( worldX * worldY );
 }
 
