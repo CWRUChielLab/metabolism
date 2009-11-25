@@ -4,13 +4,18 @@
 #ifndef REACTION_H
 #define REACTION_H 
 
+#include <map>
+#include <vector>
 #include "element.h"
 
 class Reaction
 {
+   typedef std::map<int,Reaction*> ReactionMap;
+   typedef std::vector<Element*> ElementVector;
+
    public:
       // Constructor
-      Reaction( Element** initReactants, int initNumReactants, Element** initProducts, int initNumProducts, double initRate );
+      Reaction( ElementVector initReactants, ElementVector initProducts, double initRate );
       
       // Static functions
       static Reaction* getReaction( int key );
@@ -19,25 +24,23 @@ class Reaction
 
       // Get and set functions
       int getKey();
-      Element** getReactants();
+      ElementVector getReactants();
       int getNumReactants();
-      Element** getProducts();
+      ElementVector getProducts();
       int getNumProducts();
-      void setProducts( Element** newProducts, int newNumProducts );
+      void setProducts( ElementVector newProducts );
       double getRate();
       void setRate( double newRate );
 
    private:
       // Reaction attributes
       int key;
-      Element** reactants;
-      int numReactants;
-      Element** products;
-      int numProducts;
+      ElementVector reactants;
+      ElementVector products;
       double rate;
 
       // Static members
-      static Reaction** list;
+      static ReactionMap list;
 };
 
 #endif /* REACTION_H */

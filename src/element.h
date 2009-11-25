@@ -4,11 +4,16 @@
 #ifndef ELEMENT_H
 #define ELEMENT_H 
 
+#include <map>
+#include <string>
+
 class Element
 {
+   typedef std::map<int,Element*> ElementMap;
+
    public:
       // Constructor
-      Element( const char* initName, int initColor, int initCharge = 0 );
+      Element( std::string initName, int initColor, int initCharge = 0 );
 
       // Static functions
       static Element* getElement( int key );
@@ -17,8 +22,8 @@ class Element
       
       // Get and set functions
       int getKey();
-      const char* getName();
-      void setName( const char* newName );
+      std::string getName();
+      void setName( std::string newName );
       int getColor();
       void setColor( int newColor );
       int getCharge();
@@ -27,12 +32,12 @@ class Element
    private:
       // Element attributes
       int key;
-      const char* name;
+      std::string name;
       int color;
       int charge;
 
       // Static members
-      static Element** list;
+      static ElementMap list;
 };
 
 #endif /* ELEMENT_H */

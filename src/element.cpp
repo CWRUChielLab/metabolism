@@ -1,20 +1,21 @@
 /* element.cpp
  */
 
-#include <algorithm>
 #include <cmath>
 #include <iostream>
 #include "element.h"
 
 
+typedef std::map<int,Element*> ElementMap;
+
+
 // Static members
-Element** Element::list;
+ElementMap Element::list;
 
 
 // Constructor
-Element::Element( const char* initName, int initColor, int initCharge )
+Element::Element( std::string initName, int initColor, int initCharge )
 {
-   static int listSize = 0;
    static int lastPrime = 1;
    
    // Calculate a unique prime number for the Element key
@@ -39,20 +40,6 @@ Element::Element( const char* initName, int initColor, int initCharge )
    name = initName;
    color = initColor;
    charge = initCharge;
-
-   // Grow the list if there is not room for the new Element
-   while( key >= listSize )
-   {
-      int newListSize = std::max( listSize * 2, 10 );
-      Element** tempArray = new Element*[newListSize];
-      for( int i = 0; i < listSize; i++ )
-      {
-         tempArray[i] = list[i];
-      }
-      delete [] list;
-      list = tempArray;
-      listSize = newListSize;
-   }
 
    // Place the new Element in the list, indexed by key
    list[key] = this;
@@ -85,14 +72,11 @@ Element::initList()
 void
 Element::printList()
 {
-   std::cout << "list[2]  has name: " << list[2]->getName() << std::endl;
-   std::cout << "list[3]  has name: " << list[3]->getName() << std::endl;
-   std::cout << "list[5]  has name: " << list[5]->getName() << std::endl;
-   std::cout << "list[7]  has name: " << list[7]->getName() << std::endl;
-   std::cout << "list[11] has name: " << list[11]->getName() << std::endl;
-   std::cout << "list[13] has name: " << list[13]->getName() << std::endl;
-   std::cout << "list[17] has name: " << list[17]->getName() << std::endl;
-   std::cout << "list[19] has name: " << list[19]->getName() << std::endl;
+   for( ElementMap::iterator i = list.begin(); i != list.end(); i++ )
+   {
+      Element* ele = i->second;
+      std::cout << "list[" << ele->getKey() << "] has name: " << list[ele->getKey()]->getName() << std::endl;
+   }
 }
 
 
@@ -103,7 +87,7 @@ Element::getKey()
 }
 
 
-const char*
+std::string
 Element::getName()
 {
    return name;
@@ -111,7 +95,7 @@ Element::getName()
 
 
 void
-Element::setName( const char* newName )
+Element::setName( std::string newName )
 {
    name = newName;
 }

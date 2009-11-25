@@ -6,50 +6,28 @@
 #include "reaction.h"
 
 
+typedef std::map<int,Reaction*> ReactionMap;
+typedef std::vector<Element*> ElementVector;
+
+
 // Static members
-Reaction** Reaction::list;
+ReactionMap Reaction::list;
 
 
 // Constructor
-Reaction::Reaction( Element** initReactants, int initNumReactants, Element** initProducts, int initNumProducts, double initRate )
+Reaction::Reaction( ElementVector initReactants, ElementVector initProducts, double initRate )
 {
-   static int listSize = 0;
-
    // Calculate the product of the reactant keys for the Reaction key
    key = 1;
-   for( int i = 0; i < initNumReactants; i++ )
+   for( unsigned int i = 0; i < initReactants.size(); i++ )
    {
       key *= initReactants[i]->getKey();
    }
 
    // Copy constructor arguments
-   reactants = new Element*[initNumReactants];
-   for( int i = 0; i < initNumReactants; i++ )
-   {
-      reactants[i] = initReactants[i];
-   }
-   numReactants = initNumReactants;
-   products = new Element*[initNumProducts];
-   for( int i = 0; i < initNumProducts; i++ )
-   {
-      products[i] = initProducts[i];
-   }
-   numProducts = initNumProducts;
+   reactants = initReactants;
+   products = initProducts;
    rate = initRate;
-
-   // Grow the list if there is not enough room for the new Reaction
-   while( key >= listSize )
-   {
-      int newListSize = std::max( listSize * 2, 10 );
-      Reaction** tempArray = new Reaction*[newListSize];
-      for( int i = 0; i < listSize; i++ )
-      {
-         tempArray[i] = list[i];
-      }
-      delete [] list;
-      list = tempArray;
-      listSize = newListSize;
-   }
 
    // Place the new Reaction in the list, indexed by key
    list[key] = this;
@@ -68,43 +46,58 @@ Reaction::getReaction( int key )
 void
 Reaction::initList()
 {
-   Element* p1[] = {Element::getElement(2), Element::getElement(3)};
-   Element* r1[] = {Element::getElement(5), Element::getElement(7)};
-   new Reaction( p1, 2, r1, 2, 0.02 );
-   Element* p2[] = {Element::getElement(11), Element::getElement(13)};
-   Element* r2[] = {Element::getElement(17), Element::getElement(19)};
-   new Reaction( p2, 2, r2, 2, 0.03 );
+   ElementVector p1;
+   p1.push_back(Element::getElement(2));
+   p1.push_back(Element::getElement(3));
+   ElementVector r1;
+   r1.push_back(Element::getElement(5));
+   r1.push_back(Element::getElement(7));
+   new Reaction( p1, r1, 0.02 );
+
+   ElementVector p2;
+   p2.push_back(Element::getElement(11));
+   p2.push_back(Element::getElement(13));
+   ElementVector r2;
+   r2.push_back(Element::getElement(17));
+   r2.push_back(Element::getElement(19));
+   new Reaction( p2, r2, 0.03 );
+   
+   ElementVector p3;
+   p3.push_back(Element::getElement(2));
+   p3.push_back(Element::getElement(2));
+   p3.push_back(Element::getElement(7));
+   ElementVector r3;
+   r3.push_back(Element::getElement(19));
+   new Reaction( p3, r3, 0.1 );
+
+   ElementVector p4;
+   p4.push_back(Element::getElement(3));
+   ElementVector r4;
+   r4.push_back(Element::getElement(13));
+   r4.push_back(Element::getElement(7));
+   r4.push_back(Element::getElement(19));
+   new Reaction( p4, r4, 1 );
 }
 
 
 void
 Reaction::printList()
 {
-   int x = 6;
-   std::cout << "Key: " << list[x]->key << "       " << list[x]->reactants[0]->getName();
-   for( int i = 1; i < list[x]->numReactants; i++ )
+   for( ReactionMap::iterator i = list.begin(); i != list.end(); i++ )
    {
-      std::cout << " + " << list[x]->reactants[i]->getName();
+      Reaction* rxn = i->second;
+      std::cout << "Key: " << rxn->getKey() << "  \t" << rxn->reactants[0]->getName();
+      for( unsigned int j = 1; j < rxn->reactants.size(); j++ )
+      {
+         std::cout << " + " << rxn->reactants[j]->getName();
+      }
+      std::cout << " -> " << rxn->products[0]->getName();
+      for( unsigned int j = 1; j < rxn->products.size(); j++ )
+      {
+         std::cout << " + " << rxn->products[j]->getName();
+      }
+      std::cout << std::endl;
    }
-   std::cout << " -> " << list[x]->products[0]->getName();
-   for( int i = 1; i < list[x]->numProducts; i++ )
-   {
-      std::cout << " + " << list[x]->products[i]->getName();
-   }
-   std::cout << std::endl;
-
-   x = 143;
-   std::cout << "Key: " << list[x]->key << "     " << list[x]->reactants[0]->getName();
-   for( int i = 1; i < list[x]->numReactants; i++ )
-   {
-      std::cout << " + " << list[x]->reactants[i]->getName();
-   }
-   std::cout << " -> " << list[x]->products[0]->getName();
-   for( int i = 1; i < list[x]->numProducts; i++ )
-   {
-      std::cout << " + " << list[x]->products[i]->getName();
-   }
-   std::cout << std::endl;
 }
 
 
@@ -115,7 +108,7 @@ Reaction::getKey()
 }
 
 
-Element**
+ElementVector
 Reaction::getReactants()
 {
    return reactants;
@@ -125,11 +118,11 @@ Reaction::getReactants()
 int
 Reaction::getNumReactants()
 {
-   return numReactants;
+   return reactants.size();
 }
 
 
-Element**
+ElementVector
 Reaction::getProducts()
 {
    return products;
@@ -139,20 +132,14 @@ Reaction::getProducts()
 int
 Reaction::getNumProducts()
 {
-   return numProducts;
+   return products.size();
 }
 
 
 void
-Reaction::setProducts( Element** newProducts, int newNumProducts )
+Reaction::setProducts( ElementVector newProducts )
 {
-   delete [] products;
-   products = new Element*[newNumProducts];
-   for( int i = 0; i < newNumProducts; i++ )
-   {
-      products[i] = newProducts[i];
-   }
-   numProducts = newNumProducts;
+   products = newProducts;
 }
 
 
