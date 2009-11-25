@@ -3,30 +3,25 @@
 
 // #include <QApplication>
 #include <iostream>
-#include "atom.h"
-#include "element.h"
-#include "reaction.h"
+#include "sim.h"
 
 int
 main ( int argc, char *argv[] )
 {
    // QCoreApplication *app;
-   Element::initList();
+   Sim* mySim = new Sim();
+   mySim->initialize();
    std::cout << "------" << std::endl;
-   Element::printList();
-
-   Reaction::initList();
+   mySim->printElements();
    std::cout << "------" << std::endl;
-   Reaction::printList();
-
-   Atom::initWorld();
+   mySim->printReactions();
    std::cout << "------" << std::endl;
-   Atom::printWorld();
+   mySim->printWorld();
 
    for( int i = 0; i < 2; i++ )
    {
-      Atom::moveAtoms();
-      Atom::printWorld();
+      mySim->moveAtoms();
+      mySim->printWorld();
    }
 
    return 0;

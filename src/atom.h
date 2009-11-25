@@ -12,12 +12,6 @@ class Atom
       // Constructor
       Atom( Element* initType, int initX, int initY, int initDx = 0, int initDy = 0 );
 
-      // Static functions
-      static Atom* getAtom( int x, int y );
-      static void initWorld();
-      static void printWorld();
-      static void moveAtoms();
-
       // Get and set functions
       Element* getType();
       void setType( Element* newType );
@@ -37,15 +31,6 @@ class Atom
       int y;
       int dx;
       int dy;
-
-      // Static members
-      static Atom** world;
-      static int* claimed;
-      static int worldX;
-      static int worldY;
-
-      // Private functions
-      static int getWorldIndex( int x, int y );
 };
 
 #endif /* ATOM_H */

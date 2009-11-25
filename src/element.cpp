@@ -2,15 +2,8 @@
  */
 
 #include <cmath>
-#include <iostream>
+#include <string>
 #include "element.h"
-
-
-typedef std::map<int,Element*> ElementMap;
-
-
-// Static members
-ElementMap Element::list;
 
 
 // Constructor
@@ -40,43 +33,6 @@ Element::Element( std::string initName, int initColor, int initCharge )
    name = initName;
    color = initColor;
    charge = initCharge;
-
-   // Place the new Element in the list, indexed by key
-   list[key] = this;
-}
-
-
-// Returns the pointer to an Element from the list
-Element*
-Element::getElement( int key )
-{
-   return list[key];
-}
-
-
-// Create the initial set of Elements
-void
-Element::initList()
-{
-   new Element( "A", 0, 0 );
-   new Element( "B", 0, 0 );
-   new Element( "C", 0, 0 );
-   new Element( "D", 0, 0 );
-   new Element( "E", 0, 0 );
-   new Element( "F", 0, 0 );
-   new Element( "G", 0, 0 );
-   new Element( "H", 0, 0 );
-}
-
-
-void
-Element::printList()
-{
-   for( ElementMap::iterator i = list.begin(); i != list.end(); i++ )
-   {
-      Element* ele = i->second;
-      std::cout << "list[" << ele->getKey() << "] has name: " << list[ele->getKey()]->getName() << std::endl;
-   }
 }
 
 
