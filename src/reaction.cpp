@@ -1,8 +1,8 @@
 /* reaction.cpp
  */
 
-#include <math.h>
-#include <stdio.h>
+#include <algorithm>
+#include <iostream>
 #include "reaction.h"
 
 
@@ -40,7 +40,7 @@ Reaction::Reaction( Element** initReactants, int initNumReactants, Element** ini
    // Grow the list if there is not enough room for the new Reaction
    while( key >= listSize )
    {
-      int newListSize = fmax( listSize * 2, 10 );
+      int newListSize = std::max( listSize * 2, 10 );
       Reaction** tempArray = new Reaction*[newListSize];
       for( int i = 0; i < listSize; i++ )
       {
@@ -80,29 +80,31 @@ Reaction::initList()
 void
 Reaction::printList()
 {
-   printf( "------\nKey: %d       %s", list[6]->key, list[6]->reactants[0]->getName() );
-   for( int i = 1; i < list[6]->numReactants; i++ )
+   int x = 6;
+   std::cout << "Key: " << list[x]->key << "       " << list[x]->reactants[0]->getName();
+   for( int i = 1; i < list[x]->numReactants; i++ )
    {
-      printf( " + %s", list[6]->reactants[i]->getName() );
+      std::cout << " + " << list[x]->reactants[i]->getName();
    }
-   printf( " -> %s", list[6]->products[0]->getName() );
-   for( int i = 1; i < list[6]->numProducts; i++ )
+   std::cout << " -> " << list[x]->products[0]->getName();
+   for( int i = 1; i < list[x]->numProducts; i++ )
    {
-      printf( " + %s", list[6]->products[i]->getName() );
+      std::cout << " + " << list[x]->products[i]->getName();
    }
-   printf( "\n" );
+   std::cout << std::endl;
 
-   printf( "Key: %d     %s", list[143]->key, list[143]->reactants[0]->getName() );
-   for( int i = 1; i < list[143]->numReactants; i++ )
+   x = 143;
+   std::cout << "Key: " << list[x]->key << "     " << list[x]->reactants[0]->getName();
+   for( int i = 1; i < list[x]->numReactants; i++ )
    {
-      printf( " + %s", list[143]->reactants[i]->getName() );
+      std::cout << " + " << list[x]->reactants[i]->getName();
    }
-   printf( " -> %s", list[143]->products[0]->getName() );
-   for( int i = 1; i < list[143]->numProducts; i++ )
+   std::cout << " -> " << list[x]->products[0]->getName();
+   for( int i = 1; i < list[x]->numProducts; i++ )
    {
-      printf( " + %s", list[143]->products[i]->getName() );
+      std::cout << " + " << list[x]->products[i]->getName();
    }
-   printf( "\n------\n" );
+   std::cout << std::endl;
 }
 
 

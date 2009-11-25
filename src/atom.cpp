@@ -1,7 +1,7 @@
 /* atom.cpp
  */
 
-#include <stdio.h>
+#include <iostream>
 #include "atom.h"
 
 
@@ -29,7 +29,7 @@ Atom::Atom( Element* initType, int initX, int initY, int initDx, int initDy )
    }
    else
    {
-      printf( "Replacing atom at (%d,%d) with new atom.\n", x, y );
+      std::cout << "Replacing atom at (" << x << "," << y << ") with new atom." << std::endl;
       world[ getWorldIndex(x,y) ] = this;
    }
 }
@@ -68,16 +68,16 @@ Atom::printWorld()
       {
          if( world[ getWorldIndex(x,y) ] == NULL )
          {
-            printf( ". " );
+            std::cout << ". ";
          }
          else
          {
-            printf( "%s ", world[ getWorldIndex(x,y) ]->getType()->getName() );
+            std::cout << world[ getWorldIndex(x,y) ]->getType()->getName() << " ";
          }
       }
-      printf( "\n" );
+      std::cout << std::endl;
    }
-   printf( "\n" );
+   std::cout << std::endl;
 }
 
 
