@@ -5,15 +5,17 @@
 #define SIM_H 
 
 #include <map>
+#include <vector>
 #include "atom.h"
 #include "element.h"
 #include "reaction.h"
 
+typedef std::map<int,Element*> ElementMap;
+typedef std::map<int,Reaction*> ReactionMap;
+typedef std::vector<Element*> ElementVector;
+
 class Sim
 {
-   typedef std::map<int,Element*> ElementMap;
-   typedef std::map<int,Reaction*> ReactionMap;
-
    public:
       // Constructor
       Sim();

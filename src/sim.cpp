@@ -7,11 +7,6 @@
 #include "sim.h"
 
 
-typedef std::map<int,Element*> ElementMap;
-typedef std::map<int,Reaction*> ReactionMap;
-typedef std::vector<Element*> ElementVector;
-
-
 // Constructor
 Sim::Sim()
 {
