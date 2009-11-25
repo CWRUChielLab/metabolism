@@ -1,8 +1,9 @@
 /* sim.cpp
  */
 
-#include <iostream>
+//#include <iostream>
 #include <map>
+#include <ncurses.h>
 #include <vector>
 #include "sim.h"
 
@@ -98,34 +99,36 @@ Sim::initialize()
 void
 Sim::printElements()
 {
-   std::cout << "There are " << periodicTable.size() << " elements." << std::endl;
+   printw( "There are %d elements.\n", periodicTable.size() );
    for( ElementMap::iterator i = periodicTable.begin(); i != periodicTable.end(); i++ )
    {
       Element* ele = i->second;
-      std::cout << "periodicTable[" << ele->getKey() << "] has name: " << periodicTable[ele->getKey()]->getName() << std::endl;
+      printw( "periodicTable[%d] has name:\t%s\n", ele->getKey(), periodicTable[ele->getKey()]->getName().c_str() );
    }
+   refresh();
 }
 
 
 void
 Sim::printReactions()
 {
-   std::cout << "There are " << rxnTable.size() << " reactions." << std::endl;
+   printw( "There are %d reactions.\n", rxnTable.size() );
    for( ReactionMap::iterator i = rxnTable.begin(); i != rxnTable.end(); i++ )
    {
       Reaction* rxn = i->second;
-      std::cout << "Key: " << rxn->getKey() << "  \t" << rxn->getReactants()[0]->getName();
+      printw( "Key: %d  \t%s", rxn->getKey(), rxn->getReactants()[0]->getName().c_str() );
       for( unsigned int j = 1; j < rxn->getReactants().size(); j++ )
       {
-         std::cout << " + " << rxn->getReactants()[j]->getName();
+         printw( " + %s", rxn->getReactants()[j]->getName().c_str() );
       }
-      std::cout << " -> " << rxn->getProducts()[0]->getName();
+      printw( " -> %s", rxn->getProducts()[0]->getName().c_str() );
       for( unsigned int j = 1; j < rxn->getProducts().size(); j++ )
       {
-         std::cout << " + " << rxn->getProducts()[j]->getName();
+         printw( " + %s", rxn->getProducts()[j]->getName().c_str() );
       }
-      std::cout << std::endl;
+      printw( "\n" );
    }
+   refresh();
 }
 
 
@@ -138,16 +141,17 @@ Sim::printWorld()
       {
          if( world[ getWorldIndex(x,y) ] == NULL )
          {
-            std::cout << ". ";
+            printw( ". " );
          }
          else
          {
-            std::cout << world[ getWorldIndex(x,y) ]->getType()->getName() << " ";
+            printw( "%s ", world[ getWorldIndex(x,y) ]->getType()->getName().c_str() );
          }
       }
-      std::cout << std::endl;
+      printw( "\n" );
    }
-   std::cout << std::endl;
+   printw( "\n" );
+   refresh();
 }
 
 
@@ -170,8 +174,8 @@ Sim::moveAtoms()
       {
          if( world[ getWorldIndex(x,y) ] != NULL )
          {
-            int newX = x - 1;
-            int newY = y + 1;
+            int newX = x + 1;
+            int newY = y;
             claimed[ getWorldIndex(x,y) ]++;
             claimed[ getWorldIndex(newX,newY) ]++;
          }
@@ -185,8 +189,8 @@ Sim::moveAtoms()
       {
          if( world[ getWorldIndex(x,y) ] != NULL )
          {
-            int newX = x - 1;
-            int newY = y + 1;
+            int newX = x + 1;
+            int newY = y;
             if( claimed[ getWorldIndex(x,y) ] == 1 && claimed[ getWorldIndex(newX,newY) ] == 1 )
             {
                world[ getWorldIndex(x,y) ]->setX(newX);     //TODO: Handle wrapping
@@ -205,6 +209,8 @@ Sim::moveAtoms()
 int
 Sim::getWorldIndex( int x, int y )
 {
-   return ( x + y * worldX ) % ( worldX * worldY );
+   int wrappedX = x % worldX;
+   int wrappedY = y % worldY;
+   return ( wrappedX + wrappedY * worldX );
 }
 

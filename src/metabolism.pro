@@ -31,7 +31,7 @@ unix:!macx {
    message( "Generating makefile for Linux systems." )
    INCLUDEPATH += /usr/include/qwt-qt4
    DEFINES += BLR_USELINUX HAVE_SSE2
-   LIBS += -lqwt-qt4
+   LIBS += -lqwt-qt4 -lncurses
    QMAKE_CFLAGS += -msse2
 }
 
