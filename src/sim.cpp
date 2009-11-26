@@ -26,72 +26,71 @@ Sim::initialize()
 
    // Initialize the periodicTable
    Element* tempEle;
-   tempEle = new Element( "A", 0, 0 );
-   periodicTable[ tempEle->getKey() ] = tempEle;
-   tempEle = new Element( "B", 0, 0 );
-   periodicTable[ tempEle->getKey() ] = tempEle;
-   tempEle = new Element( "C", 0, 0 );
-   periodicTable[ tempEle->getKey() ] = tempEle;
-   tempEle = new Element( "D", 0, 0 );
-   periodicTable[ tempEle->getKey() ] = tempEle;
-   tempEle = new Element( "E", 0, 0 );
-   periodicTable[ tempEle->getKey() ] = tempEle;
-   tempEle = new Element( "F", 0, 0 );
-   periodicTable[ tempEle->getKey() ] = tempEle;
-   tempEle = new Element( "G", 0, 0 );
-   periodicTable[ tempEle->getKey() ] = tempEle;
-   tempEle = new Element( "H", 0, 0 );
-   periodicTable[ tempEle->getKey() ] = tempEle;
+   for( char c = 'A'; c <= 'H'; c++ )
+   {
+      std::string s(1,c);
+      tempEle = new Element( s, 0, 0 );
+      periodicTable[ s ] = tempEle;
+   }
 
    // Initialize the rxnTable
    Reaction* tempRxn;
 
-   ElementVector p1;
-   p1.push_back(periodicTable[2]);
-   p1.push_back(periodicTable[3]);
    ElementVector r1;
-   r1.push_back(periodicTable[5]);
-   r1.push_back(periodicTable[7]);
-   tempRxn = new Reaction( p1, r1, 0.02 );
+   r1.push_back(periodicTable["A"]);
+   r1.push_back(periodicTable["B"]);
+   ElementVector p1;
+   p1.push_back(periodicTable["C"]);
+   p1.push_back(periodicTable["D"]);
+   tempRxn = new Reaction( r1, p1, 0.02 );
    rxnTable[ tempRxn->getKey() ] = tempRxn;
 
-   ElementVector p2;
-   p2.push_back(periodicTable[11]);
-   p2.push_back(periodicTable[13]);
    ElementVector r2;
-   r2.push_back(periodicTable[17]);
-   r2.push_back(periodicTable[19]);
-   tempRxn = new Reaction( p2, r2, 0.03 );
+   r2.push_back(periodicTable["E"]);
+   r2.push_back(periodicTable["F"]);
+   ElementVector p2;
+   p2.push_back(periodicTable["G"]);
+   p2.push_back(periodicTable["H"]);
+   tempRxn = new Reaction( r2, p2, 0.03 );
    rxnTable[ tempRxn->getKey() ] = tempRxn;
 
-   ElementVector p3;
-   p3.push_back(periodicTable[2]);
-   p3.push_back(periodicTable[2]);
-   p3.push_back(periodicTable[7]);
    ElementVector r3;
-   r3.push_back(periodicTable[19]);
-   tempRxn = new Reaction( p3, r3, 0.1 );
+   r3.push_back(periodicTable["A"]);
+   r3.push_back(periodicTable["A"]);
+   r3.push_back(periodicTable["D"]);
+   ElementVector p3;
+   p3.push_back(periodicTable["H"]);
+   tempRxn = new Reaction( r3, p3, 0.1 );
    rxnTable[ tempRxn->getKey() ] = tempRxn;
 
-   ElementVector p4;
-   p4.push_back(periodicTable[3]);
    ElementVector r4;
-   r4.push_back(periodicTable[13]);
-   r4.push_back(periodicTable[7]);
-   r4.push_back(periodicTable[19]);
-   tempRxn = new Reaction( p4, r4, 1 );
+   r4.push_back(periodicTable["B"]);
+   ElementVector p4;
+   p4.push_back(periodicTable["F"]);
+   p4.push_back(periodicTable["D"]);
+   p4.push_back(periodicTable["H"]);
+   tempRxn = new Reaction( r4, p4, 1 );
    rxnTable[ tempRxn->getKey() ] = tempRxn;
 
    // Initialize the world
    Atom* tempAtom;
-   tempAtom = new Atom( periodicTable[2],  4,  13 );
-   world[ getWorldIndex(4,13) ] = tempAtom;
-   tempAtom = new Atom( periodicTable[5],  10, 1  );
-   world[ getWorldIndex(10,1) ] = tempAtom;
-   tempAtom = new Atom( periodicTable[13], 11, 2  );
-   world[ getWorldIndex(11,2) ] = tempAtom;
-   tempAtom = new Atom( periodicTable[7],  8,  15 );
-   world[ getWorldIndex(8,15) ] = tempAtom;
+   int x,y;
+
+   x = 4; y = 13;
+   tempAtom = new Atom( periodicTable["A"], x, y );
+   world[ getWorldIndex(x,y) ] = tempAtom;
+
+   x = 10; y = 1;
+   tempAtom = new Atom( periodicTable["C"], x, y );
+   world[ getWorldIndex(x,y) ] = tempAtom;
+
+   x = 11; y = 2;
+   tempAtom = new Atom( periodicTable["F"], x, y );
+   world[ getWorldIndex(x,y) ] = tempAtom;
+
+   x = 8; y = 15;
+   tempAtom = new Atom( periodicTable["D"], x, y );
+   world[ getWorldIndex(x,y) ] = tempAtom;
 }
 
 
@@ -103,7 +102,7 @@ Sim::printElements()
    for( ElementMap::iterator i = periodicTable.begin(); i != periodicTable.end(); i++ )
    {
       Element* ele = i->second;
-      printw( "periodicTable[%d] has name:\t%s\n", ele->getKey(), periodicTable[ele->getKey()]->getName().c_str() );
+      printw( "periodicTable[\"%s\"] has key:\t%d\n", ele->getName().c_str(), periodicTable[ele->getName()]->getKey() );
    }
    refresh();
 }
@@ -116,15 +115,70 @@ Sim::printReactions()
    for( ReactionMap::iterator i = rxnTable.begin(); i != rxnTable.end(); i++ )
    {
       Reaction* rxn = i->second;
-      printw( "Key: %d  \t%s", rxn->getKey(), rxn->getReactants()[0]->getName().c_str() );
-      for( unsigned int j = 1; j < rxn->getReactants().size(); j++ )
+      std::map<std::string,int> reactantCount;
+      std::map<std::string,int> productCount;
+      for( unsigned int j = 0; j < rxn->getReactants().size(); j++ )
       {
-         printw( " + %s", rxn->getReactants()[j]->getName().c_str() );
+         reactantCount[ rxn->getReactants()[j]->getName() ]++;
       }
-      printw( " -> %s", rxn->getProducts()[0]->getName().c_str() );
-      for( unsigned int j = 1; j < rxn->getProducts().size(); j++ )
+      for( unsigned int j = 0; j < rxn->getProducts().size(); j++ )
       {
-         printw( " + %s", rxn->getProducts()[j]->getName().c_str() );
+         productCount[ rxn->getProducts()[j]->getName() ]++;
+      }
+
+      printw( "Key: %d  \t", rxn->getKey() );
+      for( std::map<std::string,int>::iterator j = reactantCount.begin(); j != reactantCount.end(); j++ )
+      {
+         int coefficient = j->second;
+         if( coefficient == 1 )
+         {
+            if( j == reactantCount.begin() )
+            {
+               printw( "%s", j->first.c_str() );
+            }
+            else
+            {
+               printw( " + %s", j->first.c_str() );
+            }
+         }
+         else
+         {
+            if( j == reactantCount.begin() )
+            {
+               printw( "%d%s", j->second, j->first.c_str() );
+            }
+            else
+            {
+               printw( " + %d%s", j->second, j->first.c_str() );
+            }
+         }
+      }
+      printw( " -> " );
+      for( std::map<std::string,int>::iterator j = productCount.begin(); j != productCount.end(); j++ )
+      {
+         int coefficient = j->second;
+         if( coefficient == 1 )
+         {
+            if( j == productCount.begin() )
+            {
+               printw( "%s", j->first.c_str() );
+            }
+            else
+            {
+               printw( " + %s", j->first.c_str() );
+            }
+         }
+         else
+         {
+            if( j == productCount.begin() )
+            {
+               printw( "%d%s", j->second, j->first.c_str() );
+            }
+            else
+            {
+               printw( " + %d%s", j->second, j->first.c_str() );
+            }
+         }
       }
       printw( "\n" );
    }

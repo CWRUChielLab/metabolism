@@ -15,7 +15,6 @@ class Element
       // Get and set functions
       int getKey();
       std::string getName();
-      void setName( std::string newName );
       int getColor();
       void setColor( int newColor );
       int getCharge();

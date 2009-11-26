@@ -10,7 +10,7 @@
 #include "element.h"
 #include "reaction.h"
 
-typedef std::map<int,Element*> ElementMap;
+typedef std::map<std::string,Element*> ElementMap;
 typedef std::map<int,Reaction*> ReactionMap;
 typedef std::vector<Element*> ElementVector;
 

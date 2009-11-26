@@ -11,7 +11,7 @@ main ( int argc, char *argv[] )
 {
    // Initialize ncurses
    initscr();  /* Startup */
-   cbreak();   /* Accept special commands, like CTRL+c to quit */
+   cbreak();   /* Allow special commands, like CTRL+c to quit */
 
    //QCoreApplication *app;
 

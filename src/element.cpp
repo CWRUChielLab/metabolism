@@ -50,13 +50,6 @@ Element::getName()
 }
 
 
-void
-Element::setName( std::string newName )
-{
-   name = newName;
-}
-
-
 int
 Element::getColor()
 {
