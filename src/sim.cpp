@@ -8,6 +8,7 @@
 #include <cassert>
 #include <cstdarg>
 #include <cstdlib>
+#include <ctime>
 #include <map>
 #include <ncurses.h>
 #include <SFMT.h>
@@ -32,7 +33,9 @@ Sim::initialize()
    claimed = new int[ worldX * worldY ];
    
    // SFMT prep
-   init_gen_rand( (uint32_t)(42) );
+   int seed = time(NULL);
+   init_gen_rand( (uint32_t)(seed) );
+   printw( "seed = %d\n", seed );
    int rc = 0;
    for( direction_sz64 = get_min_array_size64() * 8; direction_sz64 < (unsigned int)( worldX * worldY ); direction_sz64 *= 2 );
    rc = posix_memalign( (void**)&direction, getpagesize(), direction_sz64 );
@@ -64,24 +67,27 @@ Sim::initialize()
    rxnTable[ tempRxn->getKey() ] = tempRxn;
 
    // Initialize the world
+   generateRandNums();
    Atom* tempAtom;
-   int x,y;
+   int x,y,inc;
+   int maxAtoms = worldX * worldY / 4;
+   int atomCount = direction[0] % maxAtoms + 1;
 
-   x = 4; y = 13;
-   tempAtom = new Atom( periodicTable["A"], x, y );
-   world[ getWorldIndex(x,y) ] = tempAtom;
+   for( int i = 0; i < atomCount; i++ )
+   {
+      x = direction[3*i+1] % worldX;
+      y = direction[3*i+2] % worldY;
 
-   x = 10; y = 1;
-   tempAtom = new Atom( periodicTable["C"], x, y );
-   world[ getWorldIndex(x,y) ] = tempAtom;
+      ElementMap::iterator iter = periodicTable.begin();
+      inc = direction[3*i+3] % periodicTable.size();
+      for( int j = 0; j < inc; j++ )
+      {
+         iter++;
+      }
 
-   x = 11; y = 2;
-   tempAtom = new Atom( periodicTable["F"], x, y );
-   world[ getWorldIndex(x,y) ] = tempAtom;
-
-   x = 8; y = 15;
-   tempAtom = new Atom( periodicTable["D"], x, y );
-   world[ getWorldIndex(x,y) ] = tempAtom;
+      tempAtom = new Atom( iter->second, x, y );
+      world[ getWorldIndex(x,y) ] = tempAtom;
+   }
 }
 
 
