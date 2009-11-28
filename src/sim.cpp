@@ -1,9 +1,16 @@
 /* sim.cpp
  */
 
-//#include <iostream>
+//#ifndef _GNU_SOURCE
+//#define _GNU_SOURCE   /* Needed for posix_memalign... ? */
+//#endif
+
+#include <cassert>
+#include <cstdarg>
+#include <cstdlib>
 #include <map>
 #include <ncurses.h>
+#include <SFMT.h>
 #include <vector>
 #include "sim.h"
 
@@ -11,7 +18,7 @@
 // Constructor
 Sim::Sim()
 {
-   //
+   // Nothing to do yet
 }
 
 
@@ -23,6 +30,14 @@ Sim::initialize()
    worldY = 16;
    world = new Atom*[ worldX * worldY ];
    claimed = new int[ worldX * worldY ];
+   
+   // SFMT prep
+   init_gen_rand( (uint32_t)(42) );
+   int rc = 0;
+   for( direction_sz64 = get_min_array_size64() * 8; direction_sz64 < (unsigned int)( worldX * worldY ); direction_sz64 *= 2 );
+   rc = posix_memalign( (void**)&direction, getpagesize(), direction_sz64 );
+   assert( rc == 0 );
+   assert( direction );
 
    // Initialize the periodicTable
    Element* tempEle;
@@ -36,40 +51,16 @@ Sim::initialize()
    // Initialize the rxnTable
    Reaction* tempRxn;
 
-   ElementVector r1;
-   r1.push_back(periodicTable["A"]);
-   r1.push_back(periodicTable["B"]);
-   ElementVector p1;
-   p1.push_back(periodicTable["C"]);
-   p1.push_back(periodicTable["D"]);
-   tempRxn = new Reaction( r1, p1, 0.02 );
+   tempRxn = new Reaction( ev(2,"A","B"), ev(2,"C","D"), 0.02 );
    rxnTable[ tempRxn->getKey() ] = tempRxn;
 
-   ElementVector r2;
-   r2.push_back(periodicTable["E"]);
-   r2.push_back(periodicTable["F"]);
-   ElementVector p2;
-   p2.push_back(periodicTable["G"]);
-   p2.push_back(periodicTable["H"]);
-   tempRxn = new Reaction( r2, p2, 0.03 );
+   tempRxn = new Reaction( ev(2,"E","F"), ev(2,"G","H"), 0.03 );
    rxnTable[ tempRxn->getKey() ] = tempRxn;
 
-   ElementVector r3;
-   r3.push_back(periodicTable["A"]);
-   r3.push_back(periodicTable["A"]);
-   r3.push_back(periodicTable["D"]);
-   ElementVector p3;
-   p3.push_back(periodicTable["H"]);
-   tempRxn = new Reaction( r3, p3, 0.1 );
+   tempRxn = new Reaction( ev(2,"A","A","D"), ev(1,"H"), 0.1 );
    rxnTable[ tempRxn->getKey() ] = tempRxn;
 
-   ElementVector r4;
-   r4.push_back(periodicTable["B"]);
-   ElementVector p4;
-   p4.push_back(periodicTable["F"]);
-   p4.push_back(periodicTable["D"]);
-   p4.push_back(periodicTable["H"]);
-   tempRxn = new Reaction( r4, p4, 1 );
+   tempRxn = new Reaction( ev(1,"B"), ev(3,"F","D","H"), 1 );
    rxnTable[ tempRxn->getKey() ] = tempRxn;
 
    // Initialize the world
@@ -210,6 +201,22 @@ Sim::printWorld()
 
 
 void
+Sim::iterate()
+{
+   generateRandNums();
+   moveAtoms();
+}
+
+
+void
+Sim::generateRandNums()
+{
+   // Get a new set of directions
+   fill_array64( (uint64_t*)(direction), direction_sz64 / 8 );
+}
+
+
+void
 Sim::moveAtoms()
 {
    // Clear all claimed flags
@@ -228,8 +235,8 @@ Sim::moveAtoms()
       {
          if( world[ getWorldIndex(x,y) ] != NULL )
          {
-            int newX = x + 1;
-            int newY = y;
+            int newX = x + dx(x,y);
+            int newY = y + dy(x,y);
             claimed[ getWorldIndex(x,y) ]++;
             claimed[ getWorldIndex(newX,newY) ]++;
          }
@@ -243,14 +250,11 @@ Sim::moveAtoms()
       {
          if( world[ getWorldIndex(x,y) ] != NULL )
          {
-            int newX = x + 1;
-            int newY = y;
+            int newX = x + dx(x,y);
+            int newY = y + dy(x,y);
             if( claimed[ getWorldIndex(x,y) ] == 1 && claimed[ getWorldIndex(newX,newY) ] == 1 )
             {
-               world[ getWorldIndex(x,y) ]->setX(newX);     //TODO: Handle wrapping
-               world[ getWorldIndex(x,y) ]->setY(newY);     //TODO: Handle wrapping
-               world[ getWorldIndex(newX,newY) ] = world[ getWorldIndex(x,y) ];
-               world[ getWorldIndex(x,y) ] = NULL;
+               swapAtoms( x, y, newX, newY );
                claimed[ getWorldIndex(x,y) ]++;
                claimed[ getWorldIndex(newX,newY) ]++;
             }
@@ -261,10 +265,133 @@ Sim::moveAtoms()
 
 
 int
+Sim::dx( int x, int y )
+{
+   int threeRandBits = direction[ getWorldIndex(x,y) ] & 0x7;
+   switch( threeRandBits )
+   {
+      case 0:
+         // N
+         return 0;
+      case 1:
+         // NE
+         return 1;
+      case 2:
+         // E
+         return 1;
+      case 3:
+         // SE
+         return 1;
+      case 4:
+         // S
+         return 0;
+      case 5:
+         // SW
+         return -1;
+      case 6:
+         // W
+         return -1;
+      case 7:
+         // NW
+         return -1;
+      default:
+         assert( 0 );
+   }
+}
+
+
+int
+Sim::dy( int x, int y )
+{
+   int threeRandBits = direction[ getWorldIndex(x,y) ] & 0x7;
+   switch( threeRandBits )
+   {
+      case 0:
+         // N
+         return -1;
+      case 1:
+         // NE
+         return -1;
+      case 2:
+         // E
+         return 0;
+      case 3:
+         // SE
+         return 1;
+      case 4:
+         // S
+         return 1;
+      case 5:
+         // SW
+         return 1;
+      case 6:
+         // W
+         return 0;
+      case 7:
+         // NW
+         return -1;
+      default:
+         assert( 0 );
+   }
+}
+
+
+// Returns an ElementVector containing elementCount
+// Elements specified as a comma separated list of
+// names, e.g. ev(2,"A","B")
+ElementVector
+Sim::ev( int elementCount, ... )
+{
+   ElementVector ev;
+   char* name;
+
+   va_list nameList;
+   va_start( nameList, elementCount );
+   for( int i = 0; i < elementCount; i++ )
+   {
+      name = va_arg( nameList, char* );
+      std::string stringName(name);
+      Element* ele = periodicTable[stringName];
+      ev.push_back( ele );
+   }
+   va_end( nameList );
+
+   return ev;
+}
+
+
+// Handles wrapping around the edges of the world
+// and translating two-dimensional coordinates
+// to a one-dimensional index for the world array
+int
 Sim::getWorldIndex( int x, int y )
 {
-   int wrappedX = x % worldX;
-   int wrappedY = y % worldY;
+   int wrappedX = ( x + worldX ) % worldX;
+   int wrappedY = ( y + worldY ) % worldY;
    return ( wrappedX + wrappedY * worldX );
+}
+
+
+void
+Sim::swapAtoms( int x1, int y1, int x2, int y2 )
+{
+   Atom* atom1 = world[ getWorldIndex( x1, y1 ) ];
+   Atom* atom2 = world[ getWorldIndex( x2, y2 ) ];
+   if( atom1 != NULL )
+   {
+      atom1->setDx( atom1->getDx() + ( x2 - x1 ) );
+      atom1->setDy( atom1->getDy() + ( y2 - y1 ) );
+      atom1->setX( ( x2 + worldX ) % worldX );
+      atom1->setY( ( y2 + worldY ) % worldY );
+   }
+   if( atom2 != NULL )
+   {
+      atom2->setDx( atom2->getDx() + ( x1 - x2 ) );
+      atom2->setDy( atom2->getDy() + ( y1 - y2 ) );
+      atom2->setX( ( x1 + worldX ) % worldX );
+      atom2->setY( ( y1 + worldY ) % worldY );
+   }
+   world[ getWorldIndex( x1, y1 ) ] = atom2;
+   world[ getWorldIndex( x2, y2 ) ] = atom1;
 }
 

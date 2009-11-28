@@ -3,7 +3,7 @@
 
 //#include <QApplication>
 #include <ncurses.h>
-#include <unistd.h>
+#include <unistd.h>   /* Might not be compatible with Windows */
 #include "sim.h"
 
 int
@@ -15,6 +15,7 @@ main ( int argc, char *argv[] )
 
    //QCoreApplication *app;
 
+   printw( "Press Ctrl-c to quit.\n" );
    Sim* mySim = new Sim();
    mySim->initialize();
    printw( "------\n" );
@@ -29,8 +30,8 @@ main ( int argc, char *argv[] )
 
    for( int i = 0; i < 10000; i++ )
    {
-      usleep(80000);
-      mySim->moveAtoms();
+      usleep(200000);
+      mySim->iterate();
       move( y, x );
       mySim->printWorld();
    }

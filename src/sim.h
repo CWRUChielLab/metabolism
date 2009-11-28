@@ -25,7 +25,7 @@ class Sim
       void printElements();
       void printReactions();
       void printWorld();
-      void moveAtoms();
+      void iterate();
 
    private:
       // Sim attributes
@@ -35,9 +35,19 @@ class Sim
       int* claimed;
       int worldX;
       int worldY;
+      
+      // SFMT stuff
+      unsigned long int direction_sz64;
+      unsigned char* direction;
+      int dx( int x, int y );
+      int dy( int x, int y );
 
       // Private methods
+      void generateRandNums();
+      void moveAtoms();
+      ElementVector ev( int elementCount, ... );
       int getWorldIndex( int x, int y );
+      void swapAtoms( int x1, int y1, int x2, int y2 );
 };
 
 #endif /* SIM_H */
