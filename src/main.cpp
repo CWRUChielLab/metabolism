@@ -16,6 +16,7 @@ main ( int argc, char *argv[] )
    //QCoreApplication *app;
 
    printw( "Press Ctrl-c to quit.\n" );
+   printw( "------\n" );
    Sim* mySim = new Sim();
    mySim->initialize();
    printw( "------\n" );
@@ -36,7 +37,8 @@ main ( int argc, char *argv[] )
       mySim->printWorld();
    }
 
-   // End ncurses
+   // Pause and cleanup
+   getch();
    endwin();
 
    return 0;

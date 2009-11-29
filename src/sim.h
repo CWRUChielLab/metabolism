@@ -5,6 +5,7 @@
 #define SIM_H 
 
 #include <map>
+#include <stdint.h>
 #include <vector>
 #include "atom.h"
 #include "element.h"
@@ -36,15 +37,16 @@ class Sim
       int worldX;
       int worldY;
       
-      // SFMT stuff
-      unsigned long int direction_sz64;
-      unsigned char* direction;
-      int dx( int x, int y );
-      int dy( int x, int y );
+      // RNG parameters
+      int randNums_length_in_64_bit_words;
+      uint8_t* randNums;
 
       // Private methods
+      void initRNG( int seed );
       void generateRandNums();
       void moveAtoms();
+      int dx( int x, int y );
+      int dy( int x, int y );
       ElementVector ev( int elementCount, ... );
       int getWorldIndex( int x, int y );
       void swapAtoms( int x1, int y1, int x2, int y2 );
