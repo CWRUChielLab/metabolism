@@ -2,7 +2,7 @@
  */
 
 //#ifndef _GNU_SOURCE
-//#define _GNU_SOURCE   /* Needed for posix_memalign... ? */
+//#define _GNU_SOURCE   // Needed for posix_memalign... ?
 //#endif
 
 #include <algorithm>
@@ -35,6 +35,12 @@ Sim::initialize()
    worldY = 16;
    world = new Atom*[ worldX * worldY ];
    claimed = new uint8_t[ worldX * worldY ];
+
+   // Initialize the world array to NULL
+   for( int i = 0; i < worldX*worldY; i++ )
+   {
+      world[i] = NULL;
+   }
 
    // Initialize the periodicTable
    Element* tempEle;
@@ -73,14 +79,14 @@ Sim::initialize()
    // Initialize the world with random atoms
    Atom* tempAtom;
    int x, y, incr;
-   int minAtoms = 3;
    int maxAtoms = worldX * worldY / 4;
+   int minAtoms = std::min( 3, maxAtoms );
    int range = maxAtoms - minAtoms + 1;
    int atomCount = gen_rand32() % range + minAtoms;
    for( int i = 0; i < atomCount; i++ )
    {
-      x = positions[i] / worldY;
-      y = positions[i] % worldY;
+      x = positions[i] % worldX;
+      y = positions[i] / worldX;
 
       ElementMap::iterator iter = periodicTable.begin();
       incr = gen_rand32() % periodicTable.size();
@@ -211,13 +217,13 @@ Sim::printWorld()
    {
       for( int x = 0; x < worldX; x++ )
       {
-         if( world[ getWorldIndex(x,y) ] == NULL )
+         if( world[ getWorldIndex(x,y) ] != NULL )
          {
-            printw( ". " );
+            printw( "%s ", world[ getWorldIndex(x,y) ]->getType()->getName().c_str() );
          }
          else
          {
-            printw( "%s ", world[ getWorldIndex(x,y) ]->getType()->getName().c_str() );
+            printw( ". " );
          }
       }
       printw( "\n" );

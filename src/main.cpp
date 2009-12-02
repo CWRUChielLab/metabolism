@@ -3,15 +3,15 @@
 
 //#include <QApplication>
 #include <ncurses.h>
-#include <unistd.h>   /* Might not be compatible with Windows */
+#include <unistd.h>   // Might not be compatible with Windows
 #include "sim.h"
 
 int
-main ( int argc, char *argv[] )
+main ( int argc, char* argv[] )
 {
    // Initialize ncurses
-   initscr();  /* Startup */
-   cbreak();   /* Allow special commands, like CTRL+c to quit */
+   initscr();  // Startup
+   cbreak();   // Allow special commands, like CTRL+c to quit
 
    //QCoreApplication *app;
 
