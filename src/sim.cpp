@@ -79,7 +79,7 @@ Sim::initialize()
    int atomCount = gen_rand32() % range + minAtoms;
    for( int i = 0; i < atomCount; i++ )
    {
-      x = positions[i] / worldX;
+      x = positions[i] / worldY;
       y = positions[i] % worldY;
 
       ElementMap::iterator iter = periodicTable.begin();
@@ -292,6 +292,9 @@ Sim::generateRandNums()
 }
 
 
+// Fill the positions array with successive
+// integers ranging from 0 to worldX*worldY-1
+// and then shuffle these integers
 void
 Sim::shufflePositions()
 {
