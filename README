@@ -22,3 +22,10 @@ This program uses the standard Qt build process run from the src directory:
   qmake
   make
 
+Requires Qt 4 or later.  If you have an older version of Qt installed
+in addition to Qt 4, use:
+
+  cd src
+  qmake-qt4
+  make
+
