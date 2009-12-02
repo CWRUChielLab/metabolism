@@ -39,6 +39,7 @@ class Sim
       int worldY;
       Atom** world;
       uint8_t* claimed;
+      unsigned int* positions;
       
       // RNG parameters
       int randNums_length_in_64_bit_ints;
@@ -47,6 +48,7 @@ class Sim
       // Private methods
       void initRNG( int seed );
       void generateRandNums();
+      void shufflePositions();
 
       void moveAtoms();
       int dx( int x, int y );

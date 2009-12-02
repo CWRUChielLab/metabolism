@@ -36,11 +36,6 @@ Sim::initialize()
    world = new Atom*[ worldX * worldY ];
    claimed = new uint8_t[ worldX * worldY ];
 
-   // Initialize the random number generator
-   int seed = time(NULL);
-   initRNG( seed );   
-   printw( "seed = %d\n", seed );
-
    // Initialize the periodicTable
    Element* tempEle;
    for( char c = 'A'; c <= 'H'; c++ )
@@ -65,17 +60,27 @@ Sim::initialize()
    tempRxn = new Reaction( ev(1,"B"), ev(3,"F","D","H"), 1 );
    rxnTable[ tempRxn->getKey() ] = tempRxn;
 
+   // Initialize the random number generator
+   int seed = time(NULL);
+   printw( "seed = %d\n", seed );
+   initRNG( seed );
+
+   // Initialize the positions array with a random
+   // ordering of integers ranging from 0 to
+   // worldX*worldY-1
+   shufflePositions();
+
    // Initialize the world with random atoms
    Atom* tempAtom;
-   int x,y,incr;
+   int x, y, incr;
    int minAtoms = 3;
    int maxAtoms = worldX * worldY / 4;
    int range = maxAtoms - minAtoms + 1;
    int atomCount = gen_rand32() % range + minAtoms;
    for( int i = 0; i < atomCount; i++ )
    {
-      x = gen_rand32() % worldX;
-      y = gen_rand32() % worldY;
+      x = positions[i] / worldX;
+      y = positions[i] % worldY;
 
       ElementMap::iterator iter = periodicTable.begin();
       incr = gen_rand32() % periodicTable.size();
@@ -235,37 +240,44 @@ Sim::iterate()
 void
 Sim::initRNG( int seed )
 {
+   static int allocated = 0;
+
    // Set the seed
    init_gen_rand( (uint32_t)(seed) );
 
-   // The array randNums will be treated by the
-   // RNG as an array of 64-bit ints.  The length
-   // of the array (in 64-bit ints) must be a
-   // multiple of 2 and the array must be at least
-   // get_min_array_size64() 64-bit ints long.
-   // With MEXP = 132049, get_min_array_size64() =
-   // 2*((MEXP/128)+1) = 2064.
-   int min_rand_nums_needed = worldX * worldY;
-   int min_bytes_needed = min_rand_nums_needed * sizeof( *randNums );
-   int min_64_bit_ints_needed = ceil( min_bytes_needed / 8.0 );
-
-   // Make sure we have at least the minimum
-   // length needed
-   randNums_length_in_64_bit_ints = std::max( min_64_bit_ints_needed, get_min_array_size64() );
-
-   // Make sure we have a length (in 64-bit ints)
-   // that is a multiple of 2.
-   if( randNums_length_in_64_bit_ints % 2 != 0 )
+   if( !allocated )
    {
-      randNums_length_in_64_bit_ints++;
+      // The array randNums will be treated by the
+      // RNG as an array of 64-bit ints.  The length
+      // of the array (in 64-bit ints) must be a
+      // multiple of 2 and the array must be at least
+      // get_min_array_size64() 64-bit ints long.
+      // With MEXP = 132049, get_min_array_size64() =
+      // 2*((MEXP/128)+1) = 2064.
+      int min_rand_nums_needed = worldX * worldY;
+      int min_bytes_needed = min_rand_nums_needed * sizeof( *randNums );
+      int min_64_bit_ints_needed = ceil( min_bytes_needed / 8.0 );
+
+      // Make sure we have at least the minimum
+      // length needed
+      randNums_length_in_64_bit_ints = std::max( min_64_bit_ints_needed, get_min_array_size64() );
+
+      // Make sure we have a length (in 64-bit ints)
+      // that is a multiple of 2.
+      if( randNums_length_in_64_bit_ints % 2 != 0 )
+      {
+         randNums_length_in_64_bit_ints++;
+      }
+
+      int bytes_to_be_allocated = randNums_length_in_64_bit_ints * 8;
+
+      int rc = 0;
+      rc = posix_memalign( (void**)&randNums, getpagesize(), bytes_to_be_allocated );
+      assert( rc == 0 );
+      assert( randNums );
+
+      allocated = 1;
    }
-
-   int bytes_to_be_allocated = randNums_length_in_64_bit_ints * 8;
-
-   int rc = 0;
-   rc = posix_memalign( (void**)&randNums, getpagesize(), bytes_to_be_allocated );
-   assert( rc == 0 );
-   assert( randNums );
 }
 
 
@@ -277,6 +289,38 @@ Sim::generateRandNums()
    // ints.  See initRNG method for more
    // information.
    fill_array64( (uint64_t*)(randNums), randNums_length_in_64_bit_ints );
+}
+
+
+void
+Sim::shufflePositions()
+{
+   static int initialized = 0;
+   unsigned int i, highest, lowest, range, rand, temp;
+
+   if( !initialized )
+   {
+      positions = new unsigned int[ worldX * worldY ];
+      initialized = 1;
+   }
+
+   // Fill the positions array with successive integers
+   for( i = 0; i < (unsigned int)(worldX * worldY); i++ )
+   {
+      positions[ i ] = i;
+   }
+
+   // Shuffle the positions array
+   highest = worldX * worldY - 1;
+   for( i = 0; i < highest; i++ )
+   {
+      lowest = i + 1;
+      range = highest - lowest + 1;
+      rand = ( gen_rand32() % range ) + lowest;
+      temp = positions[ i ];
+      positions[ i ] = positions[ rand ];
+      positions[ rand ] = temp;
+   }
 }
 
 
