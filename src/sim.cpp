@@ -5,13 +5,14 @@
 //#define _GNU_SOURCE   /* Needed for posix_memalign... ? */
 //#endif
 
-#define ASSERT( test ) if( !(test) ) {fprintf(stderr, "Assertion failed:%s\n%s:%d:%s\n", #test, __FILE__, __LINE__, __func__);exit(-1);}
-
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <cstdarg>
 #include <cstdlib>
+#include <cstring>
 #include <ctime>
+#include <fstream>
 #include <map>
 #include <ncurses.h>
 #include <SFMT.h>
@@ -33,15 +34,12 @@ Sim::initialize()
    worldX = 16;
    worldY = 16;
    world = new Atom*[ worldX * worldY ];
-   claimed = new int[ worldX * worldY ];
+   claimed = new uint8_t[ worldX * worldY ];
 
    // Initialize the random number generator
    int seed = time(NULL);
    initRNG( seed );   
    printw( "seed = %d\n", seed );
-   printw( "randNums_length_in_64_bit_words = %d\n", randNums_length_in_64_bit_words );
-   printw( "sizeof(*randNums) = %d\n", sizeof( *randNums ) );
-   printw( "max rand num = %llu\n", (~((uint64_t)0)) >> (64 - 8*sizeof(*randNums)) );
 
    // Initialize the periodicTable
    Element* tempEle;
@@ -68,22 +66,20 @@ Sim::initialize()
    rxnTable[ tempRxn->getKey() ] = tempRxn;
 
    // Initialize the world with random atoms
-   generateRandNums();
    Atom* tempAtom;
    int x,y,incr;
-   int minAtoms = 1;
+   int minAtoms = 3;
    int maxAtoms = worldX * worldY / 4;
    int range = maxAtoms - minAtoms + 1;
-   int atomCount = randNums[0] % range + minAtoms;  /* be careful that the divisor goes evenly into
-                                                       the max rand num when max rand num is small */
+   int atomCount = gen_rand32() % range + minAtoms;
    for( int i = 0; i < atomCount; i++ )
    {
-      x = randNums[3*i+1] % worldX;  /* be careful that the divisor goes evenly into */
-      y = randNums[3*i+2] % worldY;  /* the max rand num when max rand num is small  */
+      x = gen_rand32() % worldX;
+      y = gen_rand32() % worldY;
 
       ElementMap::iterator iter = periodicTable.begin();
-      incr = randNums[3*i+3] % periodicTable.size();  /* be careful that the divisor goes evenly into
-                                                         the max rand num when max rand num is small */
+      incr = gen_rand32() % periodicTable.size();
+
       for( int j = 0; j < incr; j++ )
       {
          iter++;
@@ -92,6 +88,11 @@ Sim::initialize()
       tempAtom = new Atom( iter->second, x, y );
       world[ getWorldIndex(x,y) ] = tempAtom;
    }
+
+   // Initialize the RNG again, since we called
+   // gen_rand32() above, but with a different
+   // seed
+   initRNG( seed + 42 );
 }
 
 
@@ -112,9 +113,13 @@ void
 Sim::printReactions()
 {
    printw( "There are %d reactions.\n", rxnTable.size() );
+
+   // Loop through the rxnTable, printing each Reaction
    for( ReactionMap::iterator i = rxnTable.begin(); i != rxnTable.end(); i++ )
    {
       Reaction* rxn = i->second;
+
+      // Count up the number of each type of reactant and product
       std::map<std::string,int> reactantCount;
       std::map<std::string,int> productCount;
       for( unsigned int j = 0; j < rxn->getReactants().size(); j++ )
@@ -127,6 +132,9 @@ Sim::printReactions()
       }
 
       printw( "Key: %d  \t", rxn->getKey() );
+
+      // Print the reactants, grouping copies of one type together
+      // with stoichiometric coefficients
       for( std::map<std::string,int>::iterator j = reactantCount.begin(); j != reactantCount.end(); j++ )
       {
          int coefficient = j->second;
@@ -153,7 +161,11 @@ Sim::printReactions()
             }
          }
       }
+
       printw( " -> " );
+
+      // Print the products, grouping copies of one type together
+      // with stoichiometric coefficients
       for( std::map<std::string,int>::iterator j = productCount.begin(); j != productCount.end(); j++ )
       {
          int coefficient = j->second;
@@ -180,6 +192,7 @@ Sim::printReactions()
             }
          }
       }
+
       printw( "\n" );
    }
    refresh();
@@ -226,33 +239,33 @@ Sim::initRNG( int seed )
    init_gen_rand( (uint32_t)(seed) );
 
    // The array randNums will be treated by the
-   // RNG as an array of 64-bit words.  The length
-   // of the array (in 64-bit words) must be a
+   // RNG as an array of 64-bit ints.  The length
+   // of the array (in 64-bit ints) must be a
    // multiple of 2 and the array must be at least
-   // get_min_array_size64() 64-bit words long.
+   // get_min_array_size64() 64-bit ints long.
    // With MEXP = 132049, get_min_array_size64() =
    // 2*((MEXP/128)+1) = 2064.
    int min_rand_nums_needed = worldX * worldY;
    int min_bytes_needed = min_rand_nums_needed * sizeof( *randNums );
-   int min_64_bit_words_needed = ceil( min_bytes_needed / 8.0 );
+   int min_64_bit_ints_needed = ceil( min_bytes_needed / 8.0 );
 
    // Make sure we have at least the minimum
    // length needed
-   randNums_length_in_64_bit_words = std::max( min_64_bit_words_needed, get_min_array_size64() );
+   randNums_length_in_64_bit_ints = std::max( min_64_bit_ints_needed, get_min_array_size64() );
 
-   // Make sure we have a length (in 64-bit words)
+   // Make sure we have a length (in 64-bit ints)
    // that is a multiple of 2.
-   if( randNums_length_in_64_bit_words % 2 != 0 )
+   if( randNums_length_in_64_bit_ints % 2 != 0 )
    {
-      randNums_length_in_64_bit_words++;
+      randNums_length_in_64_bit_ints++;
    }
 
-   int bytes_to_be_allocated = randNums_length_in_64_bit_words * 8;
+   int bytes_to_be_allocated = randNums_length_in_64_bit_ints * 8;
 
    int rc = 0;
    rc = posix_memalign( (void**)&randNums, getpagesize(), bytes_to_be_allocated );
-   ASSERT( rc == 0 );
-   ASSERT( randNums );
+   assert( rc == 0 );
+   assert( randNums );
 }
 
 
@@ -261,9 +274,9 @@ void
 Sim::generateRandNums()
 {
    // fill_array64 fills randNums with 64-bit
-   // words.  See initRNG method for more
+   // ints.  See initRNG method for more
    // information.
-   fill_array64( (uint64_t*)(randNums), randNums_length_in_64_bit_words );
+   fill_array64( (uint64_t*)(randNums), randNums_length_in_64_bit_ints );
 }
 
 
@@ -271,13 +284,7 @@ void
 Sim::moveAtoms()
 {
    // Clear all claimed flags
-   for( int y = 0; y < worldY; y++ )
-   {
-      for( int x = 0; x < worldX; x++ )
-      {
-         claimed[ getWorldIndex(x,y) ] = 0;
-      }
-   }
+   std::memset( claimed, 0, worldX * worldY );
    
    // Stake claims
    for( int y = 0; y < worldY; y++ )
@@ -315,6 +322,70 @@ Sim::moveAtoms()
 }
 
 
+// Records important information about the state
+// of the world and writes it to file.  Passing
+// a negative value for iter will close the file.
+void
+Sim::takeCensus( int iter )
+{
+   static int initialized = 0;
+   static std::ofstream censusFile;
+   int atomCount = 0;
+
+   if( iter < 0 )
+   {
+      censusFile.close();
+      initialized = 0;
+      return;
+   }
+
+   if( !initialized )
+   {
+      initialized = 1;
+      censusFile.open( "census.out" );
+      censusFile << "iter atomCount" << std::endl;
+   }
+
+   for( int x = 0; x < worldX; x++ )
+   {
+      for( int y = 0; y < worldY; y++ )
+      {
+         if( world[ getWorldIndex(x,y) ] != NULL )
+         {
+            atomCount++;
+         }
+      }
+   }
+   censusFile << iter << " " << atomCount << std::endl;
+}
+
+
+// Writes important information about the final
+// state of the world to file.
+void
+Sim::finalizeAtoms()
+{
+   takeCensus(-1);
+   std::ofstream finalFile;
+   finalFile.open( "diffusion.out" );
+   finalFile << "type dx dy\n";
+   for( int x = 0; x < worldX; x++ )
+   {
+      for( int y = 0; y < worldY; y++ )
+      {
+         if( world[ getWorldIndex(x,y) ] != NULL )
+         {
+            Atom* thisAtom = world[ getWorldIndex(x,y) ];
+            finalFile << thisAtom->getType()->getName() << " " << thisAtom->getDx() << " " << thisAtom->getDy() << std::endl;
+         }
+      }
+   }
+   finalFile.close();
+}
+
+
+// Uses the randNum at an Atom's current position
+// to determine the direction it moves next
 int
 Sim::dx( int x, int y )
 {
@@ -338,11 +409,13 @@ Sim::dx( int x, int y )
       case 7:
          return -1; /* NW */
       default:
-         ASSERT( 0 );
+         assert( 0 );
    }
 }
 
 
+// Uses the randNum at an Atom's current position
+// to determine the direction it moves next
 int
 Sim::dy( int x, int y )
 {
@@ -366,7 +439,7 @@ Sim::dy( int x, int y )
       case 7:
          return -1; /* NW */
       default:
-         ASSERT( 0 );
+         assert( 0 );
    }
 }
 
@@ -407,7 +480,7 @@ Sim::getWorldIndex( int x, int y )
 }
 
 
-// Switches the atoms in positions (x1,y1) and
+// Switches the Atoms in positions (x1,y1) and
 // (x2,y2) and handles updating x, y, dx, and dy
 // values on both atoms.  Moves a single atom if
 // one of the two positions is empty

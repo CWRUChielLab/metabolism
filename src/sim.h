@@ -28,25 +28,30 @@ class Sim
       void printWorld();
       void iterate();
 
+      void takeCensus( int iter );
+      void finalizeAtoms();
+
    private:
       // Sim attributes
       ElementMap periodicTable;
       ReactionMap rxnTable;
-      Atom** world;
-      int* claimed;
       int worldX;
       int worldY;
+      Atom** world;
+      uint8_t* claimed;
       
       // RNG parameters
-      int randNums_length_in_64_bit_words;
+      int randNums_length_in_64_bit_ints;
       uint8_t* randNums;
 
       // Private methods
       void initRNG( int seed );
       void generateRandNums();
+
       void moveAtoms();
       int dx( int x, int y );
       int dy( int x, int y );
+
       ElementVector ev( int elementCount, ... );
       int getWorldIndex( int x, int y );
       void swapAtoms( int x1, int y1, int x2, int y2 );

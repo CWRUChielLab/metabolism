@@ -34,8 +34,15 @@ main ( int argc, char *argv[] )
       usleep(200000);
       mySim->iterate();
       move( y, x );
+      if( i % 32 == 0 )
+      {
+         mySim->takeCensus(i);
+      }
       mySim->printWorld();
    }
+   mySim->finalizeAtoms();
+   printw( "DONE!\n" );
+   refresh();
 
    // Pause and cleanup
    getch();
