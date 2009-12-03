@@ -19,24 +19,30 @@ class Sim
 {
    public:
       // Constructor
-      Sim();
+      Sim( int initSeed, int initMaxIters, int initWorldX, int initWorldY, int initAtomCount );
 
       // Methods
-      void initialize();
+      int getCurrentIter();
+      void dumpConfig();
       void printElements();
       void printReactions();
       void printWorld();
-      void iterate();
+      int iterate();
 
-      void takeCensus( int iter );
-      void finalizeAtoms();
+      void takeCensus();
+      void dumpAtoms();
 
    private:
       // Sim attributes
-      ElementMap periodicTable;
-      ReactionMap rxnTable;
+      int seed;
+      int currentIter;
+      int maxIters;
       int worldX;
       int worldY;
+      int atomCount;
+
+      ElementMap periodicTable;
+      ReactionMap rxnTable;
       Atom** world;
       uint8_t* claimed;
       unsigned int* positions;
@@ -46,7 +52,7 @@ class Sim
       uint8_t* randNums;
 
       // Private methods
-      void initRNG( int seed );
+      void initRNG( int initSeed );
       void generateRandNums();
       void shufflePositions();
 

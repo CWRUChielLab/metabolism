@@ -2,6 +2,7 @@
  */
 
 //#include <QApplication>
+#include <ctime>
 #include <ncurses.h>
 #include <unistd.h>   // Might not be compatible with Windows
 #include "sim.h"
@@ -15,10 +16,16 @@ main ( int argc, char* argv[] )
 
    //QCoreApplication *app;
 
+   int seed = time(NULL);
+   int maxIters = 10000;
+   int worldX = 16;
+   int worldY = 16;
+   int atomCount = worldX * worldY / 4;
+
+   Sim* mySim = new Sim( seed, maxIters, worldX, worldY, atomCount );
+   mySim->dumpConfig();
+
    printw( "Press Ctrl-c to quit.\n" );
-   printw( "------\n" );
-   Sim* mySim = new Sim();
-   mySim->initialize();
    printw( "------\n" );
    mySim->printElements();
    printw( "------\n" );
@@ -29,18 +36,22 @@ main ( int argc, char* argv[] )
    getyx( stdscr, y, x );
    mySim->printWorld();
 
-   for( int i = 0; i < 10000; i++ )
+   while( mySim->iterate() )
    {
-      usleep(200000);
-      mySim->iterate();
       move( y, x );
-      if( i % 32 == 0 )
-      {
-         mySim->takeCensus(i);
-      }
       mySim->printWorld();
+      if( mySim->getCurrentIter() % 128 == 0 )
+      {
+         mySim->takeCensus();
+      }
+      if( mySim->getCurrentIter() % 8 == 0 )
+      {
+         printw( "Iteration: %d of %d | %.2f%% complete\n", mySim->getCurrentIter(), maxIters, 100*(double)mySim->getCurrentIter()/(double)maxIters );
+         refresh();
+      }
+      usleep(200000);
    }
-   mySim->finalizeAtoms();
+   mySim->dumpAtoms();
    printw( "DONE!\n" );
    refresh();
 

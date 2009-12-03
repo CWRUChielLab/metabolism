@@ -11,7 +11,6 @@
 #include <cstdarg>
 #include <cstdlib>
 #include <cstring>
-#include <ctime>
 #include <fstream>
 #include <map>
 #include <ncurses.h>
@@ -21,26 +20,34 @@
 
 
 // Constructor
-Sim::Sim()
+Sim::Sim( int initSeed, int initMaxIters, int initWorldX, int initWorldY, int initAtomCount )
 {
-   // Nothing to do yet
-}
+   // Copy constructor arguments
+   seed = initSeed;
+   maxIters = initMaxIters;
+   worldX = initWorldX;
+   worldY = initWorldY;
+   atomCount = initAtomCount;
 
-
-void
-Sim::initialize()
-{
    // Setup the world
-   worldX = 16;
-   worldY = 16;
+   currentIter = 0;
    world = new Atom*[ worldX * worldY ];
    claimed = new uint8_t[ worldX * worldY ];
+   positions = new unsigned int[ worldX * worldY ];
 
    // Initialize the world array to NULL
    for( int i = 0; i < worldX*worldY; i++ )
    {
       world[i] = NULL;
    }
+
+   // Initialize the random number generator
+   initRNG( seed );
+
+   // Initialize the positions array with a random
+   // ordering of integers ranging from 0 to
+   // worldX*worldY-1
+   shufflePositions();
 
    // Initialize the periodicTable
    Element* tempEle;
@@ -66,37 +73,23 @@ Sim::initialize()
    tempRxn = new Reaction( ev(1,"B"), ev(3,"F","D","H"), 1 );
    rxnTable[ tempRxn->getKey() ] = tempRxn;
 
-   // Initialize the random number generator
-   int seed = time(NULL);
-   printw( "seed = %d\n", seed );
-   initRNG( seed );
-
-   // Initialize the positions array with a random
-   // ordering of integers ranging from 0 to
-   // worldX*worldY-1
-   shufflePositions();
-
    // Initialize the world with random atoms
    Atom* tempAtom;
    int x, y, incr;
-   int maxAtoms = worldX * worldY / 4;
-   int minAtoms = std::min( 3, maxAtoms );
-   int range = maxAtoms - minAtoms + 1;
-   int atomCount = gen_rand32() % range + minAtoms;
    for( int i = 0; i < atomCount; i++ )
    {
       x = positions[i] % worldX;
       y = positions[i] / worldX;
 
-      ElementMap::iterator iter = periodicTable.begin();
+      ElementMap::iterator ele = periodicTable.begin();
       incr = gen_rand32() % periodicTable.size();
 
       for( int j = 0; j < incr; j++ )
       {
-         iter++;
+         ele++;
       }
 
-      tempAtom = new Atom( iter->second, x, y );
+      tempAtom = new Atom( ele->second, x, y );
       world[ getWorldIndex(x,y) ] = tempAtom;
    }
 
@@ -104,6 +97,45 @@ Sim::initialize()
    // gen_rand32() above, but with a different
    // seed
    initRNG( seed + 42 );
+}
+
+
+int
+Sim::getCurrentIter()
+{
+   return currentIter;
+}
+
+
+// Output all important experimental parameters
+void
+Sim::dumpConfig()
+{
+   static std::ofstream configFile;
+   static std::ifstream gitFile;
+   std::string head;
+   std::string version;
+
+   // Look at the git directory files and pull out
+   // the name of the currently checked-out commit
+   gitFile.open( "../.git/HEAD" );
+   gitFile.ignore(5);
+   gitFile >> head;
+   head = "../.git/" + head;
+   gitFile.close();
+   gitFile.open( head.c_str() );
+   gitFile >> version;
+   gitFile.close();
+
+   // Write parameters to file
+   configFile.open( "config.out" );
+   configFile << version << std::endl;
+   configFile << "seed: " << seed << std::endl;
+   configFile << "maxIters: " << maxIters << std::endl;
+   configFile << "worldX: " << worldX << std::endl;
+   configFile << "worldY: " << worldY << std::endl;
+   configFile << "atomCount: " << atomCount << std::endl;
+   configFile.close();
 }
 
 
@@ -234,22 +266,34 @@ Sim::printWorld()
 
 
 // Execute one step of the simulation
-void
+// Returns 1 if the simulation successfully
+// and 0 if the simulation has reached its
+// maxIters
+int
 Sim::iterate()
 {
-   generateRandNums();
-   moveAtoms();
+   if( currentIter < maxIters )
+   {
+      generateRandNums();
+      moveAtoms();
+      currentIter++;
+      return 1;
+   }
+   else
+   {
+      return 0;
+   }
 }
 
 
-// Initialized the random number generator
+// Initialize the random number generator
 void
-Sim::initRNG( int seed )
+Sim::initRNG( int initSeed )
 {
    static int allocated = 0;
 
    // Set the seed
-   init_gen_rand( (uint32_t)(seed) );
+   init_gen_rand( (uint32_t)(initSeed) );
 
    if( !allocated )
    {
@@ -287,7 +331,10 @@ Sim::initRNG( int seed )
 }
 
 
-// Get a new set of randNums
+// Get a new set of randNums.
+// Note: initRNG must always be called
+// between calls of generateRandNums and
+// shufflePositions.
 void
 Sim::generateRandNums()
 {
@@ -300,18 +347,14 @@ Sim::generateRandNums()
 
 // Fill the positions array with successive
 // integers ranging from 0 to worldX*worldY-1
-// and then shuffle these integers
+// and then shuffle these integers.
+// Note: initRNG must always be called
+// between calls of generateRandNums and
+// shufflePositions.
 void
 Sim::shufflePositions()
 {
-   static int initialized = 0;
    unsigned int i, highest, lowest, range, rand, temp;
-
-   if( !initialized )
-   {
-      positions = new unsigned int[ worldX * worldY ];
-      initialized = 1;
-   }
 
    // Fill the positions array with successive integers
    for( i = 0; i < (unsigned int)(worldX * worldY); i++ )
@@ -376,27 +419,19 @@ Sim::moveAtoms()
 
 
 // Records important information about the state
-// of the world and writes it to file.  Passing
-// a negative value for iter will close the file.
+// of the world and writes it to file.
 void
-Sim::takeCensus( int iter )
+Sim::takeCensus()
 {
    static int initialized = 0;
    static std::ofstream censusFile;
-   int atomCount = 0;
-
-   if( iter < 0 )
-   {
-      censusFile.close();
-      initialized = 0;
-      return;
-   }
+   int currentAtomCount = 0;
 
    if( !initialized )
    {
       initialized = 1;
       censusFile.open( "census.out" );
-      censusFile << "iter atomCount" << std::endl;
+      censusFile << "iter atoms" << std::endl;
    }
 
    for( int x = 0; x < worldX; x++ )
@@ -405,23 +440,23 @@ Sim::takeCensus( int iter )
       {
          if( world[ getWorldIndex(x,y) ] != NULL )
          {
-            atomCount++;
+            currentAtomCount++;
          }
       }
    }
-   censusFile << iter << " " << atomCount << std::endl;
+   censusFile << currentIter << " " << currentAtomCount << std::endl;
 }
 
 
-// Writes important information about the final
-// state of the world to file.
+// Writes important information about the state
+// of the world to file.  To be called when the
+// simulation ends.
 void
-Sim::finalizeAtoms()
+Sim::dumpAtoms()
 {
-   takeCensus(-1);
-   std::ofstream finalFile;
-   finalFile.open( "diffusion.out" );
-   finalFile << "type dx dy\n";
+   std::ofstream diffusionFile;
+   diffusionFile.open( "diffusion.out" );
+   diffusionFile << "type dx dy\n";
    for( int x = 0; x < worldX; x++ )
    {
       for( int y = 0; y < worldY; y++ )
@@ -429,11 +464,11 @@ Sim::finalizeAtoms()
          if( world[ getWorldIndex(x,y) ] != NULL )
          {
             Atom* thisAtom = world[ getWorldIndex(x,y) ];
-            finalFile << thisAtom->getType()->getName() << " " << thisAtom->getDx() << " " << thisAtom->getDy() << std::endl;
+            diffusionFile << thisAtom->getType()->getName() << " " << thisAtom->getDx() << " " << thisAtom->getDy() << std::endl;
          }
       }
    }
-   finalFile.close();
+   diffusionFile.close();
 }
 
 
