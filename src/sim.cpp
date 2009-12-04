@@ -119,13 +119,21 @@ Sim::dumpConfig()
    // Look at the git directory files and pull out
    // the name of the currently checked-out commit
    gitFile.open( "../.git/HEAD" );
-   gitFile.ignore(5);
    gitFile >> head;
-   head = "../.git/" + head;
-   gitFile.close();
-   gitFile.open( head.c_str() );
-   gitFile >> version;
-   gitFile.close();
+   if( head == "ref:" )
+   {
+      gitFile >> head;
+      head = "../.git/" + head;
+      gitFile.close();
+      gitFile.open( head.c_str() );
+      gitFile >> version;
+      gitFile.close();
+   }
+   else
+   {
+      version = head;
+      gitFile.close();
+   }
 
    // Write parameters to file
    configFile.open( "config.out" );
@@ -477,28 +485,12 @@ Sim::dumpAtoms()
 int
 Sim::dx( int x, int y )
 {
+   // Horizontal dimension deltas for directions
+   // in the following order:
+   // N, NE, E, SE, S, SW, W, NW
+   static int directions[] = { 0, 1, 1, 1, 0, -1, -1, -1 };
    int threeRandBits = randNums[ getWorldIndex(x,y) ] & 0x7;
-   switch( threeRandBits )
-   {
-      case 0:
-         return 0;  /* N  */
-      case 1:
-         return 1;  /* NE */
-      case 2:
-         return 1;  /* E  */
-      case 3:
-         return 1;  /* SE */
-      case 4:
-         return 0;  /* S  */
-      case 5:
-         return -1; /* SW */
-      case 6:
-         return -1; /* W  */
-      case 7:
-         return -1; /* NW */
-      default:
-         assert( 0 );
-   }
+   return directions[ threeRandBits ];
 }
 
 
@@ -507,28 +499,12 @@ Sim::dx( int x, int y )
 int
 Sim::dy( int x, int y )
 {
+   // Vertical dimension deltas for directions
+   // in the following order:
+   // N, NE, E, SE, S, SW, W, NW
+   static int directions[] = { -1, -1, 0, 1, 1, 1, 0, -1 };
    int threeRandBits = randNums[ getWorldIndex(x,y) ] & 0x7;
-   switch( threeRandBits )
-   {
-      case 0:
-         return -1; /* N  */
-      case 1:
-         return -1; /* NE */
-      case 2:
-         return 0;  /* E  */
-      case 3:
-         return 1;  /* SE */
-      case 4:
-         return 1;  /* S  */
-      case 5:
-         return 1;  /* SW */
-      case 6:
-         return 0;  /* W  */
-      case 7:
-         return -1; /* NW */
-      default:
-         assert( 0 );
-   }
+   return directions[ threeRandBits ];
 }
 
 
