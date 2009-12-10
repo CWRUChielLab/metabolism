@@ -151,7 +151,7 @@ Options::printHelp()
    // Output help information
    std::cout << "---------------------------------------------------------------------------" << std::endl;
    std::cout << "Usage: metabolism [OPTION]..."                                               << std::endl;
-   std::cout << "Example: metabolism -i 100 -x 256 -y 256 -l 1000"                            << std::endl;
+   std::cout << "Example: metabolism -i 100 -x 256 -y 256 -z 1000"                            << std::endl;
    std::cout << "  Would run a 256x256 world for 100 iterations with 1 second pauses between" << std::endl;
    std::cout << "    each iteration."                                                         << std::endl;
    std::cout <<                                                                                  std::endl;
