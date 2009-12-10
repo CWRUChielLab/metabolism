@@ -20,6 +20,7 @@ Options::Options( int argc, char* argv[] )
    atomCount = 64;
    useGUI = 1;
    sleep = 0;
+   verbose = 0;
    configFile = "config.out";
    censusFile = "census.out";
    diffusionFile = "diffusion.out";
@@ -34,11 +35,12 @@ Options::Options( int argc, char* argv[] )
       { "no-gui",            0, 0, 'g' },
       { "help",              0, 0, 'h' },
       { "iters",             1, 0, 'i' },
-      { "sleep",             1, 0, 'l' },
       { "seed",              1, 0, 's' },
       { "version",           0, 0, 'v' },
+      { "verbose",           0, 0, 'V' },
       { "x",                 1, 0, 'x' },
-      { "y",                 1, 0, 'y' }
+      { "y",                 1, 0, 'y' },
+      { "sleep",             1, 0, 'z' }
    };
 
    int option_index = 0, c;
@@ -53,7 +55,7 @@ Options::Options( int argc, char* argv[] )
       // getopt_long to properly handle the multiple parameters
       // that can be passed to --files by assigning the second
       // and third parameters passed to --files with c=1.
-      c = getopt_long( argc, argv, "-a:f:ghi:l:s:vx:y:", long_options, &option_index );
+      c = getopt_long( argc, argv, "-a:f:ghi:s:vVx:y:z:", long_options, &option_index );
       if( c == -1 )
       {
          break;
@@ -104,9 +106,6 @@ Options::Options( int argc, char* argv[] )
          case 'i':
             maxIters = safeStrtol( optarg );
             break;
-         case 'l':
-            sleep = safeStrtol( optarg );
-            break;
          case 's':
             seed = safeStrtol( optarg );
             break;
@@ -114,11 +113,17 @@ Options::Options( int argc, char* argv[] )
             printVersion();
             exit( 0 );
             break;
+         case 'V':
+            verbose = 1;
+            break;
          case 'x':
             worldX = safeStrtol( optarg );
             break;
          case 'y':
             worldY = safeStrtol( optarg );
+            break;
+         case 'z':
+            sleep = safeStrtol( optarg );
             break;
          default:
             std::cout << "Unknown option.  Try --help for a full list." << std::endl;
@@ -156,13 +161,14 @@ Options::printHelp()
    std::cout << "-g, --no-gui       Disable the GUI."                                         << std::endl;
    std::cout << "-h, --help         Display this information."                                << std::endl;
    std::cout << "-i, --iters        Number of iterations. Default: 100000"                    << std::endl;
-   std::cout << "-l, --sleep        Number of milliseconds to sleep between iterations."      << std::endl;
-   std::cout << "                     Default: 200"                                           << std::endl;
    std::cout << "-s, --seed         Seed for the random number generator. Initialized using"  << std::endl;
    std::cout << "                     the system time by default."                            << std::endl;
    std::cout << "-v, --version      Display version information."                             << std::endl;
+   std::cout << "-V, --verbose      Write to screen detailed information for debugging."      << std::endl;
    std::cout << "-x, --x            Width of the world. Default: 16"                          << std::endl;
    std::cout << "-y, --y            Height of the world. Default: 16"                         << std::endl;
+   std::cout << "-z, --sleep        Number of milliseconds to sleep between iterations."      << std::endl;
+   std::cout << "                     Default: 200"                                           << std::endl;
    std::cout << "---------------------------------------------------------------------------" << std::endl;
 }
 

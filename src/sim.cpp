@@ -74,6 +74,7 @@ Sim::Sim( Options* newOptions )
    // Initialize the world with random atoms
    Atom* tempAtom;
    int x, y, incr;
+   o->atomCount = std::min( o->atomCount, o->worldX * o->worldY );
    for( int i = 0; i < o->atomCount; i++ )
    {
       x = positions[i] % o->worldX;

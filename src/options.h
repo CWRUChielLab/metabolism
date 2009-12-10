@@ -17,7 +17,7 @@ class Options
       void printVersion();
       void printHelp();
 
-      // Options
+      // Options attributes
       int seed;
       int maxIters;
       int worldX;
@@ -25,6 +25,7 @@ class Options
       int atomCount;
       int useGUI;
       int sleep;
+      int verbose;
       std::string configFile;
       std::string censusFile;
       std::string diffusionFile;
