@@ -50,6 +50,6 @@ namespace SafeCalls
          return p;
       }
    }
-}
+};
 
 #endif /* SAFECALLS_H */

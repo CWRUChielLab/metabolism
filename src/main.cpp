@@ -20,7 +20,7 @@ main ( int argc, char* argv[] )
    cbreak();   // Allow special commands, like CTRL+c to quit
 
    Sim* mySim = safeNew( Sim(o) );
-   mySim->dumpConfig();
+   mySim->writeConfig();
 
    printw( "Press Ctrl-c to quit.\n" );
    printw( "------\n" );
@@ -57,7 +57,7 @@ main ( int argc, char* argv[] )
       }
       usleep(o->sleep * 1000);
    }
-   mySim->dumpAtoms();
+   mySim->writeAtoms();
    printw( "DONE!\n" );
    refresh();
 

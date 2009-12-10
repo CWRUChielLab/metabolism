@@ -16,7 +16,6 @@ class Options
       // Options output methods
       void printVersion();
       void printHelp();
-      void dumpOptions();
 
       // Options
       int seed;
@@ -26,6 +25,9 @@ class Options
       int atomCount;
       int useGUI;
       int sleep;
+      std::string configFile;
+      std::string censusFile;
+      std::string diffusionFile;
 };
 
 #endif /* OPTIONS_H */

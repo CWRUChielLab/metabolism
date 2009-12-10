@@ -107,7 +107,7 @@ Sim::getCurrentIter()
 
 // Output all important experimental parameters
 void
-Sim::dumpConfig()
+Sim::writeConfig()
 {
    static std::ofstream configFile;
    static std::ifstream gitFile;
@@ -134,7 +134,7 @@ Sim::dumpConfig()
    }
 
    // Write parameters to file
-   configFile.open( "config.out" );
+   configFile.open( o->configFile.c_str() );
    configFile << version << std::endl;
    configFile << "seed: " << o->seed << std::endl;
    configFile << "maxIters: " << o->maxIters << std::endl;
@@ -436,7 +436,7 @@ Sim::takeCensus()
    if( !initialized )
    {
       initialized = 1;
-      censusFile.open( "census.out" );
+      censusFile.open( o->censusFile.c_str() );
       censusFile << "iter atoms" << std::endl;
    }
 
@@ -458,10 +458,10 @@ Sim::takeCensus()
 // of the world to file.  To be called when the
 // simulation ends.
 void
-Sim::dumpAtoms()
+Sim::writeAtoms()
 {
    std::ofstream diffusionFile;
-   diffusionFile.open( "diffusion.out" );
+   diffusionFile.open( o->diffusionFile.c_str() );
    diffusionFile << "type dx dy\n";
    for( int x = 0; x < o->worldX; x++ )
    {

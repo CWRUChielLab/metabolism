@@ -24,14 +24,14 @@ class Sim
 
       // Methods
       int getCurrentIter();
-      void dumpConfig();
+      void writeConfig();
       void printElements();
       void printReactions();
       void printWorld();
       int iterate();
 
       void takeCensus();
-      void dumpAtoms();
+      void writeAtoms();
 
    private:
       // Sim attributes

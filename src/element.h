@@ -19,7 +19,7 @@ class Element
       void setColor( int newColor );
       int getCharge();
       void setCharge( int newCharge );
-   
+
    private:
       // Element attributes
       int key;
