@@ -9,6 +9,7 @@
 #include <vector>
 #include "atom.h"
 #include "element.h"
+#include "options.h"
 #include "reaction.h"
 
 typedef std::map<std::string,Element*> ElementMap;
@@ -19,7 +20,7 @@ class Sim
 {
    public:
       // Constructor
-      Sim( int initSeed, int initMaxIters, int initWorldX, int initWorldY, int initAtomCount );
+      Sim( Options* newOptions );
 
       // Methods
       int getCurrentIter();
@@ -34,12 +35,8 @@ class Sim
 
    private:
       // Sim attributes
-      int seed;
+      Options* o;
       int currentIter;
-      int maxIters;
-      int worldX;
-      int worldY;
-      int atomCount;
 
       ElementMap periodicTable;
       ReactionMap rxnTable;

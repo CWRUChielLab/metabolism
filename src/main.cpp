@@ -5,19 +5,21 @@
 #include <ncurses.h>
 #include <unistd.h>   // Might not be compatible with Windows
 #include "options.h"
+#include "safecalls.h"
 #include "sim.h"
+using namespace SafeCalls;
 
 
 int
 main ( int argc, char* argv[] )
 {
-   Options* o = new Options( argc, argv );
+   Options* o = safeNew( Options( argc, argv ) );
 
    // Initialize ncurses
    initscr();  // Startup
    cbreak();   // Allow special commands, like CTRL+c to quit
 
-   Sim* mySim = new Sim( o->seed, o->maxIters, o->worldX, o->worldY, o->atomCount );
+   Sim* mySim = safeNew( Sim(o) );
    mySim->dumpConfig();
 
    printw( "Press Ctrl-c to quit.\n" );
@@ -47,7 +49,10 @@ main ( int argc, char* argv[] )
       }
       if( mySim->getCurrentIter() % 8 == 0 )
       {
-         printw( "Iteration: %d of %d | %.2f%% complete\n", mySim->getCurrentIter(), o->maxIters, 100*(double)mySim->getCurrentIter()/(double)o->maxIters );
+         printw( "Iteration: %d of %d | %.2f%% complete\n",
+            mySim->getCurrentIter(),
+            o->maxIters,
+            100*(double)mySim->getCurrentIter() / (double)o->maxIters );
          refresh();
       }
       usleep(o->sleep * 1000);

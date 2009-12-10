@@ -16,33 +16,31 @@
 #include <ncurses.h>
 #include <SFMT.h>
 #include <vector>
+#include "safecalls.h"
 #include "sim.h"
+using namespace SafeCalls;
 
 
 // Constructor
-Sim::Sim( int initSeed, int initMaxIters, int initWorldX, int initWorldY, int initAtomCount )
+Sim::Sim( Options* newOptions )
 {
    // Copy constructor arguments
-   seed = initSeed;
-   maxIters = initMaxIters;
-   worldX = initWorldX;
-   worldY = initWorldY;
-   atomCount = initAtomCount;
+   o = newOptions;
 
    // Setup the world
    currentIter = 0;
-   world = new Atom*[ worldX * worldY ];
-   claimed = new uint8_t[ worldX * worldY ];
-   positions = new unsigned int[ worldX * worldY ];
+   world = safeNew( Atom*[ o->worldX * o->worldY ] );
+   claimed = safeNew( uint8_t[ o->worldX * o->worldY ] );
+   positions = safeNew( unsigned int[ o->worldX * o->worldY ] );
 
    // Initialize the world array to NULL
-   for( int i = 0; i < worldX*worldY; i++ )
+   for( int i = 0; i < o->worldX * o->worldY; i++ )
    {
       world[i] = NULL;
    }
 
    // Initialize the random number generator
-   initRNG( seed );
+   initRNG( o->seed );
 
    // Initialize the positions array with a random
    // ordering of integers ranging from 0 to
@@ -54,32 +52,32 @@ Sim::Sim( int initSeed, int initMaxIters, int initWorldX, int initWorldY, int in
    for( char c = 'A'; c <= 'H'; c++ )
    {
       std::string s(1,c);
-      tempEle = new Element( s, 0, 0 );
+      tempEle = safeNew( Element( s, 0, 0 ) );
       periodicTable[ s ] = tempEle;
    }
 
    // Initialize the rxnTable
    Reaction* tempRxn;
 
-   tempRxn = new Reaction( ev(2,"A","B"), ev(2,"C","D"), 0.02 );
+   tempRxn = safeNew( Reaction( ev(2,"A","B"), ev(2,"C","D"), 0.02 ) );
    rxnTable[ tempRxn->getKey() ] = tempRxn;
 
-   tempRxn = new Reaction( ev(2,"E","F"), ev(2,"G","H"), 0.03 );
+   tempRxn = safeNew( Reaction( ev(2,"E","F"), ev(2,"G","H"), 0.03 ) );
    rxnTable[ tempRxn->getKey() ] = tempRxn;
 
-   tempRxn = new Reaction( ev(2,"A","A","D"), ev(1,"H"), 0.1 );
+   tempRxn = safeNew( Reaction( ev(2,"A","A","D"), ev(1,"H"), 0.1 ) );
    rxnTable[ tempRxn->getKey() ] = tempRxn;
 
-   tempRxn = new Reaction( ev(1,"B"), ev(3,"F","D","H"), 1 );
+   tempRxn = safeNew( Reaction( ev(1,"B"), ev(3,"F","D","H"), 1 ) );
    rxnTable[ tempRxn->getKey() ] = tempRxn;
 
    // Initialize the world with random atoms
    Atom* tempAtom;
    int x, y, incr;
-   for( int i = 0; i < atomCount; i++ )
+   for( int i = 0; i < o->atomCount; i++ )
    {
-      x = positions[i] % worldX;
-      y = positions[i] / worldX;
+      x = positions[i] % o->worldX;
+      y = positions[i] / o->worldX;
 
       ElementMap::iterator ele = periodicTable.begin();
       incr = gen_rand32() % periodicTable.size();
@@ -89,14 +87,14 @@ Sim::Sim( int initSeed, int initMaxIters, int initWorldX, int initWorldY, int in
          ele++;
       }
 
-      tempAtom = new Atom( ele->second, x, y );
+      tempAtom = safeNew( Atom( ele->second, x, y ) );
       world[ getWorldIndex(x,y) ] = tempAtom;
    }
 
    // Initialize the RNG again, since we called
    // gen_rand32() above, but with a different
    // seed
-   initRNG( seed + 42 );
+   initRNG( o->seed + 42 );
 }
 
 
@@ -138,11 +136,11 @@ Sim::dumpConfig()
    // Write parameters to file
    configFile.open( "config.out" );
    configFile << version << std::endl;
-   configFile << "seed: " << seed << std::endl;
-   configFile << "maxIters: " << maxIters << std::endl;
-   configFile << "worldX: " << worldX << std::endl;
-   configFile << "worldY: " << worldY << std::endl;
-   configFile << "atomCount: " << atomCount << std::endl;
+   configFile << "seed: " << o->seed << std::endl;
+   configFile << "maxIters: " << o->maxIters << std::endl;
+   configFile << "worldX: " << o->worldX << std::endl;
+   configFile << "worldY: " << o->worldY << std::endl;
+   configFile << "atomCount: " << o->atomCount << std::endl;
    configFile.close();
 }
 
@@ -253,9 +251,9 @@ Sim::printReactions()
 void
 Sim::printWorld()
 {
-   for( int y = 0; y < worldY; y++ )
+   for( int y = 0; y < o->worldY; y++ )
    {
-      for( int x = 0; x < worldX; x++ )
+      for( int x = 0; x < o->worldX; x++ )
       {
          if( world[ getWorldIndex(x,y) ] != NULL )
          {
@@ -280,7 +278,7 @@ Sim::printWorld()
 int
 Sim::iterate()
 {
-   if( currentIter < maxIters )
+   if( currentIter < o->maxIters )
    {
       generateRandNums();
       moveAtoms();
@@ -312,7 +310,7 @@ Sim::initRNG( int initSeed )
       // get_min_array_size64() 64-bit ints long.
       // With MEXP = 132049, get_min_array_size64() =
       // 2*((MEXP/128)+1) = 2064.
-      int min_rand_nums_needed = worldX * worldY;
+      int min_rand_nums_needed = o->worldX * o->worldY;
       int min_bytes_needed = min_rand_nums_needed * sizeof( *randNums );
       int min_64_bit_ints_needed = ceil( min_bytes_needed / 8.0 );
 
@@ -365,21 +363,21 @@ Sim::shufflePositions()
    unsigned int i, highest, lowest, range, rand, temp;
 
    // Fill the positions array with successive integers
-   for( i = 0; i < (unsigned int)(worldX * worldY); i++ )
+   for( i = 0; i < (unsigned int)(o->worldX * o->worldY); i++ )
    {
-      positions[ i ] = i;
+      positions[i] = i;
    }
 
    // Shuffle the positions array
-   highest = worldX * worldY - 1;
+   highest = o->worldX * o->worldY - 1;
    for( i = 0; i < highest; i++ )
    {
       lowest = i + 1;
       range = highest - lowest + 1;
       rand = ( gen_rand32() % range ) + lowest;
-      temp = positions[ i ];
-      positions[ i ] = positions[ rand ];
-      positions[ rand ] = temp;
+      temp = positions[i];
+      positions[i] = positions[rand];
+      positions[rand] = temp;
    }
 }
 
@@ -388,12 +386,12 @@ void
 Sim::moveAtoms()
 {
    // Clear all claimed flags
-   std::memset( claimed, 0, worldX * worldY );
+   std::memset( claimed, 0, o->worldX * o->worldY );
    
    // Stake claims
-   for( int y = 0; y < worldY; y++ )
+   for( int y = 0; y < o->worldY; y++ )
    {
-      for( int x = 0; x < worldX; x++ )
+      for( int x = 0; x < o->worldX; x++ )
       {
          if( world[ getWorldIndex(x,y) ] != NULL )
          {
@@ -406,9 +404,9 @@ Sim::moveAtoms()
    }
 
    // Move if there are no collisions
-   for( int y = 0; y < worldY; y++ )
+   for( int y = 0; y < o->worldY; y++ )
    {
-      for( int x = 0; x < worldX; x++ )
+      for( int x = 0; x < o->worldX; x++ )
       {
          if( world[ getWorldIndex(x,y) ] != NULL )
          {
@@ -442,9 +440,9 @@ Sim::takeCensus()
       censusFile << "iter atoms" << std::endl;
    }
 
-   for( int x = 0; x < worldX; x++ )
+   for( int x = 0; x < o->worldX; x++ )
    {
-      for( int y = 0; y < worldY; y++ )
+      for( int y = 0; y < o->worldY; y++ )
       {
          if( world[ getWorldIndex(x,y) ] != NULL )
          {
@@ -465,9 +463,9 @@ Sim::dumpAtoms()
    std::ofstream diffusionFile;
    diffusionFile.open( "diffusion.out" );
    diffusionFile << "type dx dy\n";
-   for( int x = 0; x < worldX; x++ )
+   for( int x = 0; x < o->worldX; x++ )
    {
-      for( int y = 0; y < worldY; y++ )
+      for( int y = 0; y < o->worldY; y++ )
       {
          if( world[ getWorldIndex(x,y) ] != NULL )
          {
@@ -538,9 +536,9 @@ Sim::ev( int elementCount, ... )
 int
 Sim::getWorldIndex( int x, int y )
 {
-   int wrappedX = ( x + worldX ) % worldX;
-   int wrappedY = ( y + worldY ) % worldY;
-   return ( wrappedX + wrappedY * worldX );
+   int wrappedX = ( x + o->worldX ) % o->worldX;
+   int wrappedY = ( y + o->worldY ) % o->worldY;
+   return ( wrappedX + wrappedY * o->worldX );
 }
 
 
@@ -557,15 +555,15 @@ Sim::swapAtoms( int x1, int y1, int x2, int y2 )
    {
       atom1->setDx( atom1->getDx() + ( x2 - x1 ) );
       atom1->setDy( atom1->getDy() + ( y2 - y1 ) );
-      atom1->setX( ( x2 + worldX ) % worldX );
-      atom1->setY( ( y2 + worldY ) % worldY );
+      atom1->setX( ( x2 + o->worldX ) % o->worldX );
+      atom1->setY( ( y2 + o->worldY ) % o->worldY );
    }
    if( atom2 != NULL )
    {
       atom2->setDx( atom2->getDx() + ( x1 - x2 ) );
       atom2->setDy( atom2->getDy() + ( y1 - y2 ) );
-      atom2->setX( ( x1 + worldX ) % worldX );
-      atom2->setY( ( y1 + worldY ) % worldY );
+      atom2->setX( ( x1 + o->worldX ) % o->worldX );
+      atom2->setY( ( y1 + o->worldY ) % o->worldY );
    }
    world[ getWorldIndex( x1, y1 ) ] = atom2;
    world[ getWorldIndex( x2, y2 ) ] = atom1;
