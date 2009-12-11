@@ -36,7 +36,7 @@ namespace SafeCalls
    double
    _safeStrtod( const char *str, const char* file, const int line )
    {
-      // Handle error checking on strtol
+      // Handle error checking on strtod
       double val;
       char *endptr;
       char msg[1024];

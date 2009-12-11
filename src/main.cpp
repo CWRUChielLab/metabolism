@@ -66,8 +66,8 @@ main ( int argc, char* argv[] )
          mySim->takeCensus();
       }
 
-      // Print out the proress of the simulation
-      // at regular intervals in real time
+      // Print out the progress of the simulation
+      // once each second
       if( time(NULL) - lastProgressUpdate > 0 )
       {
          lastProgressUpdate = time(NULL);
@@ -83,7 +83,7 @@ main ( int argc, char* argv[] )
    }
 
    // Write the simulation parameters and diffusion data
-   // and clean up nucurses
+   // and clean up ncurses
    mySim->writeConfig();
    mySim->writeAtoms();
    endwin();
