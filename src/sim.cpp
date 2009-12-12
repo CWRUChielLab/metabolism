@@ -112,31 +112,10 @@ Sim::writeConfig()
 {
    static std::ofstream configFile;
    static std::ifstream gitFile;
-   std::string head;
-   std::string version;
-
-   // Look at the git directory files and pull out
-   // the name of the currently checked-out commit
-   gitFile.open( "../.git/HEAD" );
-   gitFile >> head;
-   if( head == "ref:" )
-   {
-      gitFile >> head;
-      head = "../.git/" + head;
-      gitFile.close();
-      gitFile.open( head.c_str() );
-      gitFile >> version;
-      gitFile.close();
-   }
-   else
-   {
-      version = head;
-      gitFile.close();
-   }
 
    // Write parameters to file
    configFile.open( o->configFile.c_str() );
-   configFile << version << std::endl;
+   configFile << GIT_TAG << std::endl;
    configFile << "seed: " << o->seed << std::endl;
    configFile << "maxIters: " << o->maxIters << std::endl;
    configFile << "worldX: " << o->worldX << std::endl;

@@ -139,7 +139,8 @@ Options::printVersion()
 {
    // Output version information
    std::cout << "---------------------------------------------------------------------------" << std::endl;
-   std::cout << "Version information will go here..."                                         << std::endl;
+   std::cout << "Chemical Metabolism Simulator"                                               << std::endl;
+   std::cout << GIT_TAG                                                                       << std::endl;
    std::cout << "Compiled at " << __TIME__ << " on " << __DATE__ << "."                       << std::endl;
    std::cout << "---------------------------------------------------------------------------" << std::endl;
 }

@@ -8,7 +8,7 @@ TARGET = "metabolism"
 # RESOURCES = resources.qrc
 DEPENDPATH += .
 INCLUDEPATH += ../SFMT
-DEFINES += MEXP=132049
+DEFINES += MEXP=132049 GIT_TAG="`git describe --tags | sed \"s/\\(.*\\)/\\\"\\1\\\"/\"`"
 
 QMAKE_CFLAGS_RELEASE -= -O2
 QMAKE_CFLAGS_RELEASE += -O3
