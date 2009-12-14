@@ -26,6 +26,7 @@ class Options
       int useGUI;
       int sleep;
       int verbose;
+      int progress;
       std::string configFile;
       std::string censusFile;
       std::string diffusionFile;

@@ -2,6 +2,7 @@
  */
 
 #include <ctime>
+#include <iostream>
 #include <ncurses.h>
 #include <unistd.h>   // Might not be compatible with Windows
 #include "options.h"
@@ -14,16 +15,20 @@ int
 main ( int argc, char* argv[] )
 {
    Options* o = safeNew( Options( argc, argv ) );
-
-   // Initialize ncurses
-   initscr();   // Startup
-   raw();       // Disable special terminal commands, such as CTRL+c to quit
-   timeout(0);  // Makes getch a nonblocking call
-
    Sim* mySim = safeNew( Sim(o) );
 
-   if( o->verbose )
+   if( o->useGUI )
    {
+      // Initialize ncurses
+      initscr();   // Startup
+      raw();       // Disable special terminal commands, such as CTRL+c to quit
+      timeout(0);  // Makes getch a nonblocking call
+   }
+
+   // Print extra information about the simulation
+   if( o->verbose && o->useGUI )
+   {
+      // Print using ncurses
       printw( "Press Ctrl-c to quit.\n" );
       printw( "------\n" );
       mySim->printElements();
@@ -31,32 +36,78 @@ main ( int argc, char* argv[] )
       mySim->printReactions();
       printw( "------\n" );
    }
+   else if( o->verbose && !o->useGUI )
+   {
+      // Print using cout
+      std::cout << "Press Ctrl-c to quit." << std::endl;
+      std::cout << "------" << std::endl;
+      mySim->printElements();
+      std::cout << "------" << std::endl;
+      mySim->printReactions();
+      std::cout << "------" << std::endl;
+   }
 
-   int x, y;
+   int x = 0;
+   int y = 0;
    int lastProgressUpdate = 0;
-   getyx( stdscr, y, x );
+
    if( o->useGUI )
    {
+      getyx( stdscr, y, x );
       mySim->printWorld();
    }
 
+   // Execute the simulation
    while( mySim->iterate() )
    {
-      // Check to see if the user wants to quit
-      // by pressing Ctrl-c
-      if( getch() == 0x3 )
-      {
-         o->maxIters = mySim->getCurrentIter();
-         break;
-      }
-
-      // Move the cursor to the appropriate location
-      // for printing with ncurses and print the
-      // world
-      move( y, x );
       if( o->useGUI )
+      // **********************
+      // Print using ncurses
+      // **********************
       {
+         // Check to see if the user wants to quit
+         // by pressing Ctrl-c
+         if( getch() == 0x3 )
+         {
+            o->maxIters = mySim->getCurrentIter();
+            break;
+         }
+
+         // Move the cursor to the appropriate location
+         // for printing with ncurses and print the
+         // world
+         move( y, x );
          mySim->printWorld();
+         
+         if( o->progress )
+         {
+            // Print out the progress of the simulation
+            // once each second
+            if( time(NULL) - lastProgressUpdate > 0 )
+            {
+               lastProgressUpdate = time(NULL);
+               printw( "Iteration: %d of %d | %d%% complete\n",
+                  mySim->getCurrentIter(),
+                  o->maxIters,
+                  (int)( 100 * (double)mySim->getCurrentIter() / (double)o->maxIters ) );
+               refresh();
+            }
+         }
+      }
+      else if( o->progress )
+      // **********************
+      // Print using cout
+      // **********************
+      {
+         // Print out the progress of the simulation
+         // once each second
+         if( time(NULL) - lastProgressUpdate > 0 )
+         {
+            lastProgressUpdate = time(NULL);
+            std::cout << "                                                                                   \r" << std::flush;
+            std::cout << "Iteration: " << mySim->getCurrentIter() << " of " << o->maxIters << " | ";
+            std::cout << (int)( 100 * (double)mySim->getCurrentIter() / (double)o->maxIters ) << "\% complete\r" << std::flush;
+         }
       }
 
       // Take a census of the atoms in the world
@@ -66,27 +117,21 @@ main ( int argc, char* argv[] )
          mySim->takeCensus();
       }
 
-      // Print out the progress of the simulation
-      // once each second
-      if( time(NULL) - lastProgressUpdate > 0 )
-      {
-         lastProgressUpdate = time(NULL);
-         printw( "Iteration: %d of %d | %.2f%% complete\n",
-            mySim->getCurrentIter(),
-            o->maxIters,
-            100 * (double)mySim->getCurrentIter() / (double)o->maxIters );
-         refresh();
-      }
-
       // Sleep the simulation each iteration
-      usleep(o->sleep * 1000);
+      if( o->sleep != 0 )
+      {
+         usleep(o->sleep * 1000);
+      }
    }
 
    // Write the simulation parameters and diffusion data
    // and clean up ncurses
    mySim->writeConfig();
    mySim->writeAtoms();
-   endwin();
+   if( o->useGUI )
+   {
+      endwin();
+   }
 
    return 0;
 }

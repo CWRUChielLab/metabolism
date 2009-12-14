@@ -23,12 +23,12 @@ class Sim
       Sim( Options* newOptions );
 
       // Methods
+      int iterate();
       int getCurrentIter();
       void writeConfig();
+      void printWorld();
       void printElements();
       void printReactions();
-      void printWorld();
-      int iterate();
 
       void takeCensus();
       void writeAtoms();

@@ -21,6 +21,7 @@ Options::Options( int argc, char* argv[] )
    useGUI = 1;
    sleep = 0;
    verbose = 0;
+   progress = 1;
    configFile = "config.out";
    censusFile = "census.out";
    diffusionFile = "diffusion.out";
@@ -35,6 +36,7 @@ Options::Options( int argc, char* argv[] )
       { "no-gui",            0, 0, 'g' },
       { "help",              0, 0, 'h' },
       { "iters",             1, 0, 'i' },
+      { "no-progress",       0, 0, 'p' },
       { "seed",              1, 0, 's' },
       { "version",           0, 0, 'v' },
       { "verbose",           0, 0, 'V' },
@@ -55,7 +57,7 @@ Options::Options( int argc, char* argv[] )
       // getopt_long to properly handle the multiple parameters
       // that can be passed to --files by assigning the second
       // and third parameters passed to --files with c=1.
-      c = getopt_long( argc, argv, "-a:f:ghi:s:vVx:y:z:", long_options, &option_index );
+      c = getopt_long( argc, argv, "-a:f:ghi:ps:vVx:y:z:", long_options, &option_index );
       if( c == -1 )
       {
          break;
@@ -105,6 +107,9 @@ Options::Options( int argc, char* argv[] )
             break;
          case 'i':
             maxIters = safeStrtol( optarg );
+            break;
+         case 'p':
+            progress = 0;
             break;
          case 's':
             seed = safeStrtol( optarg );
@@ -162,6 +167,8 @@ Options::printHelp()
    std::cout << "-g, --no-gui       Disable the GUI."                                         << std::endl;
    std::cout << "-h, --help         Display this information."                                << std::endl;
    std::cout << "-i, --iters        Number of iterations. Default: 100000"                    << std::endl;
+   std::cout << "-p, --progress     Disable simulation progress reporting (percent"           << std::endl;
+   std::cout << "                     complete)."                                             << std::endl;
    std::cout << "-s, --seed         Seed for the random number generator. Initialized using"  << std::endl;
    std::cout << "                     the system time by default."                            << std::endl;
    std::cout << "-v, --version      Display version information."                             << std::endl;

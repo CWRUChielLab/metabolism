@@ -12,6 +12,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
+#include <iostream>
 #include <map>
 #include <ncurses.h>
 #include <SFMT.h>
@@ -99,158 +100,6 @@ Sim::Sim( Options* newOptions )
 }
 
 
-int
-Sim::getCurrentIter()
-{
-   return currentIter;
-}
-
-
-// Output all important experimental parameters
-void
-Sim::writeConfig()
-{
-   static std::ofstream configFile;
-   static std::ifstream gitFile;
-
-   // Write parameters to file
-   configFile.open( o->configFile.c_str() );
-   configFile << GIT_TAG << std::endl;
-   configFile << "seed: " << o->seed << std::endl;
-   configFile << "maxIters: " << o->maxIters << std::endl;
-   configFile << "worldX: " << o->worldX << std::endl;
-   configFile << "worldY: " << o->worldY << std::endl;
-   configFile << "atomCount: " << o->atomCount << std::endl;
-   configFile.close();
-}
-
-
-void
-Sim::printElements()
-{
-   printw( "There are %d elements.\n", periodicTable.size() );
-   for( ElementMap::iterator i = periodicTable.begin(); i != periodicTable.end(); i++ )
-   {
-      Element* ele = i->second;
-      printw( "periodicTable[\"%s\"] has key:\t%d\n", ele->getName().c_str(), periodicTable[ele->getName()]->getKey() );
-   }
-   refresh();
-}
-
-
-void
-Sim::printReactions()
-{
-   printw( "There are %d reactions.\n", rxnTable.size() );
-
-   // Loop through the rxnTable, printing each Reaction
-   for( ReactionMap::iterator i = rxnTable.begin(); i != rxnTable.end(); i++ )
-   {
-      Reaction* rxn = i->second;
-
-      // Count up the number of each type of reactant and product
-      std::map<std::string,int> reactantCount;
-      std::map<std::string,int> productCount;
-      for( unsigned int j = 0; j < rxn->getReactants().size(); j++ )
-      {
-         reactantCount[ rxn->getReactants()[j]->getName() ]++;
-      }
-      for( unsigned int j = 0; j < rxn->getProducts().size(); j++ )
-      {
-         productCount[ rxn->getProducts()[j]->getName() ]++;
-      }
-
-      printw( "Key: %d  \t", rxn->getKey() );
-
-      // Print the reactants, grouping copies of one type together
-      // with stoichiometric coefficients
-      for( std::map<std::string,int>::iterator j = reactantCount.begin(); j != reactantCount.end(); j++ )
-      {
-         int coefficient = j->second;
-         if( coefficient == 1 )
-         {
-            if( j == reactantCount.begin() )
-            {
-               printw( "%s", j->first.c_str() );
-            }
-            else
-            {
-               printw( " + %s", j->first.c_str() );
-            }
-         }
-         else
-         {
-            if( j == reactantCount.begin() )
-            {
-               printw( "%d%s", j->second, j->first.c_str() );
-            }
-            else
-            {
-               printw( " + %d%s", j->second, j->first.c_str() );
-            }
-         }
-      }
-
-      printw( " -> " );
-
-      // Print the products, grouping copies of one type together
-      // with stoichiometric coefficients
-      for( std::map<std::string,int>::iterator j = productCount.begin(); j != productCount.end(); j++ )
-      {
-         int coefficient = j->second;
-         if( coefficient == 1 )
-         {
-            if( j == productCount.begin() )
-            {
-               printw( "%s", j->first.c_str() );
-            }
-            else
-            {
-               printw( " + %s", j->first.c_str() );
-            }
-         }
-         else
-         {
-            if( j == productCount.begin() )
-            {
-               printw( "%d%s", j->second, j->first.c_str() );
-            }
-            else
-            {
-               printw( " + %d%s", j->second, j->first.c_str() );
-            }
-         }
-      }
-
-      printw( "\n" );
-   }
-   refresh();
-}
-
-
-void
-Sim::printWorld()
-{
-   for( int y = 0; y < o->worldY; y++ )
-   {
-      for( int x = 0; x < o->worldX; x++ )
-      {
-         if( world[ getWorldIndex(x,y) ] != NULL )
-         {
-            printw( "%s ", world[ getWorldIndex(x,y) ]->getType()->getName().c_str() );
-         }
-         else
-         {
-            printw( ". " );
-         }
-      }
-      printw( "\n" );
-   }
-   printw( "\n" );
-   refresh();
-}
-
-
 // Execute one step of the simulation
 // Returns 1 if the simulation successfully
 // and 0 if the simulation has reached its
@@ -269,6 +118,127 @@ Sim::iterate()
    {
       return 0;
    }
+}
+
+
+int
+Sim::getCurrentIter()
+{
+   return currentIter;
+}
+
+
+// Uses the randNum at an Atom's current position
+// to determine the direction it moves next
+int
+Sim::dx( int x, int y )
+{
+   // Horizontal dimension deltas for directions
+   // in the following order:
+   // N, NE, E, SE, S, SW, W, NW
+   static int directions[] =
+   {
+       0,  // N
+       1,  // NE
+       1,  // E
+       1,  // SE
+       0,  // S
+      -1,  // SW
+      -1,  // W
+      -1   // NW
+   };
+
+   int threeRandBits = randNums[ getWorldIndex(x,y) ] & 0x7;
+   return directions[ threeRandBits ];
+}
+
+
+// Uses the randNum at an Atom's current position
+// to determine the direction it moves next
+int
+Sim::dy( int x, int y )
+{
+   // Vertical dimension deltas for directions
+   // in the following order:
+   // N, NE, E, SE, S, SW, W, NW
+   static int directions[] =
+   {
+      -1,  // N
+      -1,  // NE
+       0,  // E
+       1,  // SE
+       1,  // S
+       1,  // SW
+       0,  // W
+      -1   // NW
+   };
+
+   int threeRandBits = randNums[ getWorldIndex(x,y) ] & 0x7;
+   return directions[ threeRandBits ];
+}
+
+
+// Returns an ElementVector containing elementCount
+// Elements specified as a comma separated list of
+// names, e.g. ev(2,"A","B")
+ElementVector
+Sim::ev( int elementCount, ... )
+{
+   ElementVector ev;
+   char* name;
+
+   va_list nameList;
+   va_start( nameList, elementCount );
+   for( int i = 0; i < elementCount; i++ )
+   {
+      name = va_arg( nameList, char* );
+      std::string stringName(name);
+      Element* ele = periodicTable[stringName];
+      ev.push_back( ele );
+   }
+   va_end( nameList );
+
+   return ev;
+}
+
+
+// Handles wrapping around the edges of the world
+// and translating two-dimensional coordinates
+// to a one-dimensional index for the world array
+int
+Sim::getWorldIndex( int x, int y )
+{
+   int wrappedX = ( x + o->worldX ) % o->worldX;
+   int wrappedY = ( y + o->worldY ) % o->worldY;
+   return ( wrappedX + wrappedY * o->worldX );
+}
+
+
+// Switches the Atoms in positions (x1,y1) and
+// (x2,y2) and handles updating x, y, dx, and dy
+// values on both atoms.  Moves a single atom if
+// one of the two positions is empty
+void
+Sim::swapAtoms( int x1, int y1, int x2, int y2 )
+{
+   Atom* atom1 = world[ getWorldIndex( x1, y1 ) ];
+   Atom* atom2 = world[ getWorldIndex( x2, y2 ) ];
+   if( atom1 != NULL )
+   {
+      atom1->setDx( atom1->getDx() + ( x2 - x1 ) );
+      atom1->setDy( atom1->getDy() + ( y2 - y1 ) );
+      atom1->setX( ( x2 + o->worldX ) % o->worldX );
+      atom1->setY( ( y2 + o->worldY ) % o->worldY );
+   }
+   if( atom2 != NULL )
+   {
+      atom2->setDx( atom2->getDx() + ( x1 - x2 ) );
+      atom2->setDy( atom2->getDy() + ( y1 - y2 ) );
+      atom2->setX( ( x1 + o->worldX ) % o->worldX );
+      atom2->setY( ( y1 + o->worldY ) % o->worldY );
+   }
+   world[ getWorldIndex( x1, y1 ) ] = atom2;
+   world[ getWorldIndex( x2, y2 ) ] = atom1;
 }
 
 
@@ -388,11 +358,11 @@ Sim::moveAtoms()
    {
       for( int x = 0; x < o->worldX; x++ )
       {
-         if( world[ getWorldIndex(x,y) ] != NULL )
+         if( world[ getWorldIndex(x,y) ] != NULL && claimed[ getWorldIndex(x,y) ] == 1 )
          {
             int newX = x + dx(x,y);
             int newY = y + dy(x,y);
-            if( claimed[ getWorldIndex(x,y) ] == 1 && claimed[ getWorldIndex(newX,newY) ] == 1 )
+            if( claimed[ getWorldIndex(newX,newY) ] == 1 )
             {
                swapAtoms( x, y, newX, newY );
                claimed[ getWorldIndex(x,y) ]++;
@@ -401,6 +371,25 @@ Sim::moveAtoms()
          }
       }
    }
+}
+
+
+// Output all important experimental parameters
+void
+Sim::writeConfig()
+{
+   static std::ofstream configFile;
+   static std::ifstream gitFile;
+
+   // Write parameters to file
+   configFile.open( o->configFile.c_str() );
+   configFile << GIT_TAG << std::endl;
+   configFile << "seed: " << o->seed << std::endl;
+   configFile << "maxIters: " << o->maxIters << std::endl;
+   configFile << "worldX: " << o->worldX << std::endl;
+   configFile << "worldY: " << o->worldY << std::endl;
+   configFile << "atomCount: " << o->atomCount << std::endl;
+   configFile.close();
 }
 
 
@@ -458,94 +447,241 @@ Sim::writeAtoms()
 }
 
 
-// Uses the randNum at an Atom's current position
-// to determine the direction it moves next
-int
-Sim::dx( int x, int y )
-{
-   // Horizontal dimension deltas for directions
-   // in the following order:
-   // N, NE, E, SE, S, SW, W, NW
-   static int directions[] = { 0, 1, 1, 1, 0, -1, -1, -1 };
-   int threeRandBits = randNums[ getWorldIndex(x,y) ] & 0x7;
-   return directions[ threeRandBits ];
-}
-
-
-// Uses the randNum at an Atom's current position
-// to determine the direction it moves next
-int
-Sim::dy( int x, int y )
-{
-   // Vertical dimension deltas for directions
-   // in the following order:
-   // N, NE, E, SE, S, SW, W, NW
-   static int directions[] = { -1, -1, 0, 1, 1, 1, 0, -1 };
-   int threeRandBits = randNums[ getWorldIndex(x,y) ] & 0x7;
-   return directions[ threeRandBits ];
-}
-
-
-// Returns an ElementVector containing elementCount
-// Elements specified as a comma separated list of
-// names, e.g. ev(2,"A","B")
-ElementVector
-Sim::ev( int elementCount, ... )
-{
-   ElementVector ev;
-   char* name;
-
-   va_list nameList;
-   va_start( nameList, elementCount );
-   for( int i = 0; i < elementCount; i++ )
-   {
-      name = va_arg( nameList, char* );
-      std::string stringName(name);
-      Element* ele = periodicTable[stringName];
-      ev.push_back( ele );
-   }
-   va_end( nameList );
-
-   return ev;
-}
-
-
-// Handles wrapping around the edges of the world
-// and translating two-dimensional coordinates
-// to a one-dimensional index for the world array
-int
-Sim::getWorldIndex( int x, int y )
-{
-   int wrappedX = ( x + o->worldX ) % o->worldX;
-   int wrappedY = ( y + o->worldY ) % o->worldY;
-   return ( wrappedX + wrappedY * o->worldX );
-}
-
-
-// Switches the Atoms in positions (x1,y1) and
-// (x2,y2) and handles updating x, y, dx, and dy
-// values on both atoms.  Moves a single atom if
-// one of the two positions is empty
 void
-Sim::swapAtoms( int x1, int y1, int x2, int y2 )
+Sim::printWorld()
 {
-   Atom* atom1 = world[ getWorldIndex( x1, y1 ) ];
-   Atom* atom2 = world[ getWorldIndex( x2, y2 ) ];
-   if( atom1 != NULL )
+   for( int y = 0; y < o->worldY; y++ )
    {
-      atom1->setDx( atom1->getDx() + ( x2 - x1 ) );
-      atom1->setDy( atom1->getDy() + ( y2 - y1 ) );
-      atom1->setX( ( x2 + o->worldX ) % o->worldX );
-      atom1->setY( ( y2 + o->worldY ) % o->worldY );
+      for( int x = 0; x < o->worldX; x++ )
+      {
+         if( world[ getWorldIndex(x,y) ] != NULL )
+         {
+            printw( "%s ", world[ getWorldIndex(x,y) ]->getType()->getName().c_str() );
+         }
+         else
+         {
+            printw( ". " );
+         }
+      }
+      printw( "\n" );
    }
-   if( atom2 != NULL )
+   printw( "\n" );
+   refresh();
+}
+
+
+void
+Sim::printElements()
+{
+   if( o->useGUI )
+   // **********************
+   // Print using ncurses
+   // **********************
    {
-      atom2->setDx( atom2->getDx() + ( x1 - x2 ) );
-      atom2->setDy( atom2->getDy() + ( y1 - y2 ) );
-      atom2->setX( ( x1 + o->worldX ) % o->worldX );
-      atom2->setY( ( y1 + o->worldY ) % o->worldY );
+      printw( "There are %d elements.\n", periodicTable.size() );
+      for( ElementMap::iterator i = periodicTable.begin(); i != periodicTable.end(); i++ )
+      {
+         Element* ele = i->second;
+         printw( "periodicTable[\"%s\"] has key:\t%d\n", ele->getName().c_str(), periodicTable[ele->getName()]->getKey() );
+      }
+      refresh();
    }
-   world[ getWorldIndex( x1, y1 ) ] = atom2;
-   world[ getWorldIndex( x2, y2 ) ] = atom1;
+   else
+   // **********************
+   // Print using cout
+   // **********************
+   {
+      std::cout << "There are " << periodicTable.size() << " elements." << std::endl;
+      for( ElementMap::iterator i = periodicTable.begin(); i != periodicTable.end(); i++ )
+      {
+         Element* ele = i->second;
+         std::cout << "periodicTable[\"" << ele->getName().c_str() << "\"] has key:\t" << periodicTable[ele->getName()]->getKey() << std::endl;
+      }
+   }
+}
+
+
+void
+Sim::printReactions()
+{
+   if( o->useGUI )
+   // **********************
+   // Print using ncurses
+   // **********************
+   {
+      printw( "There are %d reactions.\n", rxnTable.size() );
+
+      // Loop through the rxnTable, printing each Reaction
+      for( ReactionMap::iterator i = rxnTable.begin(); i != rxnTable.end(); i++ )
+      {
+         Reaction* rxn = i->second;
+
+         // Count up the number of each type of reactant and product
+         std::map<std::string,int> reactantCount;
+         std::map<std::string,int> productCount;
+         for( unsigned int j = 0; j < rxn->getReactants().size(); j++ )
+         {
+            reactantCount[ rxn->getReactants()[j]->getName() ]++;
+         }
+         for( unsigned int j = 0; j < rxn->getProducts().size(); j++ )
+         {
+            productCount[ rxn->getProducts()[j]->getName() ]++;
+         }
+
+         printw( "Key: %d  \t", rxn->getKey() );
+
+         // Print the reactants, grouping copies of one type together
+         // with stoichiometric coefficients
+         for( std::map<std::string,int>::iterator j = reactantCount.begin(); j != reactantCount.end(); j++ )
+         {
+            int coefficient = j->second;
+            if( coefficient == 1 )
+            {
+               if( j == reactantCount.begin() )
+               {
+                  printw( "%s", j->first.c_str() );
+               }
+               else
+               {
+                  printw( " + %s", j->first.c_str() );
+               }
+            }
+            else
+            {
+               if( j == reactantCount.begin() )
+               {
+                  printw( "%d%s", j->second, j->first.c_str() );
+               }
+               else
+               {
+                  printw( " + %d%s", j->second, j->first.c_str() );
+               }
+            }
+         }
+
+         printw( " -> " );
+
+         // Print the products, grouping copies of one type together
+         // with stoichiometric coefficients
+         for( std::map<std::string,int>::iterator j = productCount.begin(); j != productCount.end(); j++ )
+         {
+            int coefficient = j->second;
+            if( coefficient == 1 )
+            {
+               if( j == productCount.begin() )
+               {
+                  printw( "%s", j->first.c_str() );
+               }
+               else
+               {
+                  printw( " + %s", j->first.c_str() );
+               }
+            }
+            else
+            {
+               if( j == productCount.begin() )
+               {
+                  printw( "%d%s", j->second, j->first.c_str() );
+               }
+               else
+               {
+                  printw( " + %d%s", j->second, j->first.c_str() );
+               }
+            }
+         }
+
+         printw( "\n" );
+      }
+      refresh();
+   }
+   else
+   // **********************
+   // Print using cout
+   // **********************
+   {
+      std::cout << "There are " << rxnTable.size() << " reactions." << std::endl;
+
+      // Loop through the rxnTable, printing each Reaction
+      for( ReactionMap::iterator i = rxnTable.begin(); i != rxnTable.end(); i++ )
+      {
+         Reaction* rxn = i->second;
+
+         // Count up the number of each type of reactant and product
+         std::map<std::string,int> reactantCount;
+         std::map<std::string,int> productCount;
+         for( unsigned int j = 0; j < rxn->getReactants().size(); j++ )
+         {
+            reactantCount[ rxn->getReactants()[j]->getName() ]++;
+         }
+         for( unsigned int j = 0; j < rxn->getProducts().size(); j++ )
+         {
+            productCount[ rxn->getProducts()[j]->getName() ]++;
+         }
+
+         std::cout << "Key: " << rxn->getKey() << "  \t";
+
+         // Print the reactants, grouping copies of one type together
+         // with stoichiometric coefficients
+         for( std::map<std::string,int>::iterator j = reactantCount.begin(); j != reactantCount.end(); j++ )
+         {
+            int coefficient = j->second;
+            if( coefficient == 1 )
+            {
+               if( j == reactantCount.begin() )
+               {
+                  std::cout << j->first.c_str();
+               }
+               else
+               {
+                  std::cout << " + " << j->first.c_str();
+               }
+            }
+            else
+            {
+               if( j == reactantCount.begin() )
+               {
+                  std::cout << j->second << j->first.c_str();
+               }
+               else
+               {
+                  std::cout << " + " << j->second << j->first.c_str();
+               }
+            }
+         }
+
+         std::cout << " -> ";
+
+         // Print the products, grouping copies of one type together
+         // with stoichiometric coefficients
+         for( std::map<std::string,int>::iterator j = productCount.begin(); j != productCount.end(); j++ )
+         {
+            int coefficient = j->second;
+            if( coefficient == 1 )
+            {
+               if( j == productCount.begin() )
+               {
+                  std::cout << j->first.c_str();
+               }
+               else
+               {
+                  std::cout << " + " << j->first.c_str();
+               }
+            }
+            else
+            {
+               if( j == productCount.begin() )
+               {
+                  std::cout << j->second << j->first.c_str();
+               }
+               else
+               {
+                  std::cout << " + " << j->second << j->first.c_str();
+               }
+            }
+         }
+
+         std::cout << std::endl;
+      }
+   }
 }
 
