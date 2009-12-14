@@ -1,6 +1,7 @@
 /* main.cpp
  */
 
+#include <csignal>
 #include <ctime>
 #include <iostream>
 #include <ncurses.h>
@@ -11,17 +12,35 @@
 using namespace SafeCalls;
 
 
+Sim* mySim;
+Options* o;
+int interrupted = 0;
+
+
+void
+handleExit( int sig )
+{
+   sig = 0;  // silence the compiler
+   o->maxIters = mySim->getCurrentIter();
+   interrupted = 1;
+   std::cout << std::endl;
+}
+
+
 int
 main ( int argc, char* argv[] )
 {
-   Options* o = safeNew( Options( argc, argv ) );
-   Sim* mySim = safeNew( Sim(o) );
+   // Import command line options and initialize the simulation
+   o = safeNew( Options( argc, argv ) );
+   mySim = safeNew( Sim(o) );
+
+   // Set up handling of Ctrl-c abort
+   signal(SIGINT,handleExit);
 
    if( o->useGUI )
    {
       // Initialize ncurses
       initscr();   // Startup
-      raw();       // Disable special terminal commands, such as CTRL+c to quit
       timeout(0);  // Makes getch a nonblocking call
    }
 
@@ -58,21 +77,13 @@ main ( int argc, char* argv[] )
    }
 
    // Execute the simulation
-   while( mySim->iterate() )
+   while( !interrupted && mySim->iterate() )
    {
       if( o->useGUI )
       // **********************
       // Print using ncurses
       // **********************
       {
-         // Check to see if the user wants to quit
-         // by pressing Ctrl-c
-         if( getch() == 0x3 )
-         {
-            o->maxIters = mySim->getCurrentIter();
-            break;
-         }
-
          // Move the cursor to the appropriate location
          // for printing with ncurses and print the
          // world
