@@ -5,14 +5,17 @@
 
 
 // Constructor
-Atom::Atom( Element* initType, int initX, int initY, int initDx, int initDy )
+Atom::Atom( Element* initType, int initX, int initY, int initDxActual, int initDyActual, int initDxIdeal, int initDyIdeal, int initCollisions )
 {
    // Copy constructor arguments
    type = initType;
    x = initX;
    y = initY;
-   dx = initDx;
-   dy = initDy;
+   dx_actual = initDxActual;
+   dy_actual = initDyActual;
+   dx_ideal = initDxIdeal;
+   dy_ideal = initDyIdeal;
+   collisions = initCollisions;
 }
 
 
@@ -59,29 +62,71 @@ Atom::setY( int newY )
 
 
 int
-Atom::getDx()
+Atom::getDxActual()
 {
-   return dx;
+   return dx_actual;
 }
 
 
 void
-Atom::setDx( int newDx )
+Atom::setDxActual( int newDxActual )
 {
-   dx = newDx;
+   dx_actual = newDxActual;
 }
 
 
 int
-Atom::getDy()
+Atom::getDyActual()
 {
-   return dy;
+   return dy_actual;
 }
 
 
 void
-Atom::setDy( int newDy )
+Atom::setDyActual( int newDyActual )
 {
-   dy = newDy;
+   dy_actual = newDyActual;
+}
+
+
+int
+Atom::getDxIdeal()
+{
+   return dx_ideal;
+}
+
+
+void
+Atom::setDxIdeal( int newDxIdeal )
+{
+   dx_ideal = newDxIdeal;
+}
+
+
+int
+Atom::getDyIdeal()
+{
+   return dy_ideal;
+}
+
+
+void
+Atom::setDyIdeal( int newDyIdeal )
+{
+   dy_ideal = newDyIdeal;
+}
+
+
+int
+Atom::getCollisions()
+{
+   return collisions;
+}
+
+
+void
+Atom::setCollisions( int newCollisions )
+{
+   collisions = newCollisions;
 }
 

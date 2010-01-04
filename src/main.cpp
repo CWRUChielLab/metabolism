@@ -135,10 +135,22 @@ main ( int argc, char* argv[] )
       }
    }
 
+
+   // Finalize the progress indicator to accurately
+   // display how far the simulation got before ending
+   // when running batches
+   if( o->progress && !o->useGUI )
+   {
+      std::cout << "                                                                                   \r" << std::flush;
+      std::cout << "Iteration: " << mySim->getCurrentIter() << " of " << o->maxIters << " | ";
+      std::cout << (int)( 100 * (double)mySim->getCurrentIter() / (double)o->maxIters ) << "\% complete\r" << std::flush;
+   }
+
+
    // Write the simulation parameters and diffusion data
    // and clean up ncurses
    mySim->writeConfig();
-   mySim->writeAtoms();
+   mySim->dumpAtoms();
    if( o->useGUI )
    {
       endwin();

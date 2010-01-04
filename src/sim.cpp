@@ -12,7 +12,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
-#include <iostream>
+#include <iomanip>
 #include <map>
 #include <ncurses.h>
 #include <SFMT.h>
@@ -33,6 +33,26 @@ Sim::Sim( Options* newOptions )
    world = safeNew( Atom*[ o->worldX * o->worldY ] );
    claimed = safeNew( uint8_t[ o->worldX * o->worldY ] );
    positions = safeNew( unsigned int[ o->worldX * o->worldY ] );
+
+   dirdx = new int[8];
+   dirdx[0] = 0;  // N
+   dirdx[1] = 1;  // NE
+   dirdx[2] = 1;  // E
+   dirdx[3] = 1;  // SE
+   dirdx[4] = 0;  // S
+   dirdx[5] = -1; // SW
+   dirdx[6] = -1; // W
+   dirdx[7] = -1; // NE
+
+   dirdy = new int[8];
+   dirdy[0] = -1; // N
+   dirdy[1] = -1; // NE
+   dirdy[2] = 0;  // E
+   dirdy[3] = 1;  // SE
+   dirdy[4] = 1;  // S
+   dirdy[5] = 1;  // SW
+   dirdy[6] = 0;  // W
+   dirdy[7] = -1; // NW
 
    // Initialize the world array to NULL
    for( int i = 0; i < o->worldX * o->worldY; i++ )
@@ -128,56 +148,6 @@ Sim::getCurrentIter()
 }
 
 
-// Uses the randNum at an Atom's current position
-// to determine the direction it moves next
-int
-Sim::dx( int x, int y )
-{
-   // Horizontal dimension deltas for directions
-   // in the following order:
-   // N, NE, E, SE, S, SW, W, NW
-   static int directions[] =
-   {
-       0,  // N
-       1,  // NE
-       1,  // E
-       1,  // SE
-       0,  // S
-      -1,  // SW
-      -1,  // W
-      -1   // NW
-   };
-
-   int threeRandBits = randNums[ getWorldIndex(x,y) ] & 0x7;
-   return directions[ threeRandBits ];
-}
-
-
-// Uses the randNum at an Atom's current position
-// to determine the direction it moves next
-int
-Sim::dy( int x, int y )
-{
-   // Vertical dimension deltas for directions
-   // in the following order:
-   // N, NE, E, SE, S, SW, W, NW
-   static int directions[] =
-   {
-      -1,  // N
-      -1,  // NE
-       0,  // E
-       1,  // SE
-       1,  // S
-       1,  // SW
-       0,  // W
-      -1   // NW
-   };
-
-   int threeRandBits = randNums[ getWorldIndex(x,y) ] & 0x7;
-   return directions[ threeRandBits ];
-}
-
-
 // Returns an ElementVector containing elementCount
 // Elements specified as a comma separated list of
 // names, e.g. ev(2,"A","B")
@@ -211,34 +181,6 @@ Sim::getWorldIndex( int x, int y )
    int wrappedX = ( x + o->worldX ) % o->worldX;
    int wrappedY = ( y + o->worldY ) % o->worldY;
    return ( wrappedX + wrappedY * o->worldX );
-}
-
-
-// Switches the Atoms in positions (x1,y1) and
-// (x2,y2) and handles updating x, y, dx, and dy
-// values on both atoms.  Moves a single atom if
-// one of the two positions is empty
-void
-Sim::swapAtoms( int x1, int y1, int x2, int y2 )
-{
-   Atom* atom1 = world[ getWorldIndex( x1, y1 ) ];
-   Atom* atom2 = world[ getWorldIndex( x2, y2 ) ];
-   if( atom1 != NULL )
-   {
-      atom1->setDx( atom1->getDx() + ( x2 - x1 ) );
-      atom1->setDy( atom1->getDy() + ( y2 - y1 ) );
-      atom1->setX( ( x2 + o->worldX ) % o->worldX );
-      atom1->setY( ( y2 + o->worldY ) % o->worldY );
-   }
-   if( atom2 != NULL )
-   {
-      atom2->setDx( atom2->getDx() + ( x1 - x2 ) );
-      atom2->setDy( atom2->getDy() + ( y1 - y2 ) );
-      atom2->setX( ( x1 + o->worldX ) % o->worldX );
-      atom2->setY( ( y1 + o->worldY ) % o->worldY );
-   }
-   world[ getWorldIndex( x1, y1 ) ] = atom2;
-   world[ getWorldIndex( x2, y2 ) ] = atom1;
 }
 
 
@@ -338,35 +280,54 @@ Sim::moveAtoms()
    // Clear all claimed flags
    std::memset( claimed, 0, o->worldX * o->worldY );
    
-   // Stake claims
+   for( int y = 0; y < o->worldY; y++ )
+   {
+      for( int x = 0; x < o->worldX; x++ )
+      {
+         if( world[ getWorldIndex(x,y) ] != NULL )
+         // Stake claims
+         {
+            int dx = dirdx[ randNums[ getWorldIndex(x,y) ] & 0x7 ];
+            int dy = dirdy[ randNums[ getWorldIndex(x,y) ] & 0x7 ];
+            claimed[ getWorldIndex(x,y) ]++;
+            claimed[ getWorldIndex(x+dx,y+dy) ]++;
+         }
+      }
+   }
+
    for( int y = 0; y < o->worldY; y++ )
    {
       for( int x = 0; x < o->worldX; x++ )
       {
          if( world[ getWorldIndex(x,y) ] != NULL )
          {
-            int newX = x + dx(x,y);
-            int newY = y + dy(x,y);
-            claimed[ getWorldIndex(x,y) ]++;
-            claimed[ getWorldIndex(newX,newY) ]++;
-         }
-      }
-   }
+            int dx = dirdx[ randNums[ getWorldIndex(x,y) ] & 0x7 ];
+            int dy = dirdy[ randNums[ getWorldIndex(x,y) ] & 0x7 ];
+            Atom* thisAtom = world[ getWorldIndex(x,y) ];
 
-   // Move if there are no collisions
-   for( int y = 0; y < o->worldY; y++ )
-   {
-      for( int x = 0; x < o->worldX; x++ )
-      {
-         if( world[ getWorldIndex(x,y) ] != NULL && claimed[ getWorldIndex(x,y) ] == 1 )
-         {
-            int newX = x + dx(x,y);
-            int newY = y + dy(x,y);
-            if( claimed[ getWorldIndex(newX,newY) ] == 1 )
+            thisAtom->setDxIdeal( thisAtom->getDxIdeal() + dx );
+            thisAtom->setDyIdeal( thisAtom->getDyIdeal() + dy );
+
+            if( world[ getWorldIndex(x+dx,y+dy) ] == NULL &&
+                claimed[ getWorldIndex(x,y) ] == 1 &&
+                claimed[ getWorldIndex(x+dx,y+dy) ] == 1 )
+            // Move if there are no collisions
             {
-               swapAtoms( x, y, newX, newY );
+               thisAtom->setDxActual( thisAtom->getDxActual() + dx );
+               thisAtom->setDyActual( thisAtom->getDyActual() + dy );
+               thisAtom->setX( ( (x+dx) + o->worldX ) % o->worldX );
+               thisAtom->setY( ( (y+dy) + o->worldY ) % o->worldY );
+
+               world[ getWorldIndex(x,y) ] = NULL;
+               world[ getWorldIndex(x+dx,y+dy) ] = thisAtom;
+
                claimed[ getWorldIndex(x,y) ]++;
-               claimed[ getWorldIndex(newX,newY) ]++;
+               claimed[ getWorldIndex(x+dx,y+dy) ]++;
+            }
+            else
+            // Else increment collisions
+            {
+               thisAtom->setCollisions( thisAtom->getCollisions() + 1 );
             }
          }
       }
@@ -398,15 +359,21 @@ Sim::writeConfig()
 void
 Sim::takeCensus()
 {
+   int colwidth = 12;
    static int initialized = 0;
    static std::ofstream censusFile;
    int currentAtomCount = 0;
+   int currentCollisionCount = 0;
 
    if( !initialized )
    {
       initialized = 1;
       censusFile.open( o->censusFile.c_str() );
-      censusFile << "iter atoms" << std::endl;
+      censusFile.flags(std::ios::left);
+      censusFile << std::setw(colwidth) <<
+                    "iter" << std::setw(colwidth) <<
+                    "atoms" << std::setw(colwidth) <<
+                    "collisions" << std::endl;
    }
 
    for( int x = 0; x < o->worldX; x++ )
@@ -416,10 +383,14 @@ Sim::takeCensus()
          if( world[ getWorldIndex(x,y) ] != NULL )
          {
             currentAtomCount++;
+            currentCollisionCount += world[ getWorldIndex(x,y) ]->getCollisions();
          }
       }
    }
-   censusFile << currentIter << " " << currentAtomCount << std::endl;
+   censusFile << std::setw(colwidth) <<
+                 currentIter << std::setw(colwidth) <<
+                 currentAtomCount << std::setw(colwidth) <<
+                 currentCollisionCount << std::endl;
 }
 
 
@@ -427,11 +398,19 @@ Sim::takeCensus()
 // of the world to file.  To be called when the
 // simulation ends.
 void
-Sim::writeAtoms()
+Sim::dumpAtoms()
 {
+   int colwidth = 12;
    std::ofstream diffusionFile;
    diffusionFile.open( o->diffusionFile.c_str() );
-   diffusionFile << "type dx dy\n";
+   diffusionFile.flags(std::ios::left);
+   diffusionFile << std::setw(colwidth) <<
+                    "type" << std::setw(colwidth) <<
+                    "dx_actual" << std::setw(colwidth) <<
+                    "dy_actual" << std::setw(colwidth) <<
+                    "dx_ideal" << std::setw(colwidth) <<
+                    "dy_ideal" << std::setw(colwidth) <<
+                    "collisions" << std::endl;
    for( int x = 0; x < o->worldX; x++ )
    {
       for( int y = 0; y < o->worldY; y++ )
@@ -439,7 +418,13 @@ Sim::writeAtoms()
          if( world[ getWorldIndex(x,y) ] != NULL )
          {
             Atom* thisAtom = world[ getWorldIndex(x,y) ];
-            diffusionFile << thisAtom->getType()->getName() << " " << thisAtom->getDx() << " " << thisAtom->getDy() << std::endl;
+            diffusionFile << std::setw(colwidth) <<
+                             thisAtom->getType()->getName() << std::setw(colwidth) <<
+                             thisAtom->getDxActual() << std::setw(colwidth) <<
+                             thisAtom->getDyActual() << std::setw(colwidth) <<
+                             thisAtom->getDxIdeal() << std::setw(colwidth) <<
+                             thisAtom->getDyIdeal() << std::setw(colwidth) <<
+                             thisAtom->getCollisions() << std::endl;
          }
       }
    }

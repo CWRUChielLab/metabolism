@@ -10,7 +10,7 @@ class Atom
 {
    public:
       // Constructor
-      Atom( Element* initType, int initX, int initY, int initDx = 0, int initDy = 0 );
+      Atom( Element* initType, int initX, int initY, int initDxActual = 0, int initDyActual = 0, int initDxIdeal = 0, int initDyIdeal = 0, int initCollisions = 0 );
 
       // Get and set functions
       Element* getType();
@@ -19,18 +19,27 @@ class Atom
       void setX( int newX );
       int getY();
       void setY( int newY );
-      int getDx();
-      void setDx( int newDx );
-      int getDy();
-      void setDy( int newDy );
+      int getDxActual();
+      void setDxActual( int newDxActual );
+      int getDyActual();
+      void setDyActual( int newDyActual );
+      int getDxIdeal();
+      void setDxIdeal( int newDxIdeal );
+      int getDyIdeal();
+      void setDyIdeal( int newDyIdeal );
+      int getCollisions();
+      void setCollisions( int newCollisions );
 
    private:
       // Atom attributes
       Element* type;
       int x;
       int y;
-      int dx;
-      int dy;
+      int dx_actual;
+      int dy_actual;
+      int dx_ideal;
+      int dy_ideal;
+      int collisions;
 };
 
 #endif /* ATOM_H */

@@ -31,7 +31,7 @@ class Sim
       void printReactions();
 
       void takeCensus();
-      void writeAtoms();
+      void dumpAtoms();
 
    private:
       // Sim attributes
@@ -54,12 +54,11 @@ class Sim
       void shufflePositions();
 
       void moveAtoms();
-      int dx( int x, int y );
-      int dy( int x, int y );
+      int* dirdx;
+      int* dirdy;
 
       ElementVector ev( int elementCount, ... );
       int getWorldIndex( int x, int y );
-      void swapAtoms( int x1, int y1, int x2, int y2 );
 };
 
 #endif /* SIM_H */

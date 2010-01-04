@@ -176,7 +176,7 @@ Options::printHelp()
    std::cout << "-x, --x            Width of the world. Default: 16"                          << std::endl;
    std::cout << "-y, --y            Height of the world. Default: 16"                         << std::endl;
    std::cout << "-z, --sleep        Number of milliseconds to sleep between iterations."      << std::endl;
-   std::cout << "                     Default: 200"                                           << std::endl;
+   std::cout << "                     Default: 0"                                             << std::endl;
    std::cout << "---------------------------------------------------------------------------" << std::endl;
 }
 
