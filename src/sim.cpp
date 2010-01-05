@@ -277,15 +277,16 @@ Sim::shufflePositions()
 void
 Sim::moveAtoms()
 {
-   // Clear all claimed flags
+   // Initially set all claimed flags to 0
    std::memset( claimed, 0, o->worldX * o->worldY );
    
+   // Increment a claimed flag wherever an atom exists and
+   // wherever an atom wants to move
    for( int y = 0; y < o->worldY; y++ )
    {
       for( int x = 0; x < o->worldX; x++ )
       {
          if( world[ getWorldIndex(x,y) ] != NULL )
-         // Stake claims
          {
             int dx = dirdx[ randNums[ getWorldIndex(x,y) ] & 0x7 ];
             int dy = dirdy[ randNums[ getWorldIndex(x,y) ] & 0x7 ];
@@ -295,11 +296,29 @@ Sim::moveAtoms()
       }
    }
 
+   // By this point, all atoms are guarenteed to have a positive
+   // claimed flag in their current position.  An atom that can
+   // move (has not experienced a collision) has a claimed flag
+   // value of exactly 1 in both its current position and the
+   // destination position for the atom.  An atom that cannot move
+   // has a claimed flag value greater than 1 in one or both of
+   // these positions.
+   //
+   // Below, as the world is scanned, an atom will be marked as
+   // having been processed by setting its claimed flag value
+   // to 0.  This ensures that if the same atom is encountered
+   // again in the same pass (because, e.g., it moved SE into an
+   // area that had yet to be processed), its delta and collision
+   // variables will not be adjusted a second time in the same
+   // iteration.
+
    for( int y = 0; y < o->worldY; y++ )
    {
       for( int x = 0; x < o->worldX; x++ )
       {
-         if( world[ getWorldIndex(x,y) ] != NULL )
+         if( world[ getWorldIndex(x,y) ] != NULL &&
+               claimed[ getWorldIndex(x,y) ] > 0 )
+         // If an atom is encountered that has not been processed yet
          {
             int dx = dirdx[ randNums[ getWorldIndex(x,y) ] & 0x7 ];
             int dy = dirdy[ randNums[ getWorldIndex(x,y) ] & 0x7 ];
@@ -308,26 +327,28 @@ Sim::moveAtoms()
             thisAtom->setDxIdeal( thisAtom->getDxIdeal() + dx );
             thisAtom->setDyIdeal( thisAtom->getDyIdeal() + dy );
 
-            if( world[ getWorldIndex(x+dx,y+dy) ] == NULL &&
-                claimed[ getWorldIndex(x,y) ] == 1 &&
-                claimed[ getWorldIndex(x+dx,y+dy) ] == 1 )
+            if( claimed[ getWorldIndex(x,y) ] == 1 && claimed[ getWorldIndex(x+dx,y+dy) ] == 1 )
             // Move if there are no collisions
             {
                thisAtom->setDxActual( thisAtom->getDxActual() + dx );
                thisAtom->setDyActual( thisAtom->getDyActual() + dy );
+
                thisAtom->setX( ( (x+dx) + o->worldX ) % o->worldX );
                thisAtom->setY( ( (y+dy) + o->worldY ) % o->worldY );
 
                world[ getWorldIndex(x,y) ] = NULL;
                world[ getWorldIndex(x+dx,y+dy) ] = thisAtom;
 
-               claimed[ getWorldIndex(x,y) ]++;
-               claimed[ getWorldIndex(x+dx,y+dy) ]++;
+               // Mark the moved atom as processed
+               claimed[ getWorldIndex(x+dx,y+dy) ] = 0;
             }
             else
             // Else increment collisions
             {
                thisAtom->setCollisions( thisAtom->getCollisions() + 1 );
+
+               // Mark the unmoved atom as processed
+               claimed[ getWorldIndex(x,y) ] = 0;
             }
          }
       }
