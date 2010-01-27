@@ -3,6 +3,7 @@ Makefile*
 *.o
 *~
 *.swp
+.Rhistory
 moc_*
 qrc_resources.cpp
 metabolism
@@ -18,5 +19,4 @@ object_script*
 
 # ignore any data files we've created
 *.out
-*.init
-*.world
+data/
