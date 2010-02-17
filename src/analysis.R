@@ -68,6 +68,10 @@ darkblue  = "#001055"
 red       = "#FF0000"
 
 # Plot attributes
+plot_type  = c("dx_actual",
+               "dx_ideal",
+               "dy_actual",
+               "dy_ideal")
 plot_title = c("Net Horizontal Displacement\nwith Collisions",
                "Net Horizontal Displacement\nwithout Collisions",
                "Net Vertical Displacement\nwith Collisions",
@@ -78,10 +82,7 @@ plot_color = c(green,
                darkblue)
 
 # Import diffusion data
-diffusion_data = read.table(path_to_data, header=TRUE)[c("dx_actual",
-                                                         "dx_ideal",
-                                                         "dy_actual",
-                                                         "dy_ideal")]
+diffusion_data = read.table(path_to_data, header=TRUE)
 
 # Open a PDF graphics device and set a few parameters
 pdf(file=path_to_pdf, family="Palatino")
@@ -92,10 +93,10 @@ par(font.lab=2)
 # PLOTS PAGE 1 #
 ################
 
-for (i in 1:ncol(diffusion_data))
+for (i in 1:length(plot_type))
 {
    # Draw normal Q-Q plot
-   qqnorm(diffusion_data[,i], main=plot_title[i], col=plot_color[i])
+   qqnorm(diffusion_data[,plot_type[i]], main=plot_title[i], col=plot_color[i])
 
    #Add a straight line corresponding to the expected distribution
    abline(a=expected_mean, b=expected_sd, col=red)
@@ -105,14 +106,14 @@ for (i in 1:ncol(diffusion_data))
 # PLOTS PAGE 2 #
 ################
 
-for (i in 1:ncol(diffusion_data))
+for (i in 1:length(plot_type))
 {
    # Draw histogram
-   hist(diffusion_data[,i], main=plot_title[i], xlab="Displacement", breaks=bins, col=plot_color[i], freq=FALSE)
+   hist(diffusion_data[,plot_type[i]], main=plot_title[i], xlab="Displacement", breaks=bins, col=plot_color[i], freq=FALSE)
 
    # Calculate statistics on data
-   data_mean = mean(diffusion_data[,i])
-   data_var  = var(diffusion_data[,i])
+   data_mean = mean(diffusion_data[,plot_type[i]])
+   data_var  = var(diffusion_data[,plot_type[i]])
    data_sd   = sqrt(data_var)
    data_mean_lower_ci = data_mean - qt(1-alpha/2, df=atoms-1) * data_sd / sqrt(atoms)
    data_mean_upper_ci = data_mean + qt(1-alpha/2, df=atoms-1) * data_sd / sqrt(atoms)
@@ -122,15 +123,15 @@ for (i in 1:ncol(diffusion_data))
    data_sd_upper_ci   = sqrt(data_var_upper_ci)
 
    # Save statistics for exporting
-   stats_data[paste(names(diffusion_data)[i], "_mean", sep="")] = data_mean
-   stats_data[paste(names(diffusion_data)[i], "_var", sep="")]  = data_var
-   stats_data[paste(names(diffusion_data)[i], "_sd", sep="")]   = data_sd
-   stats_data[paste(names(diffusion_data)[i], "_mean_lower_ci", sep="")] = data_mean_lower_ci
-   stats_data[paste(names(diffusion_data)[i], "_mean_upper_ci", sep="")] = data_mean_upper_ci
-   stats_data[paste(names(diffusion_data)[i], "_var_lower_ci", sep="")]  = data_var_lower_ci
-   stats_data[paste(names(diffusion_data)[i], "_var_upper_ci", sep="")]  = data_var_upper_ci
-   stats_data[paste(names(diffusion_data)[i], "_sd_lower_ci", sep="")]   = data_sd_lower_ci
-   stats_data[paste(names(diffusion_data)[i], "_sd_upper_ci", sep="")]   = data_sd_upper_ci
+   stats_data[paste(plot_type[i], "_mean", sep="")] = data_mean
+   stats_data[paste(plot_type[i], "_var", sep="")]  = data_var
+   stats_data[paste(plot_type[i], "_sd", sep="")]   = data_sd
+   stats_data[paste(plot_type[i], "_mean_lower_ci", sep="")] = data_mean_lower_ci
+   stats_data[paste(plot_type[i], "_mean_upper_ci", sep="")] = data_mean_upper_ci
+   stats_data[paste(plot_type[i], "_var_lower_ci", sep="")]  = data_var_lower_ci
+   stats_data[paste(plot_type[i], "_var_upper_ci", sep="")]  = data_var_upper_ci
+   stats_data[paste(plot_type[i], "_sd_lower_ci", sep="")]   = data_sd_lower_ci
+   stats_data[paste(plot_type[i], "_sd_upper_ci", sep="")]   = data_sd_upper_ci
 
    # Plot normal PDF using sample mean and sample standard deviation
    curve(dnorm(x, mean=data_mean, sd=data_sd), lwd=1, add=TRUE)
@@ -209,18 +210,19 @@ for (i in 1:ncol(diffusion_data))
 # PLOTS PAGE 3 #
 ################
 
-for (i in 1:ncol(diffusion_data))
+for (i in 1:length(plot_type))
 {
    # Draw the empirical CDF and expected CDF
-   plot(ecdf(diffusion_data[,i]), main=plot_title[i], xlab="Displacement", ylab="Cumulative Density", lwd=1, verticals=TRUE, do.points=FALSE, col=plot_color[i])
+   plot(ecdf(diffusion_data[,plot_type[i]]),
+      main=plot_title[i], xlab="Displacement", ylab="Cumulative Density", lwd=1, verticals=TRUE, do.points=FALSE, col=plot_color[i])
    curve(pnorm(x, mean=expected_mean, sd=expected_sd), lwd=2, lty=2, col=red, add=TRUE)
 
    # Conduct the Kolmogorov-Smirnov goodness-of-fit test
-   ks_results = suppressWarnings(ks.test(diffusion_data[,i], "pnorm", mean=expected_mean, sd=expected_sd))
+   ks_results = suppressWarnings(ks.test(diffusion_data[,plot_type[i]], "pnorm", mean=expected_mean, sd=expected_sd))
 
    # Save statistics for exporting
-   stats_data[paste(names(diffusion_data)[i], "_D", sep="")] = ks_results$statistic
-   stats_data[paste(names(diffusion_data)[i], "_p", sep="")] = ks_results$p.value
+   stats_data[paste(plot_type[i], "_D", sep="")] = ks_results$statistic
+   stats_data[paste(plot_type[i], "_p", sep="")] = ks_results$p.value
 
    # Label the plot with statistical values
    d_label = substitute(paste(D == dstatistic),

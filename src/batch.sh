@@ -9,7 +9,8 @@
 #   iters        the number of iterations to run each experiment in the batch
 #   x            the width of the world in each experiment in the batch
 #   y            the height of the world in each experiment in the batch
-#   atoms        the number of atoms in each experiment in the batch
+#   atoms        the number of atoms in each experiment in the batch;
+#                  passing -1 will run a batch with increasing densities
 
 # Check that the proper number of command line parameters were passed
 if [ ! $# == 6 ]; then
@@ -46,13 +47,27 @@ else
    exit
 fi
 
-# Run the experiments and conduct analyses
+# Determine whether atom count is fixed or increasing
+if [ "$ATOMS" = '-1' ]; then
+   FIXED=0
+else
+   FIXED=1
+fi
+
+# Run the experiments and conduct individual analyses
 for i in `seq 0 $(($EXPERIMENTS-1))`; do
    sleep 1
    echo "Beginning experiment $(($i+1)) of $EXPERIMENTS..."
    if [ ! -d data/batch/$BATCH/${NAME[i]} ]; then
       mkdir data/batch/$BATCH/${NAME[i]}
    fi
+
+   # If the atom count is not fixed, calculate the atom count,
+   # incrementing by 0.05% each experiment
+   if [ "$FIXED" = '0' ]; then
+      ATOMS=$(((5*($i+1)*$X*$Y*2+10000)/20000))
+   fi
+
    time (                                                                \
       ./metabolism -g -i $ITERS -x $X -y $Y -a $ATOMS                    \
             -f data/batch/$BATCH/${NAME[i]}/config.${NAME[i]}.out        \
@@ -66,6 +81,11 @@ for i in `seq 0 $(($EXPERIMENTS-1))`; do
         )
    echo
 done
+
+# Run batch analysis if atom count was not fixed
+if [ "$FIXED" = '0' ]; then
+   ./batchanalysis.R data/batch/$BATCH $EXPERIMENTS data/batch/$BATCH/analysis.$BATCH.out
+fi
 
 # End
 
