@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-# Conducts a series of experiments and stores the
-# output in unique locations
+# Conducts a series of experiments and analyses
+# and stores the output in unique locations
 #
 # Usage: ./batch.sh batch experiments iters x y atoms
 #   batch        the name for the batch of experiments
@@ -13,7 +13,7 @@
 
 # Check that the proper number of command line parameters were passed
 if [ ! $# == 6 ]; then
-   echo "BATCH FAILED: Improper parameter count!"
+   echo "BATCH FAILED: Incorrect number of parameters!"
    echo "  Usage: ./batch.sh batch experiments iters x y atoms"
    exit
 fi
@@ -46,17 +46,26 @@ else
    exit
 fi
 
-# Run the experiments
+# Run the experiments and conduct analyses
 for i in `seq 0 $(($EXPERIMENTS-1))`; do
    sleep 1
    echo "Beginning experiment $(($i+1)) of $EXPERIMENTS..."
    if [ ! -d data/batch/$BATCH/${NAME[i]} ]; then
       mkdir data/batch/$BATCH/${NAME[i]}
    fi
-   time ./metabolism -g -i $ITERS -x $X -y $Y -a $ATOMS \
-             -f data/batch/$BATCH/${NAME[i]}/config.out.${NAME[i]} \
-                data/batch/$BATCH/${NAME[i]}/census.out.${NAME[i]} \
-                data/batch/$BATCH/${NAME[i]}/diffusion.out.${NAME[i]}
+   time (                                                                \
+      ./metabolism -g -i $ITERS -x $X -y $Y -a $ATOMS                    \
+            -f data/batch/$BATCH/${NAME[i]}/config.${NAME[i]}.out        \
+               data/batch/$BATCH/${NAME[i]}/census.${NAME[i]}.out        \
+               data/batch/$BATCH/${NAME[i]}/diffusion.${NAME[i]}.out     \
+      &&                                                                 \
+      ./analysis.R data/batch/$BATCH/${NAME[i]}/config.${NAME[i]}.out    \
+                   data/batch/$BATCH/${NAME[i]}/diffusion.${NAME[i]}.out \
+                   data/batch/$BATCH/${NAME[i]}/analysis.${NAME[i]}.pdf  \
+                   data/batch/$BATCH/${NAME[i]}/stats.${NAME[i]}.out     \
+        )
    echo
 done
+
+# End
 

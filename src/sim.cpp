@@ -360,17 +360,26 @@ Sim::moveAtoms()
 void
 Sim::writeConfig()
 {
+   int colwidth = 12;
    static std::ofstream configFile;
-   static std::ifstream gitFile;
+   configFile.open( o->configFile.c_str() );
 
    // Write parameters to file
-   configFile.open( o->configFile.c_str() );
-   configFile << GIT_TAG << std::endl;
-   configFile << "seed: " << o->seed << std::endl;
-   configFile << "maxIters: " << o->maxIters << std::endl;
-   configFile << "worldX: " << o->worldX << std::endl;
-   configFile << "worldY: " << o->worldY << std::endl;
-   configFile << "atomCount: " << o->atomCount << std::endl;
+   configFile.flags(std::ios::left);
+   configFile << std::setw(20) <<
+                 "version" << std::setw(colwidth) <<
+                 "seed" << std::setw(colwidth) <<
+                 "iters" << std::setw(colwidth) <<
+                 "x" << std::setw(colwidth) <<
+                 "y" << std::setw(colwidth) <<
+                 "atoms" << std::endl;
+   configFile << std::setw(20) <<
+                 GIT_TAG << std::setw(colwidth) <<
+                 o->seed << std::setw(colwidth) <<
+                 o->maxIters << std::setw(colwidth) <<
+                 o->worldX << std::setw(colwidth) <<
+                 o->worldY << std::setw(colwidth) <<
+                 o->atomCount << std::endl;
    configFile.close();
 }
 
