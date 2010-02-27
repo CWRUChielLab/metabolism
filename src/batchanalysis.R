@@ -2,16 +2,20 @@
 #
 # Analyzes batch data in R and creates graphs
 #
-# Usage: ./batchanalysis.R pathtobatch nexperiments pathtopdf
+# Usage: ./batchanalysis.R pathtobatch nexperiments pathtopdf grouping
 #   pathtobatch   the path of the batch directory
 #   nexperiments  the number of experiments in the batch
-#   pathtopdf     the path of the PDF that the R script will create
+#   pathtopdf     the path and base name of the PDF(s) that the R script
+#                    will create without the .pdf extension
+#   grouping      if "false" is passed, create individual PDFs for each
+#                    plot; else place all plots into one PDF
 
 # Import command line arguments
 Args = commandArgs()
 path_to_batch = as.character(Args[6])
 n_experiments = as.integer(Args[7])
-path_to_pdf = as.character(Args[8])
+path_to_pdf   = as.character(Args[8])
+grouping      = as.character(Args[9])
 
 # Import experimental parameters and statistics
 config = list()
@@ -59,17 +63,29 @@ plot_color = c(green,
                blue,
                darkblue)
 
-# Open a PDF graphics device and set a few parameters
-pdf(file=path_to_pdf, family="Palatino")
-par(mfrow=c(2,2))
-par(font.lab=2)
+# If all plots are to be placed in a single PDF,
+# open a PDF graphics device and set a few parameters
+if (grouping != "false")
+{
+   pdf(file=paste(path_to_pdf, ".pdf", sep=""), family="Palatino")
+   par(mfrow=c(2,2))
+   par(font.lab=2)
+}
 
-################
-# PLOTS PAGE 1 #
-################
+########################
+# PLOTS OF SAMPLE MEAN #
+########################
 
 for (i in 1:length(plot_type))
 {
+   # If each plot is to be placed in its own PDF,
+   # open a PDF graphics device and set a few parameters
+   if (grouping == "false")
+   {
+      pdf(file=paste(path_to_pdf, "_", plot_type[i], "_mean.pdf", sep=""), family="Palatino", width=4, height=4)
+      par(font.lab=2)
+   }
+
    # Draw scatter plot of sample means against density
    plot(config[,"density"], stats[,paste(plot_type[i], "_mean", sep="")],
       main=plot_title[i], xlab="Density", ylab="Sample Mean", col=plot_color[i])
@@ -89,14 +105,29 @@ for (i in 1:length(plot_type))
    par(cex=old_size*0.8)
    corner.label(alpha_label, x=1, y=1, yoff=1.0*strheight("m"))
    par(cex=old_size)
+
+   # If each plot is being plotted on its own PDF,
+   # close the current PDF graphics device
+   if (grouping == "false")
+   {
+      dev.off()
+   }
 }
 
-################
-# PLOTS PAGE 2 #
-################
+######################################
+# PLOTS OF SAMPLE STANDARD DEVIATION #
+######################################
 
 for (i in 1:length(plot_type))
 {
+   # If each plot is to be placed in its own PDF,
+   # open a PDF graphics device and set a few parameters
+   if (grouping == "false")
+   {
+      pdf(file=paste(path_to_pdf, "_", plot_type[i], "_sd.pdf", sep=""), family="Palatino", width=4, height=4)
+      par(font.lab=2)
+   }
+
    # Draw scatter plot of sample standard deviations against density
    plot(config[,"density"], stats[,paste(plot_type[i], "_sd", sep="")],
       main=plot_title[i], xlab="Density", ylab="Sample Standard Deviation", col=plot_color[i])
@@ -116,6 +147,13 @@ for (i in 1:length(plot_type))
    par(cex=old_size*0.8)
    corner.label(alpha_label, x=1, y=1, yoff=1.0*strheight("m"))
    par(cex=old_size)
+
+   # If each plot is being plotted on its own PDF,
+   # close the current PDF graphics device
+   if (grouping == "false")
+   {
+      dev.off()
+   }
 }
 
 # End

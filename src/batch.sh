@@ -84,7 +84,8 @@ done
 
 # Run batch analysis if atom count was not fixed
 if [ "$FIXED" = '0' ]; then
-   ./batchanalysis.R data/batch/$BATCH $EXPERIMENTS data/batch/$BATCH/analysis.$BATCH.out
+   ./batchanalysis.R data/batch/$BATCH $EXPERIMENTS data/batch/$BATCH/analysis_$BATCH true
+   ./batchanalysis.R data/batch/$BATCH $EXPERIMENTS data/batch/$BATCH/analysis_$BATCH false
 fi
 
 # End
