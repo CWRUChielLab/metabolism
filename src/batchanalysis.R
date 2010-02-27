@@ -2,20 +2,20 @@
 #
 # Analyzes batch data in R and creates graphs
 #
-# Usage: ./batchanalysis.R pathtobatch nexperiments pathtopdf grouping
+# Usage: ./batchanalysis.R pathtobatch nexperiments pathtoplots usetex
 #   pathtobatch   the path of the batch directory
 #   nexperiments  the number of experiments in the batch
-#   pathtopdf     the path and base name of the PDF(s) that the R script
-#                    will create without the .pdf extension
-#   grouping      if "false" is passed, create individual PDFs for each
-#                    plot; else place all plots into one PDF
+#   pathtoplots   the path of the PDF or LaTeX documents that the R script
+#                    will create without the .pdf or .tex extension
+#   uselatex      if "true" is passed, create individual plots in the form
+#                    of LaTeX documents; else draw all plots in one PDF
 
 # Import command line arguments
 Args = commandArgs()
-path_to_batch = as.character(Args[6])
-n_experiments = as.integer(Args[7])
-path_to_pdf   = as.character(Args[8])
-grouping      = as.character(Args[9])
+path_to_batch  = as.character(Args[6])
+n_experiments  = as.integer(Args[7])
+path_to_plots  = as.character(Args[8])
+use_latex      = as.character(Args[9])
 
 # Import experimental parameters and statistics
 config = list()
@@ -42,6 +42,13 @@ expected_sd   = stats[1,"expected_sd"]
 # For corner.label
 library(plotrix)
 
+# If individual LaTeX documents are to be created,
+# load the TikZ package
+if (use_latex == "true" )
+{
+   library(tikzDevice)
+}
+
 # Colors 
 green     = "#249800"
 darkgreen = "#237A09"
@@ -63,11 +70,11 @@ plot_color = c(green,
                blue,
                darkblue)
 
-# If all plots are to be placed in a single PDF,
+# If all plots are to be drawn in a single PDF,
 # open a PDF graphics device and set a few parameters
-if (grouping != "false")
+if (use_latex != "true")
 {
-   pdf(file=paste(path_to_pdf, ".pdf", sep=""), family="Palatino")
+   pdf(file=paste(path_to_plots, ".pdf", sep=""), family="Palatino")
    par(mfrow=c(2,2))
    par(font.lab=2)
 }
@@ -78,12 +85,13 @@ if (grouping != "false")
 
 for (i in 1:length(plot_type))
 {
-   # If each plot is to be placed in its own PDF,
-   # open a PDF graphics device and set a few parameters
-   if (grouping == "false")
+   # If individual LaTeX documents are to be created,
+   # open a TikZ graphics device and set a few parameters
+   if (use_latex == "true")
    {
-      pdf(file=paste(path_to_pdf, "_", plot_type[i], "_mean.pdf", sep=""), family="Palatino", width=4, height=4)
-      par(font.lab=2)
+      tikz(file=paste(path_to_plots, "_", plot_type[i], "_mean.tex", sep=""), width=3, height=2.7)
+      par(cex=0.7)
+      par(font.main=1)
    }
 
    # Draw scatter plot of sample means against density
@@ -99,16 +107,19 @@ for (i in 1:length(plot_type))
       from=min(config[,"density"]), to=max(config[,"density"]), lwd=1, lty=5, col=red, add=TRUE)
 
    # Label the plot with statistical values
-   alpha_label = substitute(paste(alpha == a),
-                        list(a=alpha))
-   old_size = par("cex")
-   par(cex=old_size*0.8)
-   corner.label(alpha_label, x=1, y=1, yoff=1.0*strheight("m"))
-   par(cex=old_size)
+   if (use_latex != "true")
+   {
+      alpha_label = substitute(paste(alpha == a),
+                           list(a=alpha))
+      old_size = par("cex")
+      par(cex=old_size*0.8)
+      corner.label(alpha_label, x=1, y=1, yoff=1.0*strheight("m"))
+      par(cex=old_size)
+   }
 
-   # If each plot is being plotted on its own PDF,
-   # close the current PDF graphics device
-   if (grouping == "false")
+   # If individual LaTeX documents are to be created,
+   # close the current TikZ graphics device
+   if (use_latex == "true")
    {
       dev.off()
    }
@@ -120,12 +131,13 @@ for (i in 1:length(plot_type))
 
 for (i in 1:length(plot_type))
 {
-   # If each plot is to be placed in its own PDF,
-   # open a PDF graphics device and set a few parameters
-   if (grouping == "false")
+   # If individual LaTeX documents are to be created,
+   # open a TikZ graphics device and set a few parameters
+   if (use_latex == "true")
    {
-      pdf(file=paste(path_to_pdf, "_", plot_type[i], "_sd.pdf", sep=""), family="Palatino", width=4, height=4)
-      par(font.lab=2)
+      tikz(file=paste(path_to_plots, "_", plot_type[i], "_sd.tex", sep=""), width=3, height=2.7)
+      par(cex=0.7)
+      par(font.main=1)
    }
 
    # Draw scatter plot of sample standard deviations against density
@@ -141,16 +153,19 @@ for (i in 1:length(plot_type))
       from=min(config[,"density"]), to=max(config[,"density"]), lwd=1, lty=5, col=red, add=TRUE)
 
    # Label the plot with statistical values
-   alpha_label = substitute(paste(alpha == a),
-                        list(a=alpha))
-   old_size = par("cex")
-   par(cex=old_size*0.8)
-   corner.label(alpha_label, x=1, y=1, yoff=1.0*strheight("m"))
-   par(cex=old_size)
+   if (use_latex != "true")
+   {
+      alpha_label = substitute(paste(alpha == a),
+                           list(a=alpha))
+      old_size = par("cex")
+      par(cex=old_size*0.8)
+      corner.label(alpha_label, x=1, y=1, yoff=1.0*strheight("m"))
+      par(cex=old_size)
+   }
 
-   # If each plot is being plotted on its own PDF,
-   # close the current PDF graphics device
-   if (grouping == "false")
+   # If individual LaTeX documents are to be created,
+   # close the current TikZ graphics device
+   if (use_latex == "true")
    {
       dev.off()
    }

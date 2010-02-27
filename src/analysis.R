@@ -2,22 +2,22 @@
 #
 # Analyzes experimental data in R and creates graphs
 #
-# Usage: ./analysis.R pathtoconfig pathtodata pathtopdf pathtostats grouping
+# Usage: ./analysis.R pathtoconfig pathtodata pathtoplots pathtostats uselatex
 #   pathtoconfig  the path of the config.out file
 #   pathtodata    the path of the diffusion.out file
-#   pathtopdf     the path and base name of the PDF(s) that the R script
-#                    will create without the .pdf extension
+#   pathtoplots   the path of the PDF or LaTeX documents that the R script
+#                    will create without the .pdf or .tex extension
 #   pathtostats   the path of the text file that the R script will create
-#   grouping      if "false" is passed, create individual PDFs for each
-#                    plot; else place all plots into one PDF
+#   uselatex      if "true" is passed, create individual plots in the form
+#                    of LaTeX documents; else draw all plots in one PDF
 
 # Import command line arguments
 Args = commandArgs()
 path_to_config = as.character(Args[6])
 path_to_data   = as.character(Args[7])
-path_to_pdf    = as.character(Args[8])
+path_to_plots  = as.character(Args[8])
 path_to_stats  = as.character(Args[9])
-grouping       = as.character(Args[10])
+use_latex      = as.character(Args[10])
 
 # Import experimental parameters
 config = read.table(path_to_config, header=TRUE)
@@ -30,6 +30,13 @@ atoms = as.integer(config["atoms"])
 
 # For corner.label
 library(plotrix)
+
+# If individual LaTeX documents are to be created,
+# load the TikZ package
+if (use_latex == "true")
+{
+   library(tikzDevice)
+}
 
 # List for exporting statistical test results
 stats_data = list();
@@ -88,11 +95,11 @@ plot_color = c(green,
 # Import diffusion data
 diffusion_data = read.table(path_to_data, header=TRUE)
 
-# If all plots are to be placed in a single PDF,
+# If all plots are to be drawn in a single PDF,
 # open a PDF graphics device and set a few parameters
-if (grouping != "false")
+if (use_latex != "true")
 {
-   pdf(file=paste(path_to_pdf, ".pdf", sep=""), family="Palatino")
+   pdf(file=paste(path_to_plots, ".pdf", sep=""), family="Palatino")
    par(mfrow=c(2,2))
    par(font.lab=2)
 }
@@ -103,12 +110,13 @@ if (grouping != "false")
 
 for (i in 1:length(plot_type))
 {
-   # If each plot is to be placed in its own PDF,
-   # open a PDF graphics device and set a few parameters
-   if (grouping == "false")
+   # If individual LaTeX documents are to be created,
+   # open a TikZ graphics device and set a few parameters
+   if (use_latex == "true")
    {
-      pdf(file=paste(path_to_pdf, "_", plot_type[i], "_qq.pdf", sep=""), family="Palatino", width=4, height=4)
-      par(font.lab=2)
+      tikz(file=paste(path_to_plots, "_", plot_type[i], "_qq.tex", sep=""), width=3, height=2.7)
+      par(cex=0.7)
+      par(font.main=1)
    }
 
    # Draw normal Q-Q plot
@@ -117,9 +125,9 @@ for (i in 1:length(plot_type))
    #Add a straight line corresponding to the expected distribution
    abline(a=expected_mean, b=expected_sd, col=red)
 
-   # If each plot is being plotted on its own PDF,
-   # close the current PDF graphics device
-   if (grouping == "false")
+   # If individual LaTeX documents are to be created,
+   # close the current TikZ graphics device
+   if (use_latex == "true")
    {
       dev.off()
    }
@@ -131,12 +139,13 @@ for (i in 1:length(plot_type))
 
 for (i in 1:length(plot_type))
 {
-   # If each plot is to be placed in its own PDF,
-   # open a PDF graphics device and set a few parameters
-   if (grouping == "false")
+   # If individual LaTeX documents are to be created,
+   # open a TikZ graphics device and set a few parameters
+   if (use_latex == "true")
    {
-      pdf(file=paste(path_to_pdf, "_", plot_type[i], "_hist.pdf", sep=""), family="Palatino", width=4, height=4)
-      par(font.lab=2)
+      tikz(file=paste(path_to_plots, "_", plot_type[i], "_hist.tex", sep=""), width=3, height=2.7)
+      par(cex=0.7)
+      par(font.main=1)
    }
 
    # Draw histogram
@@ -219,26 +228,29 @@ for (i in 1:length(plot_type))
             ), lwd=1, lty=2, col=red, add=TRUE)
 
    # Label the plot with statistical values
-   density_label = substitute(paste(rho == d, "%"),
-                        list(d=signif(100*atoms/(x*y), digits=3)))
-   alpha_label = substitute(paste(alpha == a),
-                        list(a=alpha))
-   test_label = substitute(paste(H[0], " ", result),
-                        list(result=ifelse((data_mean > expected_mean_lower_ci) &
-                                           (data_mean < expected_mean_upper_ci) &
-                                           (data_var  > expected_var_lower_ci) &
-                                           (data_var  < expected_var_upper_ci),
-                                           "ACCEPTED", "REJECTED")))
-   old_size = par("cex")
-   par(cex=old_size*0.8) 
-   corner.label(density_label, x=1, y=1, yoff=1.0*strheight("m"))
-   corner.label(alpha_label,   x=1, y=1, yoff=2.5*strheight("m"))
-   corner.label(test_label,    x=1, y=1, yoff=4.0*strheight("m"))
-   par(cex=old_size)
+   if (use_latex != "true")
+   {
+      density_label = substitute(paste(rho == d, "%"),
+                           list(d=signif(100*atoms/(x*y), digits=3)))
+      alpha_label = substitute(paste(alpha == a),
+                           list(a=alpha))
+      test_label = substitute(paste(H[0], " ", result),
+                           list(result=ifelse((data_mean > expected_mean_lower_ci) &
+                                              (data_mean < expected_mean_upper_ci) &
+                                              (data_var  > expected_var_lower_ci) &
+                                              (data_var  < expected_var_upper_ci),
+                                              "ACCEPTED", "REJECTED")))
+      old_size = par("cex")
+      par(cex=old_size*0.8) 
+      corner.label(density_label, x=1, y=1, yoff=1.0*strheight("m"))
+      corner.label(alpha_label,   x=1, y=1, yoff=2.5*strheight("m"))
+      corner.label(test_label,    x=1, y=1, yoff=4.0*strheight("m"))
+      par(cex=old_size)
+   }
 
-   # If each plot is being plotted on its own PDF,
-   # close the current PDF graphics device
-   if (grouping == "false")
+   # If individual LaTeX documents are to be created,
+   # close the current TikZ graphics device
+   if (use_latex == "true")
    {
       dev.off()
    }
@@ -250,12 +262,13 @@ for (i in 1:length(plot_type))
 
 for (i in 1:length(plot_type))
 {
-   # If each plot is to be placed in its own PDF,
-   # open a PDF graphics device and set a few parameters
-   if (grouping == "false")
+   # If individual LaTeX documents are to be created,
+   # open a TikZ graphics device and set a few parameters
+   if (use_latex == "true")
    {
-      pdf(file=paste(path_to_pdf, "_", plot_type[i], "_ks.pdf", sep=""), family="Palatino", width=4, height=4)
-      par(font.lab=2)
+      tikz(file=paste(path_to_plots, "_", plot_type[i], "_ks.tex", sep=""), width=3, height=2.7)
+      par(cex=0.7)
+      par(font.main=1)
    }
 
    # Draw the empirical CDF and expected CDF
@@ -271,23 +284,26 @@ for (i in 1:length(plot_type))
    stats_data[paste(plot_type[i], "_p", sep="")] = ks_results$p.value
 
    # Label the plot with statistical values
-   d_label = substitute(paste(D == dstatistic),
-                    list(dstatistic=signif(ks_results$statistic, digits=3)))
-   if (ks_results$p.value > 10^-6)
-      p_label = substitute(paste(p == pvalue),
-                      list(pvalue=signif(ks_results$p.value, digits=3)))
-   else
-      p_label = substitute(paste(p < 10^-6),
-                      list())
-   old_size = par("cex")
-   par(cex=old_size*0.8)
-   corner.label(d_label, x=1, y=-1, yoff=3.5*strheight("m"))
-   corner.label(p_label, x=1, y=-1, yoff=1.5*strheight("m"))
-   par(cex=old_size)
+   if (use_latex != "true")
+   {
+      d_label = substitute(paste(D == dstatistic),
+                       list(dstatistic=signif(ks_results$statistic, digits=3)))
+      if (ks_results$p.value > 10^-6)
+         p_label = substitute(paste(p == pvalue),
+                         list(pvalue=signif(ks_results$p.value, digits=3)))
+      else
+         p_label = substitute(paste(p < 10^-6),
+                         list())
+      old_size = par("cex")
+      par(cex=old_size*0.8)
+      corner.label(d_label, x=1, y=-1, yoff=3.5*strheight("m"))
+      corner.label(p_label, x=1, y=-1, yoff=1.5*strheight("m"))
+      par(cex=old_size)
+   }
 
-   # If each plot is being plotted on its own PDF,
-   # close the current PDF graphics device
-   if (grouping == "false")
+   # If individual LaTeX documents are to be created,
+   # close the current TikZ graphics device
+   if (use_latex == "true")
    {
       dev.off()
    }

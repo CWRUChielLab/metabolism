@@ -78,14 +78,13 @@ for i in `seq 0 $(($EXPERIMENTS-1))`; do
                    data/batch/$BATCH/${NAME[i]}/diffusion.${NAME[i]}.out     \
                    data/batch/$BATCH/${NAME[i]}/analysis_${BATCH}_${NAME[i]} \
                    data/batch/$BATCH/${NAME[i]}/stats.${NAME[i]}.out         \
-                   true                                                      \
+                   false                                                     \
         )
    echo
 done
 
 # Run batch analysis if atom count was not fixed
 if [ "$FIXED" = '0' ]; then
-   ./batchanalysis.R data/batch/$BATCH $EXPERIMENTS data/batch/$BATCH/analysis_$BATCH true
    ./batchanalysis.R data/batch/$BATCH $EXPERIMENTS data/batch/$BATCH/analysis_$BATCH false
 fi
 
