@@ -68,16 +68,17 @@ for i in `seq 0 $(($EXPERIMENTS-1))`; do
       ATOMS=$(((5*($i+1)*$X*$Y*2+10000)/20000))
    fi
 
-   time (                                                                \
-      ./metabolism -g -i $ITERS -x $X -y $Y -a $ATOMS                    \
-            -f data/batch/$BATCH/${NAME[i]}/config.${NAME[i]}.out        \
-               data/batch/$BATCH/${NAME[i]}/census.${NAME[i]}.out        \
-               data/batch/$BATCH/${NAME[i]}/diffusion.${NAME[i]}.out     \
-      &&                                                                 \
-      ./analysis.R data/batch/$BATCH/${NAME[i]}/config.${NAME[i]}.out    \
-                   data/batch/$BATCH/${NAME[i]}/diffusion.${NAME[i]}.out \
-                   data/batch/$BATCH/${NAME[i]}/analysis.${NAME[i]}.pdf  \
-                   data/batch/$BATCH/${NAME[i]}/stats.${NAME[i]}.out     \
+   time (                                                                    \
+      ./metabolism -g -i $ITERS -x $X -y $Y -a $ATOMS                        \
+            -f data/batch/$BATCH/${NAME[i]}/config.${NAME[i]}.out            \
+               data/batch/$BATCH/${NAME[i]}/census.${NAME[i]}.out            \
+               data/batch/$BATCH/${NAME[i]}/diffusion.${NAME[i]}.out         \
+      &&                                                                     \
+      ./analysis.R data/batch/$BATCH/${NAME[i]}/config.${NAME[i]}.out        \
+                   data/batch/$BATCH/${NAME[i]}/diffusion.${NAME[i]}.out     \
+                   data/batch/$BATCH/${NAME[i]}/analysis_${BATCH}_${NAME[i]} \
+                   data/batch/$BATCH/${NAME[i]}/stats.${NAME[i]}.out         \
+                   true                                                      \
         )
    echo
 done

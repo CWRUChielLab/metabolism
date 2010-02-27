@@ -2,18 +2,22 @@
 #
 # Analyzes experimental data in R and creates graphs
 #
-# Usage: ./analysis.R pathtoconfig pathtodata pathtopdf pathtostats
+# Usage: ./analysis.R pathtoconfig pathtodata pathtopdf pathtostats grouping
 #   pathtoconfig  the path of the config.out file
 #   pathtodata    the path of the diffusion.out file
-#   pathtopdf     the path of the PDF that the R script will create
+#   pathtopdf     the path and base name of the PDF(s) that the R script
+#                    will create without the .pdf extension
 #   pathtostats   the path of the text file that the R script will create
+#   grouping      if "false" is passed, create individual PDFs for each
+#                    plot; else place all plots into one PDF
 
 # Import command line arguments
 Args = commandArgs()
 path_to_config = as.character(Args[6])
-path_to_data = as.character(Args[7])
-path_to_pdf = as.character(Args[8])
-path_to_stats = as.character(Args[9])
+path_to_data   = as.character(Args[7])
+path_to_pdf    = as.character(Args[8])
+path_to_stats  = as.character(Args[9])
+grouping       = as.character(Args[10])
 
 # Import experimental parameters
 config = read.table(path_to_config, header=TRUE)
@@ -84,30 +88,57 @@ plot_color = c(green,
 # Import diffusion data
 diffusion_data = read.table(path_to_data, header=TRUE)
 
-# Open a PDF graphics device and set a few parameters
-pdf(file=path_to_pdf, family="Palatino")
-par(mfrow=c(2,2))
-par(font.lab=2)
+# If all plots are to be placed in a single PDF,
+# open a PDF graphics device and set a few parameters
+if (grouping != "false")
+{
+   pdf(file=paste(path_to_pdf, ".pdf", sep=""), family="Palatino")
+   par(mfrow=c(2,2))
+   par(font.lab=2)
+}
 
-################
-# PLOTS PAGE 1 #
-################
+############
+# QQ PLOTS #
+############
 
 for (i in 1:length(plot_type))
 {
+   # If each plot is to be placed in its own PDF,
+   # open a PDF graphics device and set a few parameters
+   if (grouping == "false")
+   {
+      pdf(file=paste(path_to_pdf, "_", plot_type[i], "_qq.pdf", sep=""), family="Palatino", width=4, height=4)
+      par(font.lab=2)
+   }
+
    # Draw normal Q-Q plot
    qqnorm(diffusion_data[,plot_type[i]], main=plot_title[i], col=plot_color[i])
 
    #Add a straight line corresponding to the expected distribution
    abline(a=expected_mean, b=expected_sd, col=red)
+
+   # If each plot is being plotted on its own PDF,
+   # close the current PDF graphics device
+   if (grouping == "false")
+   {
+      dev.off()
+   }
 }
 
-################
-# PLOTS PAGE 2 #
-################
+##############
+# HISTOGRAMS #
+##############
 
 for (i in 1:length(plot_type))
 {
+   # If each plot is to be placed in its own PDF,
+   # open a PDF graphics device and set a few parameters
+   if (grouping == "false")
+   {
+      pdf(file=paste(path_to_pdf, "_", plot_type[i], "_hist.pdf", sep=""), family="Palatino", width=4, height=4)
+      par(font.lab=2)
+   }
+
    # Draw histogram
    hist(diffusion_data[,plot_type[i]], main=plot_title[i], xlab="Displacement", breaks=bins, col=plot_color[i], freq=FALSE)
 
@@ -204,14 +235,29 @@ for (i in 1:length(plot_type))
    corner.label(alpha_label,   x=1, y=1, yoff=2.5*strheight("m"))
    corner.label(test_label,    x=1, y=1, yoff=4.0*strheight("m"))
    par(cex=old_size)
+
+   # If each plot is being plotted on its own PDF,
+   # close the current PDF graphics device
+   if (grouping == "false")
+   {
+      dev.off()
+   }
 }
 
-################
-# PLOTS PAGE 3 #
-################
+######################
+# KOLMOGOROV-SMIRNOV #
+######################
 
 for (i in 1:length(plot_type))
 {
+   # If each plot is to be placed in its own PDF,
+   # open a PDF graphics device and set a few parameters
+   if (grouping == "false")
+   {
+      pdf(file=paste(path_to_pdf, "_", plot_type[i], "_ks.pdf", sep=""), family="Palatino", width=4, height=4)
+      par(font.lab=2)
+   }
+
    # Draw the empirical CDF and expected CDF
    plot(ecdf(diffusion_data[,plot_type[i]]),
       main=plot_title[i], xlab="Displacement", ylab="Cumulative Density", lwd=1, verticals=TRUE, do.points=FALSE, col=plot_color[i])
@@ -238,6 +284,13 @@ for (i in 1:length(plot_type))
    corner.label(d_label, x=1, y=-1, yoff=3.5*strheight("m"))
    corner.label(p_label, x=1, y=-1, yoff=1.5*strheight("m"))
    par(cex=old_size)
+
+   # If each plot is being plotted on its own PDF,
+   # close the current PDF graphics device
+   if (grouping == "false")
+   {
+      dev.off()
+   }
 }
 
 # Export statistical test results
