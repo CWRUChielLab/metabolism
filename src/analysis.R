@@ -83,10 +83,18 @@ plot_type  = c("dx_actual",
                "dx_ideal",
                "dy_actual",
                "dy_ideal")
-plot_title = c("Net Horizontal Displacement\nwith Collisions",
-               "Net Horizontal Displacement\nwithout Collisions",
-               "Net Vertical Displacement\nwith Collisions",
-               "Net Vertical Displacement\nwithout Collisions")
+{
+   if (use_latex == "true")
+      plot_title = c("Displacement in the\n$x$-Dimension with Collisions",
+                     "Displacement in the\n$x$-Dimension without Collisions",
+                     "Displacement in the\n$y$-Dimension with Collisions",
+                     "Displacement in the\n$y$-Dimension without Collisions")
+   else
+      plot_title = c("Displacement in the\nx-Dimension with Collisions",
+                     "Displacement in the\nx-Dimension without Collisions",
+                     "Displacement in the\ny-Dimension with Collisions",
+                     "Displacement in the\ny-Dimension without Collisions")
+}
 plot_color = c(green,
                darkgreen,
                blue,
