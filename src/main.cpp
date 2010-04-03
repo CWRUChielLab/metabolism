@@ -33,6 +33,7 @@ main ( int argc, char* argv[] )
    // Import command line options and initialize the simulation
    o = safeNew( Options( argc, argv ) );
    mySim = safeNew( Sim(o) );
+   mySim->takeCensus();
 
    // Set up handling of Ctrl-c abort
    signal(SIGINT,handleExit);
@@ -123,7 +124,7 @@ main ( int argc, char* argv[] )
 
       // Take a census of the atoms in the world
       // occasionally
-      if( mySim->getCurrentIter() % 128 == 0 )
+      if( mySim->getCurrentIter() % 32 == 0 )
       {
          mySim->takeCensus();
       }

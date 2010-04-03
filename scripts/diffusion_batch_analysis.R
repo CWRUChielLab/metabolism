@@ -2,7 +2,7 @@
 #
 # Analyzes batch data in R and creates graphs
 #
-# Usage: ./batchanalysis.R pathtobatch nexperiments pathtoplots usetex
+# Usage: ./diffusion_batch_analysis.R pathtobatch nexperiments pathtoplots usetex
 #   pathtobatch   the path of the batch directory
 #   nexperiments  the number of experiments in the batch
 #   pathtoplots   the path of the PDF or LaTeX documents that the R script

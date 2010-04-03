@@ -33,6 +33,8 @@ Element::Element( std::string initName, int initColor, int initCharge )
    name = initName;
    color = initColor;
    charge = initCharge;
+
+   count = 0;
 }
 
 
@@ -75,5 +77,19 @@ void
 Element::setCharge( int newCharge )
 {
    charge = newCharge;
+}
+
+
+int
+Element::getCount()
+{
+   return count;
+}
+
+
+void
+Element::setCount( int newCount )
+{
+   count = newCount;
 }
 

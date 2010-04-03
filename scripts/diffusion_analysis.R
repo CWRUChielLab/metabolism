@@ -2,7 +2,7 @@
 #
 # Analyzes experimental data in R and creates graphs
 #
-# Usage: ./analysis.R pathtoconfig pathtodata pathtoplots pathtostats uselatex
+# Usage: ./diffusion_analysis.R pathtoconfig pathtodata pathtoplots pathtostats uselatex
 #   pathtoconfig  the path of the config.out file
 #   pathtodata    the path of the diffusion.out file
 #   pathtoplots   the path of the PDF or LaTeX documents that the R script

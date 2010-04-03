@@ -16,6 +16,9 @@ Atom::Atom( Element* initType, int initX, int initY, int initDxActual, int initD
    dx_ideal = initDxIdeal;
    dy_ideal = initDyIdeal;
    collisions = initCollisions;
+
+   // Increment Element type counter
+   type->setCount( type->getCount() + 1 );
 }
 
 
@@ -29,7 +32,13 @@ Atom::getType()
 void
 Atom::setType( Element* newType )
 {
+   // Decrement old Element type counter
+   type->setCount( type->getCount() - 1 );
+
    type = newType;
+
+   // Increment new Element type counter
+   type->setCount( type->getCount() + 1 );
 }
 
 

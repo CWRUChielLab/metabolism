@@ -19,6 +19,8 @@ class Element
       void setColor( int newColor );
       int getCharge();
       void setCharge( int newCharge );
+      int getCount();
+      void setCount( int newCount );
 
    private:
       // Element attributes
@@ -26,6 +28,7 @@ class Element
       std::string name;
       int color;
       int charge;
+      int count;
 };
 
 #endif /* ELEMENT_H */

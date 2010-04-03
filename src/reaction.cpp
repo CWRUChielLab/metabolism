@@ -1,13 +1,21 @@
 /* reaction.cpp
  */
 
+#include <cassert>
 #include <vector>
 #include "reaction.h"
 
 
 // Constructor
-Reaction::Reaction( std::vector<Element*> initReactants, std::vector<Element*> initProducts, double initRate )
+Reaction::Reaction( std::vector<Element*> initReactants, std::vector<Element*> initProducts, double initProb )
 {
+   // Ensure that atom count remains constant
+   assert( initReactants.size() == initProducts.size() );
+
+   // Prob must be constrained between 0 and 0.2 in order for it
+   // to be an absolute probability of reaction
+   assert( initProb >= 0 && initProb <= 0.2 );
+
    // Calculate the product of the reactant keys for the Reaction key
    key = 1;
    for( unsigned int i = 0; i < initReactants.size(); i++ )
@@ -18,7 +26,7 @@ Reaction::Reaction( std::vector<Element*> initReactants, std::vector<Element*> i
    // Copy constructor arguments
    reactants = initReactants;
    products = initProducts;
-   rate = initRate;
+   prob = initProb;
 }
 
 
@@ -46,20 +54,27 @@ Reaction::getProducts()
 void
 Reaction::setProducts( std::vector<Element*> newProducts )
 {
+   // Ensure that atom count remains constant
+   assert( newProducts.size() == reactants.size() );
+
    products = newProducts;
 }
 
 
 double
-Reaction::getRate()
+Reaction::getProb()
 {
-   return rate;
+   return prob;
 }
 
 
 void
-Reaction::setRate( double newRate )
+Reaction::setProb( double newProb )
 {
-   rate = newRate;
+   // Prob must be constrained between 0 and 0.2 in order for it
+   // to be an absolute probability of reaction
+   assert( newProb >= 0 && newProb <= 0.2 );
+
+   prob = newProb;
 }
 

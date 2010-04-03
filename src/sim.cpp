@@ -42,7 +42,7 @@ Sim::Sim( Options* newOptions )
    dirdx[4] = 0;  // S
    dirdx[5] = -1; // SW
    dirdx[6] = -1; // W
-   dirdx[7] = -1; // NE
+   dirdx[7] = -1; // NW
 
    dirdy = new int[8];
    dirdy[0] = -1; // N
@@ -70,7 +70,7 @@ Sim::Sim( Options* newOptions )
 
    // Initialize the periodicTable
    Element* tempEle;
-   for( char c = 'A'; c <= 'H'; c++ )
+   for( char c = 'A'; c <= 'B'; c++ )
    {
       std::string s(1,c);
       tempEle = safeNew( Element( s, 0, 0 ) );
@@ -80,16 +80,8 @@ Sim::Sim( Options* newOptions )
    // Initialize the rxnTable
    Reaction* tempRxn;
 
-   tempRxn = safeNew( Reaction( ev(2,"A","B"), ev(2,"C","D"), 0.02 ) );
-   rxnTable[ tempRxn->getKey() ] = tempRxn;
-
-   tempRxn = safeNew( Reaction( ev(2,"E","F"), ev(2,"G","H"), 0.03 ) );
-   rxnTable[ tempRxn->getKey() ] = tempRxn;
-
-   tempRxn = safeNew( Reaction( ev(2,"A","A","D"), ev(1,"H"), 0.1 ) );
-   rxnTable[ tempRxn->getKey() ] = tempRxn;
-
-   tempRxn = safeNew( Reaction( ev(1,"B"), ev(3,"F","D","H"), 1 ) );
+   //tempRxn = safeNew( Reaction( ev(2,"A","B"), ev(2,"C","D"), 0.02 ) );
+   tempRxn = safeNew( Reaction( ev(1,"A"), ev(1,"B"), 0.01 ) );
    rxnTable[ tempRxn->getKey() ] = tempRxn;
 
    // Initialize the world with random atoms
@@ -102,7 +94,12 @@ Sim::Sim( Options* newOptions )
       y = positions[i] / o->worldX;
 
       ElementMap::iterator ele = periodicTable.begin();
-      incr = gen_rand32() % periodicTable.size();
+      //incr = gen_rand32() % periodicTable.size();
+      //////////////////////////////////////////////
+      //incr = gen_rand32() % 2;
+      incr = gen_rand32() % 1;
+      //incr = i % 2;
+      //////////////////////////////////////////////
 
       for( int j = 0; j < incr; j++ )
       {
@@ -114,15 +111,16 @@ Sim::Sim( Options* newOptions )
    }
 
    // Initialize the RNG again, since we called
-   // gen_rand32() above, but with a different
-   // seed
+   // shuffelPositions() and gen_rand32() above,
+   // but with a different seed
    initRNG( o->seed + 42 );
 }
 
 
 // Execute one step of the simulation
-// Returns 1 if the simulation successfully
-// and 0 if the simulation has reached its
+// Returns 1 if the simulation succeeded in
+// executing one step, and 0 if the
+// simulation had already reached its
 // maxIters
 int
 Sim::iterate()
@@ -131,6 +129,7 @@ Sim::iterate()
    {
       generateRandNums();
       moveAtoms();
+      executeRxns();
       currentIter++;
       return 1;
    }
@@ -298,8 +297,8 @@ Sim::moveAtoms()
 
    // By this point, all atoms are guarenteed to have a positive
    // claimed flag in their current position.  An atom that can
-   // move (has not experienced a collision) has a claimed flag
-   // value of exactly 1 in both its current position and the
+   // move (i.e., it has not experienced a collision) has a claimed
+   // flag value of exactly 1 in both its current position and the
    // destination position for the atom.  An atom that cannot move
    // has a claimed flag value greater than 1 in one or both of
    // these positions.
@@ -356,6 +355,200 @@ Sim::moveAtoms()
 }
 
 
+// Scan the world, checking for potential
+// reactions and executing some of them
+void
+Sim::executeRxns()
+{
+   // Initially set all claimed flags to 0
+   std::memset( claimed, 0, o->worldX * o->worldY );
+
+   // Increment a claimed flag wherever an atom that wants
+   // to react exists and wherever its reactive neighbor exists
+   for( int y = 0; y < o->worldY; y++ )
+   {
+      for( int x = 0; x < o->worldX; x++ )
+      {
+         if( world[ getWorldIndex(x,y) ] != NULL )
+         // If an atom is encountered
+         {
+            Atom* thisAtom = world[ getWorldIndex(x,y) ];
+
+            // Check for a first-order reaction:
+            if( (randNums[ getWorldIndex(x,y) ] >> 3) % 5 == 0 )
+            // If this reaction is chosen
+            {
+               if( rxnTable[ thisAtom->getType()->getKey() ] != NULL )
+               // If the reaction exists
+               {
+                  Reaction* thisRxn = rxnTable[ thisAtom->getType()->getKey() ];
+                  if( (double)(randNums[ getWorldIndex(x,y) ] >> 3) /
+                      (double)(1 << (8 * sizeof(*randNums) - 3))
+                         < 5 * thisRxn->getProb() )
+                  // If the reactants have enough energy
+                  {
+                     // Stake the claim
+                     claimed[ getWorldIndex(x,y) ]++;
+                  }
+               }
+            }
+            else
+            // Check for second-order reactions with neighbors:
+            {
+               int neighborX, neighborY;
+               switch( (randNums[ getWorldIndex(x,y) ] >> 3) % 5 )
+               // Choose a neighbor
+               {
+                  case 1:  // E
+                     neighborX = ( (x+1) + o->worldX ) % o->worldX;
+                     neighborY = ( (y+0) + o->worldY ) % o->worldY;
+                     break;
+                  case 2:  // SE
+                     neighborX = ( (x+1) + o->worldX ) % o->worldX;
+                     neighborY = ( (y+1) + o->worldY ) % o->worldY;
+                     break;
+                  case 3:  // S
+                     neighborX = ( (x+0) + o->worldX ) % o->worldX;
+                     neighborY = ( (y+1) + o->worldY ) % o->worldY;
+                     break;
+                  case 4:  // SW
+                     neighborX = ( (x-1) + o->worldX ) % o->worldX;
+                     neighborY = ( (y+1) + o->worldY ) % o->worldY;
+                     break;
+                  default:
+                     assert( 0 );
+               }
+               if( world[ getWorldIndex(neighborX,neighborY) ] != NULL )
+               // If there is a neighboring atom in that location
+               {
+                  Atom* neighborAtom = world[ getWorldIndex(neighborX,neighborY) ];
+                  if( rxnTable[ thisAtom->getType()->getKey() *
+                            neighborAtom->getType()->getKey() ] != NULL )
+                  // If the reaction exists
+                  {
+                     Reaction* thisRxn = rxnTable[ thisAtom->getType()->getKey() *
+                                               neighborAtom->getType()->getKey() ];
+                     if( (double)(randNums[ getWorldIndex(x,y) ] >> 3) /
+                         (double)(1 << (8 * sizeof(*randNums) - 3))
+                            < 5 * thisRxn->getProb() )
+                     // If the reactants have enough energy
+                     {
+                        // Stake the claim
+                        claimed[ getWorldIndex(x,y) ]++;
+                        claimed[ getWorldIndex(neighborX,neighborY) ]++;
+                     }
+                  }
+               }
+            }
+         }
+      }
+   }
+
+   // By this point, all atoms that are trying to react are
+   // guarenteed to have a positive claimed flag in their current
+   // position.  An atom that can react (i.e., it and its reacting
+   // neighbor are trying to participate in exactly 1 reaction) has a
+   // claimed flag value of exactly 1 in both its position and the
+   // position of the neighboring reactive atom.  An atom that
+   // cannot react has a claimed flag value greater than 1 in one
+   // or both of these positions.
+   //
+   // Below, as the world is scanned, an atom will be marked as
+   // having reacted by setting its claimed flag value to 0.  This
+   // speeds up checking as the scan moves through the world.
+
+   for( int y = 0; y < o->worldY; y++ )
+   {
+      for( int x = 0; x < o->worldX; x++ )
+      {
+         if( world[ getWorldIndex(x,y) ] != NULL &&
+               claimed[ getWorldIndex(x,y) ] == 1)
+         // If an atom is encountered that has not been processed yet
+         // and could undergo a reaction
+         {
+            Atom* thisAtom = world[ getWorldIndex(x,y) ];
+
+            // Check for a first-order reaction:
+            if( (randNums[ getWorldIndex(x,y) ] >> 3) % 5 == 0 )
+            // If this reaction is chosen
+            {
+               if( rxnTable[ thisAtom->getType()->getKey() ] != NULL )
+               // If the reaction exists
+               {
+                  Reaction* thisRxn = rxnTable[ thisAtom->getType()->getKey() ];
+                  if( (double)(randNums[ getWorldIndex(x,y) ] >> 3) /
+                      (double)(1 << (8 * sizeof(*randNums) - 3))
+                         < 5 * thisRxn->getProb() )
+                  // If the reactants have enough energy
+                  {
+                     // Execute the reaction
+                     thisAtom->setType(thisRxn->getProducts()[0]);
+
+                     // Mark the atom as having already reacted
+                     claimed[ getWorldIndex(x,y) ] = 0;
+                  }
+               }
+            }
+            else
+            // Check for second-order reactions with neighbors:
+            {
+               int neighborX, neighborY;
+               switch( (randNums[ getWorldIndex(x,y) ] >> 3) % 5 )
+               // Choose a neighbor
+               {
+                  case 1:  // E
+                     neighborX = ( (x+1) + o->worldX ) % o->worldX;
+                     neighborY = ( (y+0) + o->worldY ) % o->worldY;
+                     break;
+                  case 2:  // SE
+                     neighborX = ( (x+1) + o->worldX ) % o->worldX;
+                     neighborY = ( (y+1) + o->worldY ) % o->worldY;
+                     break;
+                  case 3:  // S
+                     neighborX = ( (x+0) + o->worldX ) % o->worldX;
+                     neighborY = ( (y+1) + o->worldY ) % o->worldY;
+                     break;
+                  case 4:  // SW
+                     neighborX = ( (x-1) + o->worldX ) % o->worldX;
+                     neighborY = ( (y+1) + o->worldY ) % o->worldY;
+                     break;
+                  default:
+                     assert( 0 );
+               }
+               if( world[ getWorldIndex(neighborX,neighborY) ] != NULL &&
+                     claimed[ getWorldIndex(neighborX,neighborY) ] == 1 )
+               // If there is a neighboring atom in that location that has not
+               // yet reacted and could undergo a reaction
+               {
+                  Atom* neighborAtom = world[ getWorldIndex(neighborX,neighborY) ];
+                  if( rxnTable[ thisAtom->getType()->getKey() *
+                            neighborAtom->getType()->getKey() ] != NULL )
+                  // If the reaction exists
+                  {
+                     Reaction* thisRxn = rxnTable[ thisAtom->getType()->getKey() *
+                                               neighborAtom->getType()->getKey() ];
+                     if( (double)(randNums[ getWorldIndex(x,y) ] >> 3) /
+                         (double)(1 << (8 * sizeof(*randNums) - 3))
+                            < 5 * thisRxn->getProb() )
+                     // If the reactants have enough energy
+                     {
+                        // Execute the reaction
+                        thisAtom->setType(thisRxn->getProducts()[0]);
+                        neighborAtom->setType(thisRxn->getProducts()[1]);
+
+                        // Mark the reaction participants as having already reacted
+                        claimed[ getWorldIndex(x,y) ] = 0;
+                        claimed[ getWorldIndex(neighborX,neighborY) ] = 0;
+                     }
+                  }
+               }
+            }
+         }
+      }
+   }
+}
+
+
 // Output all important experimental parameters
 void
 Sim::writeConfig()
@@ -392,35 +585,30 @@ Sim::takeCensus()
    int colwidth = 12;
    static int initialized = 0;
    static std::ofstream censusFile;
-   int currentAtomCount = 0;
-   int currentCollisionCount = 0;
+   int totalAtoms = 0;
 
    if( !initialized )
    {
       initialized = 1;
       censusFile.open( o->censusFile.c_str() );
       censusFile.flags(std::ios::left);
-      censusFile << std::setw(colwidth) <<
-                    "iter" << std::setw(colwidth) <<
-                    "atoms" << std::setw(colwidth) <<
-                    "collisions" << std::endl;
+      censusFile << std::setw(colwidth) << "iter";
+      for( ElementMap::iterator i = periodicTable.begin(); i != periodicTable.end(); i++ )
+      {
+         Element* ele = i->second;
+         censusFile << std::setw(colwidth) << ele->getName();
+      }
+      censusFile << std::setw(colwidth) << "total" << std::endl;
    }
 
-   for( int x = 0; x < o->worldX; x++ )
+   censusFile << std::setw(colwidth) << currentIter;
+   for( ElementMap::iterator i = periodicTable.begin(); i != periodicTable.end(); i++ )
    {
-      for( int y = 0; y < o->worldY; y++ )
-      {
-         if( world[ getWorldIndex(x,y) ] != NULL )
-         {
-            currentAtomCount++;
-            currentCollisionCount += world[ getWorldIndex(x,y) ]->getCollisions();
-         }
-      }
+      Element* ele = i->second;
+      censusFile << std::setw(colwidth) << ele->getCount();
+      totalAtoms += ele->getCount();
    }
-   censusFile << std::setw(colwidth) <<
-                 currentIter << std::setw(colwidth) <<
-                 currentAtomCount << std::setw(colwidth) <<
-                 currentCollisionCount << std::endl;
+   censusFile << std::setw(colwidth) << totalAtoms << std::endl;
 }
 
 
@@ -543,7 +731,7 @@ Sim::printReactions()
             productCount[ rxn->getProducts()[j]->getName() ]++;
          }
 
-         printw( "Key: %d  \t", rxn->getKey() );
+         printw( "Key: %d  Prob: %.2f  \t", rxn->getKey(), rxn->getProb() );
 
          // Print the reactants, grouping copies of one type together
          // with stoichiometric coefficients

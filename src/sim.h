@@ -46,7 +46,7 @@ class Sim
       
       // RNG parameters
       int randNums_length_in_64_bit_ints;
-      uint8_t* randNums;
+      uint32_t* randNums;
 
       // Private methods
       void initRNG( int initSeed );
@@ -56,6 +56,8 @@ class Sim
       void moveAtoms();
       int* dirdx;
       int* dirdy;
+
+      void executeRxns();
 
       ElementVector ev( int elementCount, ... );
       int getWorldIndex( int x, int y );
