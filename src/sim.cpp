@@ -400,20 +400,20 @@ Sim::executeRxns()
                // Choose a neighbor
                {
                   case 1:  // E
-                     neighborX = ( (x+1) + o->worldX ) % o->worldX;
-                     neighborY = ( (y+0) + o->worldY ) % o->worldY;
+                     neighborX = x+1;
+                     neighborY = y+0;
                      break;
                   case 2:  // SE
-                     neighborX = ( (x+1) + o->worldX ) % o->worldX;
-                     neighborY = ( (y+1) + o->worldY ) % o->worldY;
+                     neighborX = x+1;
+                     neighborY = y+1;
                      break;
                   case 3:  // S
-                     neighborX = ( (x+0) + o->worldX ) % o->worldX;
-                     neighborY = ( (y+1) + o->worldY ) % o->worldY;
+                     neighborX = x+0;
+                     neighborY = y+1;
                      break;
                   case 4:  // SW
-                     neighborX = ( (x-1) + o->worldX ) % o->worldX;
-                     neighborY = ( (y+1) + o->worldY ) % o->worldY;
+                     neighborX = x-1;
+                     neighborY = y+1;
                      break;
                   default:
                      assert( 0 );
@@ -497,20 +497,20 @@ Sim::executeRxns()
                // Choose a neighbor
                {
                   case 1:  // E
-                     neighborX = ( (x+1) + o->worldX ) % o->worldX;
-                     neighborY = ( (y+0) + o->worldY ) % o->worldY;
+                     neighborX = x+1;
+                     neighborY = y+0;
                      break;
                   case 2:  // SE
-                     neighborX = ( (x+1) + o->worldX ) % o->worldX;
-                     neighborY = ( (y+1) + o->worldY ) % o->worldY;
+                     neighborX = x+1;
+                     neighborY = y+1;
                      break;
                   case 3:  // S
-                     neighborX = ( (x+0) + o->worldX ) % o->worldX;
-                     neighborY = ( (y+1) + o->worldY ) % o->worldY;
+                     neighborX = x+0;
+                     neighborY = y+1;
                      break;
                   case 4:  // SW
-                     neighborX = ( (x-1) + o->worldX ) % o->worldX;
-                     neighborY = ( (y+1) + o->worldY ) % o->worldY;
+                     neighborX = x-1;
+                     neighborY = y+1;
                      break;
                   default:
                      assert( 0 );
