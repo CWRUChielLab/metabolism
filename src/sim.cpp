@@ -94,10 +94,10 @@ Sim::Sim( Options* newOptions )
       y = positions[i] / o->worldX;
 
       ElementMap::iterator ele = periodicTable.begin();
-      //incr = gen_rand32() % periodicTable.size();
+      //incr = randNums[i] % periodicTable.size();
       //////////////////////////////////////////////
-      //incr = gen_rand32() % 2;
-      incr = gen_rand32() % 1;
+      //incr = randNums[i] % 2;
+      incr = randNums[i] % 1;
       //incr = i % 2;
       //////////////////////////////////////////////
 
@@ -109,11 +109,6 @@ Sim::Sim( Options* newOptions )
       tempAtom = safeNew( Atom( ele->second, x, y ) );
       world[ getWorldIndex(x,y) ] = tempAtom;
    }
-
-   // Initialize the RNG again, since we called
-   // shuffelPositions() and gen_rand32() above,
-   // but with a different seed
-   initRNG( o->seed + 42 );
 }
 
 
@@ -229,15 +224,11 @@ Sim::initRNG( int initSeed )
 
 
 // Get a new set of randNums.
-// Note: initRNG must always be called
-// between calls of generateRandNums and
-// shufflePositions.
 void
 Sim::generateRandNums()
 {
-   // fill_array64 fills randNums with 64-bit
-   // ints.  See initRNG method for more
-   // information.
+   // fill_array64 fills randNums with 64-bit ints.
+   // See initRNG method for more information.
    fill_array64( (uint64_t*)(randNums), randNums_length_in_64_bit_ints );
 }
 
@@ -245,13 +236,13 @@ Sim::generateRandNums()
 // Fill the positions array with successive
 // integers ranging from 0 to worldX*worldY-1
 // and then shuffle these integers.
-// Note: initRNG must always be called
-// between calls of generateRandNums and
-// shufflePositions.
 void
 Sim::shufflePositions()
 {
    unsigned int i, highest, lowest, range, rand, temp;
+
+   // Fill the array of random numbers
+   generateRandNums();
 
    // Fill the positions array with successive integers
    for( i = 0; i < (unsigned int)(o->worldX * o->worldY); i++ )
@@ -265,11 +256,14 @@ Sim::shufflePositions()
    {
       lowest = i + 1;
       range = highest - lowest + 1;
-      rand = ( gen_rand32() % range ) + lowest;
+      rand = ( randNums[i] % range ) + lowest;
       temp = positions[i];
       positions[i] = positions[rand];
       positions[rand] = temp;
    }
+   
+   // Fill the array of random numbers again
+   generateRandNums();
 }
 
 
