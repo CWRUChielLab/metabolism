@@ -52,6 +52,7 @@ class Sim
       void initRNG( int initSeed );
       void generateRandNums();
       void shufflePositions();
+      void shuffleWorld();
 
       void moveAtoms();
       int* dirdx;

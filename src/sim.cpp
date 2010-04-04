@@ -65,12 +65,12 @@ Sim::Sim( Options* newOptions )
 
    // Initialize the positions array with a random
    // ordering of integers ranging from 0 to
-   // worldX*worldY-1
+   // worldX*worldY-1, and fill the randNums array
    shufflePositions();
 
    // Initialize the periodicTable
    Element* tempEle;
-   for( char c = 'A'; c <= 'B'; c++ )
+   for( char c = 'A'; c <= 'D'; c++ )
    {
       std::string s(1,c);
       tempEle = safeNew( Element( s, 0, 0 ) );
@@ -80,8 +80,8 @@ Sim::Sim( Options* newOptions )
    // Initialize the rxnTable
    Reaction* tempRxn;
 
-   //tempRxn = safeNew( Reaction( ev(2,"A","B"), ev(2,"C","D"), 0.02 ) );
-   tempRxn = safeNew( Reaction( ev(1,"A"), ev(1,"B"), 0.01 ) );
+   tempRxn = safeNew( Reaction( ev(2,"A","B"), ev(2,"C","D"), 0.02 ) );
+   //tempRxn = safeNew( Reaction( ev(1,"A"), ev(1,"B"), 0.01 ) );
    rxnTable[ tempRxn->getKey() ] = tempRxn;
 
    // Initialize the world with random atoms
@@ -95,11 +95,9 @@ Sim::Sim( Options* newOptions )
 
       ElementMap::iterator ele = periodicTable.begin();
       //incr = randNums[i] % periodicTable.size();
-      //////////////////////////////////////////////
-      //incr = randNums[i] % 2;
-      incr = randNums[i] % 1;
+      incr = randNums[i] % 2;
+      //incr = randNums[i] % 1;
       //incr = i % 2;
-      //////////////////////////////////////////////
 
       for( int j = 0; j < incr; j++ )
       {
@@ -122,6 +120,7 @@ Sim::iterate()
 {
    if( currentIter < o->maxIters )
    {
+      //shuffleWorld();
       generateRandNums();
       moveAtoms();
       executeRxns();
@@ -235,7 +234,8 @@ Sim::generateRandNums()
 
 // Fill the positions array with successive
 // integers ranging from 0 to worldX*worldY-1
-// and then shuffle these integers.
+// and then shuffle these integers.  Also fill
+// the randNums array.
 void
 Sim::shufflePositions()
 {
@@ -264,6 +264,36 @@ Sim::shufflePositions()
    
    // Fill the array of random numbers again
    generateRandNums();
+}
+
+
+// Shuffle the atoms in the world to
+// random positions
+void
+Sim::shuffleWorld()
+{
+   Atom** temp = safeNew( Atom*[ o->worldX * o->worldY ] );
+   for( int i = 0; i < o->worldX * o->worldY; i++ )
+   {
+      temp[i] = NULL;
+   }
+
+   for( int x = 0; x < o->worldX; x++ )
+   {
+      for( int y = 0; y < o->worldY; y++ )
+      {
+         if( world[ getWorldIndex(x,y) ] != NULL )
+         {
+            int newX = positions[ getWorldIndex(x,y) ] % o->worldX;
+            int newY = positions[ getWorldIndex(x,y) ] / o->worldX;
+            temp[ getWorldIndex(newX,newY) ] = world[ getWorldIndex(x,y) ];
+            temp[ getWorldIndex(newX,newY) ]->setX(newX);
+            temp[ getWorldIndex(newX,newY) ]->setY(newY);
+         }
+      }
+   }
+
+   world = temp;
 }
 
 
