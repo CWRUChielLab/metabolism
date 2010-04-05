@@ -24,6 +24,8 @@ class Options
       int worldY;
       int atomCount;
       int useGUI;
+      int doRxns;
+      int doShuffle;
       int sleep;
       int verbose;
       int progress;

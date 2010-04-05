@@ -16,8 +16,9 @@ x = as.integer(config["x"])
 y = as.integer(config["y"])
 atoms = as.integer(config["atoms"])
 
-# Import rate data
+# Import rate data and remove timesteps that had zero A or B atoms
 rate_data = read.table(path_to_data, header=TRUE)
+rate_data = rate_data[which(rate_data$A != 0 & rate_data$B != 0),]
 
 #########
 # PLOTS #
@@ -50,7 +51,7 @@ if (a0_density != b0_density)
 }
 
 # Plot atom data directly with expected trajectory
-plot(rate_data$iter,   rate_data$A, col="red", xlab="Iterations", ylab="Atoms")
+plot(rate_data$iter,   rate_data$A, col="red", xlab="Iterations", ylab="Atoms", ylim=c(0,max(rate_data$A, rate_data$B)))
 points(rate_data$iter, rate_data$B, col="blue")
 if (a0_atoms != b0_atoms)
 {
@@ -73,7 +74,7 @@ if (a0_atoms != b0_atoms)
 curve(k_atoms*x, add=TRUE)
 
 # Plot density data directly with expected trajectory
-plot(rate_data$iter,   rate_data$A/(x*y), col="red", xlab="Iterations", ylab="Density")
+plot(rate_data$iter,   rate_data$A/(x*y), col="red", xlab="Iterations", ylab="Density", ylim=c(0,max(rate_data$A, rate_data$B)/(x*y)))
 points(rate_data$iter, rate_data$B/(x*y), col="blue")
 if (a0_density != b0_density)
 {

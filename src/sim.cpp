@@ -65,7 +65,7 @@ Sim::Sim( Options* newOptions )
 
    // Initialize the positions array with a random
    // ordering of integers ranging from 0 to
-   // worldX*worldY-1, and fill the randNums array
+   // worldX*worldY-1
    shufflePositions();
 
    // Initialize the periodicTable
@@ -80,9 +80,12 @@ Sim::Sim( Options* newOptions )
    // Initialize the rxnTable
    Reaction* tempRxn;
 
-   tempRxn = safeNew( Reaction( ev(2,"A","B"), ev(2,"C","D"), 0.02 ) );
    //tempRxn = safeNew( Reaction( ev(1,"A"), ev(1,"B"), 0.01 ) );
+   tempRxn = safeNew( Reaction( ev(2,"A","B"), ev(2,"C","D"), 0.01 ) );
    rxnTable[ tempRxn->getKey() ] = tempRxn;
+
+   // Fill the array of random numbers
+   generateRandNums();
 
    // Initialize the world with random atoms
    Atom* tempAtom;
@@ -94,10 +97,12 @@ Sim::Sim( Options* newOptions )
       y = positions[i] / o->worldX;
 
       ElementMap::iterator ele = periodicTable.begin();
-      //incr = randNums[i] % periodicTable.size();
-      incr = randNums[i] % 2;
-      //incr = randNums[i] % 1;
-      //incr = i % 2;
+      //incr = randNums[i] % periodicTable.size(); // Pick type at random from the whole table
+      //incr = 0;                // A's only
+      incr = randNums[i] % 2;  // A's and B's chosen at random
+      //incr = i % 2;            // A's and B's in a 1:1 ration
+      //incr = i < o->atomCount * 2 / 3 ? 0 : 1;   // A's and B's in a 2:1 ratio
+      //incr = i < o->atomCount * 5 / 9 ? 0 : 1;   // A's and B's in a 5:4 ratio
 
       for( int j = 0; j < incr; j++ )
       {
@@ -120,10 +125,16 @@ Sim::iterate()
 {
    if( currentIter < o->maxIters )
    {
-      //shuffleWorld();
+      if( o->doShuffle )
+      {
+         shuffleWorld();
+      }
       generateRandNums();
       moveAtoms();
-      executeRxns();
+      if( o->doRxns )
+      {
+         executeRxns();
+      }
       currentIter++;
       return 1;
    }
@@ -234,8 +245,7 @@ Sim::generateRandNums()
 
 // Fill the positions array with successive
 // integers ranging from 0 to worldX*worldY-1
-// and then shuffle these integers.  Also fill
-// the randNums array.
+// and then shuffle these integers.
 void
 Sim::shufflePositions()
 {
@@ -261,17 +271,17 @@ Sim::shufflePositions()
       positions[i] = positions[rand];
       positions[rand] = temp;
    }
-   
-   // Fill the array of random numbers again
-   generateRandNums();
 }
 
 
 // Shuffle the atoms in the world to
-// random positions
+// random positions.  Add to iterate
+// in for the well-mixed case
 void
 Sim::shuffleWorld()
 {
+   shufflePositions();
+
    Atom** temp = safeNew( Atom*[ o->worldX * o->worldY ] );
    for( int i = 0; i < o->worldX * o->worldY; i++ )
    {

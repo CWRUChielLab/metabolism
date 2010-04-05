@@ -19,6 +19,8 @@ Options::Options( int argc, char* argv[] )
    worldY = 16;
    atomCount = 64;
    useGUI = 1;
+   doRxns = 1;
+   doShuffle = 0;
    sleep = 0;
    verbose = 0;
    progress = 1;
@@ -37,7 +39,9 @@ Options::Options( int argc, char* argv[] )
       { "help",              0, 0, 'h' },
       { "iters",             1, 0, 'i' },
       { "no-progress",       0, 0, 'p' },
+      { "no-rxns",           0, 0, 'r' },
       { "seed",              1, 0, 's' },
+      { "shuffle",           0, 0, 'S' },
       { "version",           0, 0, 'v' },
       { "verbose",           0, 0, 'V' },
       { "x",                 1, 0, 'x' },
@@ -57,7 +61,7 @@ Options::Options( int argc, char* argv[] )
       // getopt_long to properly handle the multiple parameters
       // that can be passed to --files by assigning the second
       // and third parameters passed to --files with c=1.
-      c = getopt_long( argc, argv, "-a:f:ghi:ps:vVx:y:z:", long_options, &option_index );
+      c = getopt_long( argc, argv, "-a:f:ghi:prs:SvVx:y:z:", long_options, &option_index );
       if( c == -1 )
       {
          break;
@@ -111,8 +115,14 @@ Options::Options( int argc, char* argv[] )
          case 'p':
             progress = 0;
             break;
+         case 'r':
+            doRxns = 0;
+            break;
          case 's':
             seed = safeStrtol( optarg );
+            break;
+         case 'S':
+            doShuffle = 1;
             break;
          case 'v':
             printVersion();
@@ -162,15 +172,19 @@ Options::printHelp()
    std::cout << "    each iteration."                                                         << std::endl;
    std::cout <<                                                                                  std::endl;
    std::cout << "-a, --atoms        Number of atoms in the world. Default: 64"                << std::endl;
-   std::cout << "-f, --files        Specify the names of up to three output files."           << std::endl;
+   std::cout << "-f, --files        Specify the names of the three output files."             << std::endl;
    std::cout << "                     Default: config.out census.out diffusion.out"           << std::endl;
-   std::cout << "-g, --no-gui       Disable the GUI."                                         << std::endl;
+   std::cout << "-g, --no-gui       Disable the GUI. The GUI is enabled by default."          << std::endl;
    std::cout << "-h, --help         Display this information."                                << std::endl;
    std::cout << "-i, --iters        Number of iterations. Default: 100000"                    << std::endl;
    std::cout << "-p, --progress     Disable simulation progress reporting (percent"           << std::endl;
    std::cout << "                     complete)."                                             << std::endl;
+   std::cout << "-r, --no-rxns      Disable the execution of chemical reactions. Reactions"   << std::endl;
+   std::cout << "                     are enabled by default."                                << std::endl;
    std::cout << "-s, --seed         Seed for the random number generator. Initialized using"  << std::endl;
    std::cout << "                     the system time by default."                            << std::endl;
+   std::cout << "-S, --shuffle      Shuffle the positions of the atoms in the world each"     << std::endl;
+   std::cout << "                     iteration. Shuffling disabled by default."              << std::endl;
    std::cout << "-v, --version      Display version information."                             << std::endl;
    std::cout << "-V, --verbose      Write to screen detailed information for debugging."      << std::endl;
    std::cout << "-x, --x            Width of the world. Default: 16"                          << std::endl;

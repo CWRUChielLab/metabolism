@@ -39,7 +39,7 @@ k_density  = lm(-log((rate_data$A/(x*y))/a0_density)
                ~ 0 + rate_data$iter)$coefficients
 
 # Plot atom data directly with expected trajectory
-plot(rate_data$iter,   rate_data$A, col="red", xlab="Iterations", ylab="Atoms")
+plot(rate_data$iter,   rate_data$A, col="red", xlab="Iterations", ylab="Atoms", ylim=c(0, max(rate_data$A, rate_data$B)))
 points(rate_data$iter, rate_data$B, col="blue")
 curve(a0_atoms*exp(-k_atoms*x), add=TRUE)
 curve(a0_atoms-a0_atoms*exp(-k_atoms*x), add=TRUE)
@@ -49,7 +49,7 @@ plot(rate_data$iter, -log(rate_data$A/a0_atoms), col="red", xlab="Iterations", y
 curve(k_atoms*x, add=TRUE)
 
 # Plot density data directly with expected trajectory
-plot(rate_data$iter,   rate_data$A/(x*y), col="red", xlab="Iterations", ylab="Density")
+plot(rate_data$iter,   rate_data$A/(x*y), col="red", xlab="Iterations", ylab="Density", ylim=c(0, max(rate_data$A, rate_data$B)/(x*y)))
 points(rate_data$iter, rate_data$B/(x*y), col="blue")
 curve(a0_density*exp(-k_density*x), add=TRUE)
 curve(a0_density-a0_density*exp(-k_density*x), add=TRUE)
