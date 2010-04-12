@@ -319,6 +319,7 @@ Sim::shuffleWorld()
       }
    }
 
+   delete world;
    world = temp;
 }
 
@@ -425,8 +426,6 @@ Sim::executeRxns()
    {
       for( int x = 0; x < o->worldX; x++ )
       {
-         thisRxnProb = 0;
-
          if( world[ getWorldIndex(x,y) ] != NULL )
          // If an atom is encountered
          {
@@ -439,30 +438,25 @@ Sim::executeRxns()
          }
 
          // Determine which neighbor to attempt to react with, if any
-         switch( (randNums[ getWorldIndex(x,y) ] >> 3) % 10 )
+         switch( (randNums[ getWorldIndex(x,y) ] >> 3) % 5 )
          {
-            case 0:
-            case 1:  // First-order
+            case 0:  // First-order
                neighborX = x+0;
                neighborY = y+0;
                break;
-            case 2:
-            case 3:  // Second-order (E)
+            case 1:  // Second-order (E)
                neighborX = x+1;
                neighborY = y+0;
                break;
-            case 4:
-            case 5:  // Second-order (SE)
+            case 2:  // Second-order (SE)
                neighborX = x+1;
                neighborY = y+1;
                break;
-            case 6:
-            case 7:  // Second-order (S)
+            case 3:  // Second-order (S)
                neighborX = x+0;
                neighborY = y+1;
                break;
-            case 8:
-            case 9:  // Second-order (SW)
+            case 4:  // Second-order (SW)
                neighborX = x-1;
                neighborY = y+1;
                break;
@@ -485,6 +479,8 @@ Sim::executeRxns()
             }
          }
 
+         thisRxnProb = 0;
+
          if( neighborAtom == NULL )
          // If the reaction is first-order
          {
@@ -494,7 +490,7 @@ Sim::executeRxns()
                case 0:  // First products
                   if( rxnTable[ thisAtom->getType()->getKey() ] != NULL &&
                      !rxnTable[ thisAtom->getType()->getKey() ]->getFirstProducts().empty() )
-                  // If the first products exist
+                  // If the reaction exists and has first products
                   {
                      thisRxnProducts = rxnTable[ thisAtom->getType()->getKey() ]->getFirstProducts();
                      thisRxnProb     = rxnTable[ thisAtom->getType()->getKey() ]->getFirstProb();
@@ -503,7 +499,7 @@ Sim::executeRxns()
                case 1:  // Second products
                   if( rxnTable[ thisAtom->getType()->getKey() ] != NULL &&
                      !rxnTable[ thisAtom->getType()->getKey() ]->getSecondProducts().empty() )
-                  // If the second products exist
+                  // If the reaction exists and has second products
                   {
                      thisRxnProducts = rxnTable[ thisAtom->getType()->getKey() ]->getSecondProducts();
                      thisRxnProb     = rxnTable[ thisAtom->getType()->getKey() ]->getSecondProb();
@@ -524,7 +520,7 @@ Sim::executeRxns()
                             neighborAtom->getType()->getKey() ] != NULL &&
                      !rxnTable[ thisAtom->getType()->getKey() *
                             neighborAtom->getType()->getKey() ]->getFirstProducts().empty() )
-                  // If the first products exist
+                  // If the reaction exists and has first products
                   {
                      thisRxnProducts = rxnTable[ thisAtom->getType()->getKey() *
                                              neighborAtom->getType()->getKey() ]->getFirstProducts();
@@ -537,7 +533,7 @@ Sim::executeRxns()
                             neighborAtom->getType()->getKey() ] != NULL &&
                      !rxnTable[ thisAtom->getType()->getKey() *
                             neighborAtom->getType()->getKey() ]->getSecondProducts().empty() )
-                  // If the second products exist
+                  // If the reaction exists and has second products
                   {
                      thisRxnProducts = rxnTable[ thisAtom->getType()->getKey() *
                                              neighborAtom->getType()->getKey() ]->getSecondProducts();
@@ -601,8 +597,6 @@ Sim::executeRxns()
    {
       for( int x = 0; x < o->worldX; x++ )
       {
-         thisRxnProb = 0;
-
          if( claimed[ getWorldIndex(x,y) ] == 1)
          // If something is encountered that has not been processed yet
          // and could undergo a reaction
@@ -619,30 +613,25 @@ Sim::executeRxns()
             }
 
             // Determine which neighbor to attempt to react with, if any
-            switch( (randNums[ getWorldIndex(x,y) ] >> 3) % 10 )
+            switch( (randNums[ getWorldIndex(x,y) ] >> 3) % 5 )
             {
-               case 0:
-               case 1:  // First-order
+               case 0:  // First-order
                   neighborX = x+0;
                   neighborY = y+0;
                   break;
-               case 2:
-               case 3:  // Second-order (E)
+               case 1:  // Second-order (E)
                   neighborX = x+1;
                   neighborY = y+0;
                   break;
-               case 4:
-               case 5:  // Second-order (SE)
+               case 2:  // Second-order (SE)
                   neighborX = x+1;
                   neighborY = y+1;
                   break;
-               case 6:
-               case 7:  // Second-order (S)
+               case 3:  // Second-order (S)
                   neighborX = x+0;
                   neighborY = y+1;
                   break;
-               case 8:
-               case 9:  // Second-order (SW)
+               case 4:  // Second-order (SW)
                   neighborX = x-1;
                   neighborY = y+1;
                   break;
@@ -665,6 +654,8 @@ Sim::executeRxns()
                }
             }
 
+            thisRxnProb = 0;
+
             if( neighborAtom == NULL )
             // If the reaction is first-order
             {
@@ -674,7 +665,7 @@ Sim::executeRxns()
                   case 0:  // First products
                      if( rxnTable[ thisAtom->getType()->getKey() ] != NULL &&
                         !rxnTable[ thisAtom->getType()->getKey() ]->getFirstProducts().empty() )
-                     // If the first products exist
+                     // If the reaction exists and has first products
                      {
                         thisRxnProducts = rxnTable[ thisAtom->getType()->getKey() ]->getFirstProducts();
                         thisRxnProb     = rxnTable[ thisAtom->getType()->getKey() ]->getFirstProb();
@@ -683,7 +674,7 @@ Sim::executeRxns()
                   case 1:  // Second products
                      if( rxnTable[ thisAtom->getType()->getKey() ] != NULL &&
                         !rxnTable[ thisAtom->getType()->getKey() ]->getSecondProducts().empty() )
-                     // If the second products exist
+                     // If the reaction exists and has second products
                      {
                         thisRxnProducts = rxnTable[ thisAtom->getType()->getKey() ]->getSecondProducts();
                         thisRxnProb     = rxnTable[ thisAtom->getType()->getKey() ]->getSecondProb();
@@ -704,7 +695,7 @@ Sim::executeRxns()
                                neighborAtom->getType()->getKey() ] != NULL &&
                         !rxnTable[ thisAtom->getType()->getKey() *
                                neighborAtom->getType()->getKey() ]->getFirstProducts().empty() )
-                     // If the first products exist
+                     // If the reaction exists and has first products
                      {
                         thisRxnProducts = rxnTable[ thisAtom->getType()->getKey() *
                                                 neighborAtom->getType()->getKey() ]->getFirstProducts();
@@ -717,7 +708,7 @@ Sim::executeRxns()
                                neighborAtom->getType()->getKey() ] != NULL &&
                         !rxnTable[ thisAtom->getType()->getKey() *
                                neighborAtom->getType()->getKey() ]->getSecondProducts().empty() )
-                     // If the second products exist
+                     // If the reaction exists and has second products
                      {
                         thisRxnProducts = rxnTable[ thisAtom->getType()->getKey() *
                                                 neighborAtom->getType()->getKey() ]->getSecondProducts();
