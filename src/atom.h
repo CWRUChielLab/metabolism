@@ -12,6 +12,9 @@ class Atom
       // Constructor
       Atom( Element* initType, int initX, int initY, int initDxActual = 0, int initDyActual = 0, int initDxIdeal = 0, int initDyIdeal = 0, int initCollisions = 0 );
 
+      // Deconstructor
+      ~Atom();
+
       // Get and set functions
       Element* getType();
       void setType( Element* newType );

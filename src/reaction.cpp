@@ -9,7 +9,7 @@
 // Constructor
 Reaction::Reaction( std::vector<Element*> initReactants, std::vector<Element*> initProducts, double initProb )
 {
-   // Ensure that atom count remains constant
+   // Ensure that products and reactants are balanced
    assert( initReactants.size() == initProducts.size() );
 
    // Prob must be constrained between 0 and 0.2 in order for it
@@ -54,7 +54,7 @@ Reaction::getProducts()
 void
 Reaction::setProducts( std::vector<Element*> newProducts )
 {
-   // Ensure that atom count remains constant
+   // Ensure that products and reactants are balanced
    assert( newProducts.size() == reactants.size() );
 
    products = newProducts;

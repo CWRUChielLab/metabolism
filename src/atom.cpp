@@ -22,6 +22,14 @@ Atom::Atom( Element* initType, int initX, int initY, int initDxActual, int initD
 }
 
 
+// Deconstructor
+Atom::~Atom()
+{
+   // Decrement Element type counter
+   type->setCount( type->getCount() - 1 );
+}
+
+
 Element*
 Atom::getType()
 {

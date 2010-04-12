@@ -7,7 +7,7 @@
 
 
 // Constructor
-Element::Element( std::string initName, int initColor, int initCharge )
+Element::Element( std::string initName, char initSymbol, int initColor, int initCharge )
 {
    static int lastPrime = 1;
    
@@ -31,6 +31,7 @@ Element::Element( std::string initName, int initColor, int initCharge )
 
    // Copy constructor arguments
    name = initName;
+   symbol = initSymbol;
    color = initColor;
    charge = initCharge;
 
@@ -49,6 +50,13 @@ std::string
 Element::getName()
 {
    return name;
+}
+
+
+char
+Element::getSymbol()
+{
+   return symbol;
 }
 
 
