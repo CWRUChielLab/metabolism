@@ -72,7 +72,7 @@ if (rxn_order == "first")
 {
    k_atoms = lm(-log(rate_data$A/a0_atoms)
                ~ 0 + rate_data$iter)$coefficients
-   k_atoms_expected = prob
+   k_atoms_expected = prob/10
 }
 if (rxn_order == "second")
 {
@@ -84,7 +84,7 @@ if (rxn_order == "second")
       k_atoms = lm(1/rate_data$A - 1/a0_atoms
                   ~ 0 + rate_data$iter)$coefficients
    }
-   k_atoms_expected = prob * 8 / (x*y)
+   k_atoms_expected = prob/10 * 8/(x*y)
 }
 
 # Calculate k for densities
@@ -94,7 +94,7 @@ if (rxn_order == "first")
 {
    k_density = lm(-log((rate_data$A/(x*y))/a0_density)
                   ~ 0 + rate_data$iter)$coefficients
-   k_density_expected = prob
+   k_density_expected = prob/10
 }
 if (rxn_order == "second")
 {
@@ -106,7 +106,7 @@ if (rxn_order == "second")
       k_density = lm((x*y)/rate_data$A - 1/a0_density
                      ~ 0 + rate_data$iter)$coefficients
    }
-   k_density_expected = prob * 8
+   k_density_expected = prob/10 * 8
 }
 
 # Save statistics for exporting

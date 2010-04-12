@@ -87,8 +87,8 @@ Sim::Sim( Options* newOptions )
    tempEle = safeNew( Element( "Substrate", 'S', 0, 0 ) );
    periodicTable[ "Substrate" ] = tempEle;
 
-   tempEle = safeNew( Element( "ES Complex", 'F', 0, 0 ) );
-   periodicTable[ "ES Complex" ] = tempEle;
+   tempEle = safeNew( Element( "ES-Complex", 'F', 0, 0 ) );
+   periodicTable[ "ES-Complex" ] = tempEle;
 
    tempEle = safeNew( Element( "Product", 'P', 0, 0 ) );
    periodicTable[ "Product" ] = tempEle;
@@ -103,16 +103,14 @@ Sim::Sim( Options* newOptions )
    // Initialize the rxnTable
    Reaction* tempRxn;
 
-   tempRxn = safeNew( Reaction( ev(2,"A","B"), ev(2,"C","D"), 0.01 ) );
+   tempRxn = safeNew( Reaction( ev(2,"A","B"), ev(2,"C","D"), 0.1 ) );
+   //tempRxn = safeNew( Reaction( ev(1,"A"), ev(1,"B"), 0.001 ) );
    rxnTable[ tempRxn->getKey() ] = tempRxn;
 
-   //tempRxn = safeNew( Reaction( ev(2,"Enzyme","Substrate"), ev(2,"ES Complex","Solvent"), 0.001 ) );
+   //tempRxn = safeNew( Reaction( ev(2,"Enzyme","Substrate"), ev(2,"ES-Complex","Solvent"), 0.001 ) );
    //rxnTable[ tempRxn->getKey() ] = tempRxn;
 
-   //tempRxn = safeNew( Reaction( ev(2,"ES Complex","Solvent"), ev(2,"Enzyme","Substrate"), 0.001 ) );
-   //rxnTable[ tempRxn->getKey() ] = tempRxn;
-
-   //tempRxn = safeNew( Reaction( ev(2,"ES Complex","Solvent"), ev(2,"Enzyme","Substrate"), 0.001 ) );
+   //tempRxn = safeNew( Reaction( ev(2,"ES-Complex","Solvent"), ev(2,"Enzyme","Substrate"), 0.001, ev(2,"Enzyme","Product"), 0.001 ) );
    //rxnTable[ tempRxn->getKey() ] = tempRxn;
 
    // Fill the array of random numbers
@@ -413,7 +411,10 @@ void
 Sim::executeRxns()
 {
    Atom* thisAtom;
+   int neighborX, neighborY;
    Atom* neighborAtom;
+   std::vector<Element*> thisRxnProducts;
+   double thisRxnProb;
 
    // Initially set all claimed flags to 0
    std::memset( claimed, 0, o->worldX * o->worldY );
@@ -424,99 +425,161 @@ Sim::executeRxns()
    {
       for( int x = 0; x < o->worldX; x++ )
       {
+         thisRxnProb = 0;
+
          if( world[ getWorldIndex(x,y) ] != NULL )
          // If an atom is encountered
          {
             thisAtom = world[ getWorldIndex(x,y) ];
          }
          else
-         // If solvent is encountered
+         // Else solvent is encountered
          {
             thisAtom = safeNew( Atom( periodicTable[ "Solvent" ], x, y) );
          }
 
-         // Check for a first-order reaction:
-         if( (randNums[ getWorldIndex(x,y) ] >> 3) % 5 == 0 )
-         // If this reaction is chosen
+         // Determine which neighbor to attempt to react with, if any
+         switch( (randNums[ getWorldIndex(x,y) ] >> 3) % 10 )
          {
-            if( rxnTable[ thisAtom->getType()->getKey() ] != NULL )
-            // If the reaction exists
-            {
-               Reaction* thisRxn = rxnTable[ thisAtom->getType()->getKey() ];
-               if( (double)(randNums[ getWorldIndex(x,y) ] >> 3) /
-                   (double)(1 << (8 * sizeof(*randNums) - 3))
-                      < 5 * thisRxn->getProb() )
-               // If the reactants have enough energy
-               {
-                  // Stake the claim
-                  claimed[ getWorldIndex(x,y) ]++;
-               }
-            }
+            case 0:
+            case 1:  // First-order
+               neighborX = x+0;
+               neighborY = y+0;
+               break;
+            case 2:
+            case 3:  // Second-order (E)
+               neighborX = x+1;
+               neighborY = y+0;
+               break;
+            case 4:
+            case 5:  // Second-order (SE)
+               neighborX = x+1;
+               neighborY = y+1;
+               break;
+            case 6:
+            case 7:  // Second-order (S)
+               neighborX = x+0;
+               neighborY = y+1;
+               break;
+            case 8:
+            case 9:  // Second-order (SW)
+               neighborX = x-1;
+               neighborY = y+1;
+               break;
+            default:
+               assert( 0 );
+         }
+         if( neighborX == x && neighborY == y )
+         {
+            neighborAtom = NULL;
          }
          else
-         // Check for second-order reactions with neighbors:
          {
-            int neighborX, neighborY;
-            switch( (randNums[ getWorldIndex(x,y) ] >> 3) % 5 )
-            // Choose a neighbor
-            {
-               case 1:  // E
-                  neighborX = x+1;
-                  neighborY = y+0;
-                  break;
-               case 2:  // SE
-                  neighborX = x+1;
-                  neighborY = y+1;
-                  break;
-               case 3:  // S
-                  neighborX = x+0;
-                  neighborY = y+1;
-                  break;
-               case 4:  // SW
-                  neighborX = x-1;
-                  neighborY = y+1;
-                  break;
-               default:
-                  assert( 0 );
-            }
             if( world[ getWorldIndex(neighborX,neighborY) ] != NULL )
-            // If there is a neighboring atom in that location
             {
                neighborAtom = world[ getWorldIndex(neighborX,neighborY) ];
             }
             else
-            // If there is solvent in that location
             {
                neighborAtom = safeNew( Atom( periodicTable[ "Solvent" ], x, y ) );
             }
-            if( rxnTable[ thisAtom->getType()->getKey() *
-                      neighborAtom->getType()->getKey() ] != NULL )
-            // If the reaction exists
+         }
+
+         if( neighborAtom == NULL )
+         // If the reaction is first-order
+         {
+            switch( (randNums[ getWorldIndex(x,y) ] >> 3) % 2 )
+            // Determine which set of products to consider
             {
-               Reaction* thisRxn = rxnTable[ thisAtom->getType()->getKey() *
-                                         neighborAtom->getType()->getKey() ];
-               if( (double)(randNums[ getWorldIndex(x,y) ] >> 3) /
-                   (double)(1 << (8 * sizeof(*randNums) - 3))
-                      < 5 * thisRxn->getProb() )
-               // If the reactants have enough energy
-               {
-                  // Stake the claim
-                  claimed[ getWorldIndex(x,y) ]++;
-                  claimed[ getWorldIndex(neighborX,neighborY) ]++;
-               }
-            }
-            if( world[ getWorldIndex(neighborX,neighborY) ] == NULL )
-            // Delete the temporary solvent atom
-            {
-               delete neighborAtom;
-               neighborAtom = NULL;
+               case 0:  // First products
+                  if( rxnTable[ thisAtom->getType()->getKey() ] != NULL &&
+                     !rxnTable[ thisAtom->getType()->getKey() ]->getFirstProducts().empty() )
+                  // If the first products exist
+                  {
+                     thisRxnProducts = rxnTable[ thisAtom->getType()->getKey() ]->getFirstProducts();
+                     thisRxnProb     = rxnTable[ thisAtom->getType()->getKey() ]->getFirstProb();
+                  }
+                  break;
+               case 1:  // Second products
+                  if( rxnTable[ thisAtom->getType()->getKey() ] != NULL &&
+                     !rxnTable[ thisAtom->getType()->getKey() ]->getSecondProducts().empty() )
+                  // If the second products exist
+                  {
+                     thisRxnProducts = rxnTable[ thisAtom->getType()->getKey() ]->getSecondProducts();
+                     thisRxnProb     = rxnTable[ thisAtom->getType()->getKey() ]->getSecondProb();
+                  }
+                  break;
+               default:
+                  assert( 0 );
             }
          }
+         else
+         // Else the reaction is second-order
+         {
+            switch( (randNums[ getWorldIndex(x,y) ] >> 3) % 2 )
+            // Determine which set of products to consider
+            {
+               case 0:  // First products
+                  if( rxnTable[ thisAtom->getType()->getKey() *
+                            neighborAtom->getType()->getKey() ] != NULL &&
+                     !rxnTable[ thisAtom->getType()->getKey() *
+                            neighborAtom->getType()->getKey() ]->getFirstProducts().empty() )
+                  // If the first products exist
+                  {
+                     thisRxnProducts = rxnTable[ thisAtom->getType()->getKey() *
+                                             neighborAtom->getType()->getKey() ]->getFirstProducts();
+                     thisRxnProb     = rxnTable[ thisAtom->getType()->getKey() *
+                                             neighborAtom->getType()->getKey() ]->getFirstProb();
+                  }
+                  break;
+               case 1:  // Second products
+                  if( rxnTable[ thisAtom->getType()->getKey() *
+                            neighborAtom->getType()->getKey() ] != NULL &&
+                     !rxnTable[ thisAtom->getType()->getKey() *
+                            neighborAtom->getType()->getKey() ]->getSecondProducts().empty() )
+                  // If the second products exist
+                  {
+                     thisRxnProducts = rxnTable[ thisAtom->getType()->getKey() *
+                                             neighborAtom->getType()->getKey() ]->getSecondProducts();
+                     thisRxnProb     = rxnTable[ thisAtom->getType()->getKey() *
+                                             neighborAtom->getType()->getKey() ]->getSecondProb();
+                  }
+                  break;
+               default:
+                  assert( 0 );
+            }
+         }
+
+         if( (double)(randNums[ getWorldIndex(x,y) ] >> 3) /
+             (double)(1 << (8 * sizeof(*randNums) - 3))
+               < thisRxnProb )
+         // If the reactant have enough energy
+         {
+            if( neighborAtom == NULL )
+            // If the reaction is first-order
+            {
+               // Stake the claim
+               claimed[ getWorldIndex(x,y) ]++;
+            }
+            else
+            // Else the reaction is second-order
+            {
+               // Stake the claim
+               claimed[ getWorldIndex(x,y) ]++;
+               claimed[ getWorldIndex(neighborX,neighborY) ]++;
+            }
+         }
+
+         // Delete any temporary solvent atoms
          if( world[ getWorldIndex(x,y) ] == NULL )
-         // Delete the temporary solvent atom
          {
             delete thisAtom;
             thisAtom = NULL;
+         }
+         if( world[ getWorldIndex(neighborX,neighborY) ] == NULL )
+         {
+            delete neighborAtom;
+            neighborAtom = NULL;
          }
       }
    }
@@ -538,121 +601,177 @@ Sim::executeRxns()
    {
       for( int x = 0; x < o->worldX; x++ )
       {
+         thisRxnProb = 0;
+
          if( claimed[ getWorldIndex(x,y) ] == 1)
          // If something is encountered that has not been processed yet
          // and could undergo a reaction
          {
             if( world[ getWorldIndex(x,y) ] != NULL )
-            // If it is an atom
+            // If an atom is encountered
             {
                thisAtom = world[ getWorldIndex(x,y) ];
             }
             else
-            // If it is solvent
+            // Else solvent is encountered
             {
-               thisAtom = safeNew( Atom( periodicTable[ "Solvent" ], x, y ) );
+               thisAtom = safeNew( Atom( periodicTable[ "Solvent" ], x, y) );
             }
 
-            // Check for a first-order reaction:
-            if( (randNums[ getWorldIndex(x,y) ] >> 3) % 5 == 0 )
-            // If this reaction is chosen
+            // Determine which neighbor to attempt to react with, if any
+            switch( (randNums[ getWorldIndex(x,y) ] >> 3) % 10 )
             {
-               if( rxnTable[ thisAtom->getType()->getKey() ] != NULL )
-               // If the reaction exists
-               {
-                  Reaction* thisRxn = rxnTable[ thisAtom->getType()->getKey() ];
-                  if( (double)(randNums[ getWorldIndex(x,y) ] >> 3) /
-                      (double)(1 << (8 * sizeof(*randNums) - 3))
-                         < 5 * thisRxn->getProb() )
-                  // If the reactants have enough energy
-                  {
-                     // Execute the reaction
-                     thisAtom->setType(thisRxn->getProducts()[0]);
-                     world[ getWorldIndex(x,y) ] = thisAtom;
-
-                     // Mark the atom as having already reacted
-                     claimed[ getWorldIndex(x,y) ] = 0;
-                  }
-               }
+               case 0:
+               case 1:  // First-order
+                  neighborX = x+0;
+                  neighborY = y+0;
+                  break;
+               case 2:
+               case 3:  // Second-order (E)
+                  neighborX = x+1;
+                  neighborY = y+0;
+                  break;
+               case 4:
+               case 5:  // Second-order (SE)
+                  neighborX = x+1;
+                  neighborY = y+1;
+                  break;
+               case 6:
+               case 7:  // Second-order (S)
+                  neighborX = x+0;
+                  neighborY = y+1;
+                  break;
+               case 8:
+               case 9:  // Second-order (SW)
+                  neighborX = x-1;
+                  neighborY = y+1;
+                  break;
+               default:
+                  assert( 0 );
+            }
+            if( neighborX == x || neighborY == y )
+            {
+               neighborAtom = NULL;
             }
             else
-            // Check for second-order reactions with neighbors:
             {
-               int neighborX, neighborY;
-               switch( (randNums[ getWorldIndex(x,y) ] >> 3) % 5 )
-               // Choose a neighbor
+               if( world[ getWorldIndex(neighborX,neighborY) ] != NULL )
                {
-                  case 1:  // E
-                     neighborX = x+1;
-                     neighborY = y+0;
+                  neighborAtom = world[ getWorldIndex(neighborX,neighborY) ];
+               }
+               else
+               {
+                  neighborAtom = safeNew( Atom( periodicTable[ "Solvent" ], x, y ) );
+               }
+            }
+
+            if( neighborAtom == NULL )
+            // If the reaction is first-order
+            {
+               switch( (randNums[ getWorldIndex(x,y) ] >> 3) % 2 )
+               // Determine which set of products to consider
+               {
+                  case 0:  // First products
+                     if( rxnTable[ thisAtom->getType()->getKey() ] != NULL &&
+                        !rxnTable[ thisAtom->getType()->getKey() ]->getFirstProducts().empty() )
+                     // If the first products exist
+                     {
+                        thisRxnProducts = rxnTable[ thisAtom->getType()->getKey() ]->getFirstProducts();
+                        thisRxnProb     = rxnTable[ thisAtom->getType()->getKey() ]->getFirstProb();
+                     }
                      break;
-                  case 2:  // SE
-                     neighborX = x+1;
-                     neighborY = y+1;
-                     break;
-                  case 3:  // S
-                     neighborX = x+0;
-                     neighborY = y+1;
-                     break;
-                  case 4:  // SW
-                     neighborX = x-1;
-                     neighborY = y+1;
+                  case 1:  // Second products
+                     if( rxnTable[ thisAtom->getType()->getKey() ] != NULL &&
+                        !rxnTable[ thisAtom->getType()->getKey() ]->getSecondProducts().empty() )
+                     // If the second products exist
+                     {
+                        thisRxnProducts = rxnTable[ thisAtom->getType()->getKey() ]->getSecondProducts();
+                        thisRxnProb     = rxnTable[ thisAtom->getType()->getKey() ]->getSecondProb();
+                     }
                      break;
                   default:
                      assert( 0 );
                }
-               if( claimed[ getWorldIndex(neighborX,neighborY) ] == 1 )
-               // If there is something in that location that has not
-               // yet reacted and could undergo a reaction
+            }
+            else
+            // Else the reaction is second-order
+            {
+               switch( (randNums[ getWorldIndex(x,y) ] >> 3) % 2 )
+               // Determine which set of products to consider
                {
-                  if( world[ getWorldIndex(neighborX,neighborY) ] != NULL )
-                  // If it is an atom
-                  {
-                     neighborAtom = world[ getWorldIndex(neighborX,neighborY) ];
-                  }
-                  else
-                  // If it is solvent
-                  {
-                     neighborAtom = safeNew( Atom( periodicTable[ "Solvent" ], neighborX, neighborY ) );
-                  }
-
-                  if( rxnTable[ thisAtom->getType()->getKey() *
-                            neighborAtom->getType()->getKey() ] != NULL )
-                  // If the reaction exists
-                  {
-                     Reaction* thisRxn = rxnTable[ thisAtom->getType()->getKey() *
-                                               neighborAtom->getType()->getKey() ];
-                     if( (double)(randNums[ getWorldIndex(x,y) ] >> 3) /
-                         (double)(1 << (8 * sizeof(*randNums) - 3))
-                            < 5 * thisRxn->getProb() )
-                     // If the reactants have enough energy
+                  case 0:  // First products
+                     if( rxnTable[ thisAtom->getType()->getKey() *
+                               neighborAtom->getType()->getKey() ] != NULL &&
+                        !rxnTable[ thisAtom->getType()->getKey() *
+                               neighborAtom->getType()->getKey() ]->getFirstProducts().empty() )
+                     // If the first products exist
                      {
-                        // Execute the reaction
-                        thisAtom->setType(thisRxn->getProducts()[0]);
-                        neighborAtom->setType(thisRxn->getProducts()[1]);
-                        world[ getWorldIndex(x,y) ] = thisAtom;
-                        world[ getWorldIndex(neighborX,neighborY) ] = neighborAtom;
-
-                        // Mark the reaction participants as having already reacted
-                        claimed[ getWorldIndex(x,y) ] = 0;
-                        claimed[ getWorldIndex(neighborX,neighborY) ] = 0;
+                        thisRxnProducts = rxnTable[ thisAtom->getType()->getKey() *
+                                                neighborAtom->getType()->getKey() ]->getFirstProducts();
+                        thisRxnProb     = rxnTable[ thisAtom->getType()->getKey() *
+                                                neighborAtom->getType()->getKey() ]->getFirstProb();
                      }
-                  }
-                  if( neighborAtom->getType() == periodicTable[ "Solvent" ] )
-                  // If neighborAtom became solvent
-                  {
-                     delete neighborAtom;
-                     neighborAtom = NULL;
-                     world[ getWorldIndex(neighborX,neighborY) ] = NULL;
-                  }
+                     break;
+                  case 1:  // Second products
+                     if( rxnTable[ thisAtom->getType()->getKey() *
+                               neighborAtom->getType()->getKey() ] != NULL &&
+                        !rxnTable[ thisAtom->getType()->getKey() *
+                               neighborAtom->getType()->getKey() ]->getSecondProducts().empty() )
+                     // If the second products exist
+                     {
+                        thisRxnProducts = rxnTable[ thisAtom->getType()->getKey() *
+                                                neighborAtom->getType()->getKey() ]->getSecondProducts();
+                        thisRxnProb     = rxnTable[ thisAtom->getType()->getKey() *
+                                                neighborAtom->getType()->getKey() ]->getSecondProb();
+                     }
+                     break;
+                  default:
+                     assert( 0 );
                }
             }
+
+            if( (double)(randNums[ getWorldIndex(x,y) ] >> 3) /
+                (double)(1 << (8 * sizeof(*randNums) - 3))
+                  < thisRxnProb )
+            // If the reactant have enough energy
+            {
+               if( neighborAtom == NULL )
+               // If the reaction is first-order
+               {
+                  // Execute the reaction
+                  thisAtom->setType(thisRxnProducts[0]);
+                  world[ getWorldIndex(x,y) ] = thisAtom;
+
+                  // Mark the atom as having already reacted
+                  claimed[ getWorldIndex(x,y) ] = 0;
+               }
+               else
+               // Else the reaction is second-order
+               {
+                  // Execute the reaction
+                  thisAtom->setType(thisRxnProducts[0]);
+                  neighborAtom->setType(thisRxnProducts[1]);
+                  world[ getWorldIndex(x,y) ] = thisAtom;
+                  world[ getWorldIndex(neighborX,neighborY) ] = neighborAtom;
+
+                  // Mark the reaction participants as having already reacted
+                  claimed[ getWorldIndex(x,y) ] = 0;
+                  claimed[ getWorldIndex(neighborX,neighborY) ] = 0;
+               }
+            }
+
+            // Delete any solvent atoms that are newly created or never reacted
             if( thisAtom->getType() == periodicTable[ "Solvent" ] )
-            // If thisAtom became solvent
             {
                delete thisAtom;
                thisAtom = NULL;
                world[ getWorldIndex(x,y) ] = NULL;
+            }
+            if( neighborAtom != NULL && neighborAtom->getType() == periodicTable[ "Solvent" ] )
+            {
+               delete neighborAtom;
+               neighborAtom = NULL;
+               world[ getWorldIndex(neighborX,neighborY) ] = NULL;
             }
          }
       }
@@ -815,7 +934,7 @@ Sim::printElements()
       for( ElementMap::iterator i = periodicTable.begin(); i != periodicTable.end(); i++ )
       {
          Element* ele = i->second;
-         std::cout << "periodicTable[\"" << ele->getName().c_str() << "\"] has key:\t" << periodicTable[ele->getName()]->getKey() << std::endl;
+         std::cout << "periodicTable[\"" << ele->getName() << "\"] has key:\t" << periodicTable[ele->getName()]->getKey() << std::endl;
       }
    }
 }
@@ -824,31 +943,38 @@ Sim::printElements()
 void
 Sim::printReactions()
 {
-   if( o->useGUI )
-   // **********************
-   // Print using ncurses
-   // **********************
+   std::map<char,int> reactantCount;
+   std::map<char,int> firstProductCount;
+   std::map<char,int> secondProductCount;
+
+   // Loop through the rxnTable, printing each Reaction
+   for( ReactionMap::iterator i = rxnTable.begin(); i != rxnTable.end(); i++ )
    {
-      printw( "There are %d reactions.\n", rxnTable.size() );
+      Reaction* rxn = i->second;
 
-      // Loop through the rxnTable, printing each Reaction
-      for( ReactionMap::iterator i = rxnTable.begin(); i != rxnTable.end(); i++ )
+      // Count up the number of each type of reactant and product
+      for( unsigned int j = 0; j < rxn->getReactants().size(); j++ )
       {
-         Reaction* rxn = i->second;
-
-         // Count up the number of each type of reactant and product
-         std::map<char,int> reactantCount;
-         std::map<char,int> productCount;
-         for( unsigned int j = 0; j < rxn->getReactants().size(); j++ )
+         reactantCount[ rxn->getReactants()[j]->getSymbol() ]++;
+      }
+      for( unsigned int j = 0; j < rxn->getFirstProducts().size(); j++ )
+      {
+         firstProductCount[ rxn->getFirstProducts()[j]->getSymbol() ]++;
+      }
+      if( !rxn->getSecondProducts().empty() )
+      {
+         for( unsigned int j = 0; j < rxn->getSecondProducts().size(); j++ )
          {
-            reactantCount[ rxn->getReactants()[j]->getSymbol() ]++;
+            secondProductCount[ rxn->getSecondProducts()[j]->getSymbol() ]++;
          }
-         for( unsigned int j = 0; j < rxn->getProducts().size(); j++ )
-         {
-            productCount[ rxn->getProducts()[j]->getSymbol() ]++;
-         }
+      }
 
-         printw( "Key: %d  Prob: %f  \t", rxn->getKey(), rxn->getProb() );
+      if( o->useGUI )
+      // **********************************
+      // Print first reaction using ncurses
+      // **********************************
+      {
+         printw( "Key: %d  Prob: %f  \t", rxn->getKey(), rxn->getFirstProb() );
 
          // Print the reactants, grouping copies of one type together
          // with stoichiometric coefficients
@@ -881,14 +1007,14 @@ Sim::printReactions()
 
          printw( " -> " );
 
-         // Print the products, grouping copies of one type together
+         // Print the first products, grouping copies of one type together
          // with stoichiometric coefficients
-         for( std::map<char,int>::iterator j = productCount.begin(); j != productCount.end(); j++ )
+         for( std::map<char,int>::iterator j = firstProductCount.begin(); j != firstProductCount.end(); j++ )
          {
             int coefficient = j->second;
             if( coefficient == 1 )
             {
-               if( j == productCount.begin() )
+               if( j == firstProductCount.begin() )
                {
                   printw( "%c", j->first );
                }
@@ -899,7 +1025,7 @@ Sim::printReactions()
             }
             else
             {
-               if( j == productCount.begin() )
+               if( j == firstProductCount.begin() )
                {
                   printw( "%d%c", j->second, j->first );
                }
@@ -911,34 +1037,84 @@ Sim::printReactions()
          }
 
          printw( "\n" );
+
+
+         if( !rxn->getSecondProducts().empty() )
+         // ***********************************
+         // Print second reaction using ncurses
+         // ***********************************
+         {
+            printw( "Key: %d  Prob: %f  \t", rxn->getKey(), rxn->getSecondProb() );
+
+            // Print the reactants, grouping copies of one type together
+            // with stoichiometric coefficients
+            for( std::map<char,int>::iterator j = reactantCount.begin(); j != reactantCount.end(); j++ )
+            {
+               int coefficient = j->second;
+               if( coefficient == 1 )
+               {
+                  if( j == reactantCount.begin() )
+                  {
+                     printw( "%c", j->first );
+                  }
+                  else
+                  {
+                     printw( " + %c", j->first );
+                  }
+               }
+               else
+               {
+                  if( j == reactantCount.begin() )
+                  {
+                     printw( "%d%c", j->second, j->first );
+                  }
+                  else
+                  {
+                     printw( " + %d%c", j->second, j->first );
+                  }
+               }
+            }
+
+            printw( " -> " );
+
+            // Print the second products, grouping copies of one type together
+            // with stoichiometric coefficients
+            for( std::map<char,int>::iterator j = secondProductCount.begin(); j != secondProductCount.end(); j++ )
+            {
+               int coefficient = j->second;
+               if( coefficient == 1 )
+               {
+                  if( j == secondProductCount.begin() )
+                  {
+                     printw( "%c", j->first );
+                  }
+                  else
+                  {
+                     printw( " + %c", j->first );
+                  }
+               }
+               else
+               {
+                  if( j == secondProductCount.begin() )
+                  {
+                     printw( "%d%c", j->second, j->first );
+                  }
+                  else
+                  {
+                     printw( " + %d%c", j->second, j->first );
+                  }
+               }
+            }
+
+            printw( "\n" );
+         }
       }
-      refresh();
-   }
-   else
-   // **********************
-   // Print using cout
-   // **********************
-   {
-      std::cout << "There are " << rxnTable.size() << " reactions." << std::endl;
-
-      // Loop through the rxnTable, printing each Reaction
-      for( ReactionMap::iterator i = rxnTable.begin(); i != rxnTable.end(); i++ )
+      else
+      // *******************************
+      // Print first reaction using cout
+      // *******************************
       {
-         Reaction* rxn = i->second;
-
-         // Count up the number of each type of reactant and product
-         std::map<char,int> reactantCount;
-         std::map<char,int> productCount;
-         for( unsigned int j = 0; j < rxn->getReactants().size(); j++ )
-         {
-            reactantCount[ rxn->getReactants()[j]->getSymbol() ]++;
-         }
-         for( unsigned int j = 0; j < rxn->getProducts().size(); j++ )
-         {
-            productCount[ rxn->getProducts()[j]->getSymbol() ]++;
-         }
-
-         std::cout << "Key: " << rxn->getKey() << "  Prob: " << rxn->getProb() << "  \t";
+         std::cout << "Key: " << rxn->getKey() << "  Prob: " << rxn->getFirstProb() << "  \t";
 
          // Print the reactants, grouping copies of one type together
          // with stoichiometric coefficients
@@ -971,14 +1147,14 @@ Sim::printReactions()
 
          std::cout << " -> ";
 
-         // Print the products, grouping copies of one type together
+         // Print the first products, grouping copies of one type together
          // with stoichiometric coefficients
-         for( std::map<char,int>::iterator j = productCount.begin(); j != productCount.end(); j++ )
+         for( std::map<char,int>::iterator j = firstProductCount.begin(); j != firstProductCount.end(); j++ )
          {
             int coefficient = j->second;
             if( coefficient == 1 )
             {
-               if( j == productCount.begin() )
+               if( j == firstProductCount.begin() )
                {
                   std::cout << j->first;
                }
@@ -989,7 +1165,7 @@ Sim::printReactions()
             }
             else
             {
-               if( j == productCount.begin() )
+               if( j == firstProductCount.begin() )
                {
                   std::cout << j->second << j->first;
                }
@@ -1001,6 +1177,77 @@ Sim::printReactions()
          }
 
          std::cout << std::endl;
+
+
+         if( !rxn->getSecondProducts().empty() )
+         // ********************************
+         // Print second reaction using cout
+         // ********************************
+         {
+            std::cout << "Key: " << rxn->getKey() << "  Prob: " << rxn->getSecondProb() << "  \t";
+
+            // Print the reactants, grouping copies of one type together
+            // with stoichiometric coefficients
+            for( std::map<char,int>::iterator j = reactantCount.begin(); j != reactantCount.end(); j++ )
+            {
+               int coefficient = j->second;
+               if( coefficient == 1 )
+               {
+                  if( j == reactantCount.begin() )
+                  {
+                     std::cout << j->first;
+                  }
+                  else
+                  {
+                     std::cout << " + " << j->first;
+                  }
+               }
+               else
+               {
+                  if( j == reactantCount.begin() )
+                  {
+                     std::cout << j->second << j->first;
+                  }
+                  else
+                  {
+                     std::cout << " + " << j->second << j->first;
+                  }
+               }
+            }
+
+            std::cout << " -> ";
+
+            // Print the second products, grouping copies of one type together
+            // with stoichiometric coefficients
+            for( std::map<char,int>::iterator j = secondProductCount.begin(); j != secondProductCount.end(); j++ )
+            {
+               int coefficient = j->second;
+               if( coefficient == 1 )
+               {
+                  if( j == secondProductCount.begin() )
+                  {
+                     std::cout << j->first;
+                  }
+                  else
+                  {
+                     std::cout << " + " << j->first;
+                  }
+               }
+               else
+               {
+                  if( j == secondProductCount.begin() )
+                  {
+                     std::cout << j->second << j->first;
+                  }
+                  else
+                  {
+                     std::cout << " + " << j->second << j->first;
+                  }
+               }
+            }
+
+            std::cout << std::endl;
+         }
       }
    }
 }
