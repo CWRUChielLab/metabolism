@@ -638,7 +638,7 @@ Sim::executeRxns()
                default:
                   assert( 0 );
             }
-            if( neighborX == x || neighborY == y )
+            if( neighborX == x && neighborY == y )
             {
                neighborAtom = NULL;
             }
@@ -687,37 +687,42 @@ Sim::executeRxns()
             else
             // Else the reaction is second-order
             {
-               switch( (randNums[ getWorldIndex(x,y) ] >> 3) % 2 )
-               // Determine which set of products to consider
+               if( claimed[ getWorldIndex(neighborX,neighborY) ] == 1 )
+               // If the neighbor has not been processed yet and
+               // could undergo a reaction
                {
-                  case 0:  // First products
-                     if( rxnTable[ thisAtom->getType()->getKey() *
-                               neighborAtom->getType()->getKey() ] != NULL &&
-                        !rxnTable[ thisAtom->getType()->getKey() *
-                               neighborAtom->getType()->getKey() ]->getFirstProducts().empty() )
-                     // If the reaction exists and has first products
-                     {
-                        thisRxnProducts = rxnTable[ thisAtom->getType()->getKey() *
-                                                neighborAtom->getType()->getKey() ]->getFirstProducts();
-                        thisRxnProb     = rxnTable[ thisAtom->getType()->getKey() *
-                                                neighborAtom->getType()->getKey() ]->getFirstProb();
-                     }
-                     break;
-                  case 1:  // Second products
-                     if( rxnTable[ thisAtom->getType()->getKey() *
-                               neighborAtom->getType()->getKey() ] != NULL &&
-                        !rxnTable[ thisAtom->getType()->getKey() *
-                               neighborAtom->getType()->getKey() ]->getSecondProducts().empty() )
-                     // If the reaction exists and has second products
-                     {
-                        thisRxnProducts = rxnTable[ thisAtom->getType()->getKey() *
-                                                neighborAtom->getType()->getKey() ]->getSecondProducts();
-                        thisRxnProb     = rxnTable[ thisAtom->getType()->getKey() *
-                                                neighborAtom->getType()->getKey() ]->getSecondProb();
-                     }
-                     break;
-                  default:
-                     assert( 0 );
+                  switch( (randNums[ getWorldIndex(x,y) ] >> 3) % 2 )
+                  // Determine which set of products to consider
+                  {
+                     case 0:  // First products
+                        if( rxnTable[ thisAtom->getType()->getKey() *
+                                  neighborAtom->getType()->getKey() ] != NULL &&
+                           !rxnTable[ thisAtom->getType()->getKey() *
+                                  neighborAtom->getType()->getKey() ]->getFirstProducts().empty() )
+                        // If the reaction exists and has first products
+                        {
+                           thisRxnProducts = rxnTable[ thisAtom->getType()->getKey() *
+                                                   neighborAtom->getType()->getKey() ]->getFirstProducts();
+                           thisRxnProb     = rxnTable[ thisAtom->getType()->getKey() *
+                                                   neighborAtom->getType()->getKey() ]->getFirstProb();
+                        }
+                        break;
+                     case 1:  // Second products
+                        if( rxnTable[ thisAtom->getType()->getKey() *
+                                  neighborAtom->getType()->getKey() ] != NULL &&
+                           !rxnTable[ thisAtom->getType()->getKey() *
+                                  neighborAtom->getType()->getKey() ]->getSecondProducts().empty() )
+                        // If the reaction exists and has second products
+                        {
+                           thisRxnProducts = rxnTable[ thisAtom->getType()->getKey() *
+                                                   neighborAtom->getType()->getKey() ]->getSecondProducts();
+                           thisRxnProb     = rxnTable[ thisAtom->getType()->getKey() *
+                                                   neighborAtom->getType()->getKey() ]->getSecondProb();
+                        }
+                        break;
+                     default:
+                        assert( 0 );
+                  }
                }
             }
 
