@@ -1,6 +1,6 @@
 #!/usr/bin/Rscript
 #
-# Analyzes batch data in R and creates graphs
+# Analyzes batch diffusion data in R and creates graphs
 #
 # Usage: ./diffusion_batch_analysis.R pathtobatch nexperiments pathtoplots usetex
 #   pathtobatch   the path of the batch directory

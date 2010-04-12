@@ -1,6 +1,6 @@
 #!/usr/bin/Rscript
 #
-# Analyzes experimental data in R and creates graphs
+# Analyzes diffusion data in R and creates graphs
 #
 # Usage: ./diffusion_analysis.R pathtoconfig pathtodata pathtoplots pathtostats uselatex
 #   pathtoconfig  the path of the config.out file
