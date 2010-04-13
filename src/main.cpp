@@ -124,7 +124,8 @@ main ( int argc, char* argv[] )
 
       // Take a census of the atoms in the world
       // occasionally
-      if( mySim->getCurrentIter() % 32 == 0 )
+      //if( mySim->getCurrentIter() % 32 == 0 )
+      if( mySim->getCurrentIter() % 8 == 0 )
       {
          mySim->takeCensus();
       }

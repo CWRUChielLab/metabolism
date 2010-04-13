@@ -49,7 +49,7 @@ if [ ! -d ../data/rate/$BATCH ]; then
 else
    echo "BATCH FAILED: Batch ../data/rate/$BATCH already exists!"
    echo "  Rename this batch or move/delete the old data before continuing."
-   exit
+#   exit
 fi
 
 # Determine whether atom count is fixed or increasing
@@ -60,8 +60,7 @@ else
 fi
 
 # Run the experiments and conduct individual analyses
-#for i in `seq 0 $(($EXPERIMENTS-1))`; do
-for i in `seq 30 $(($EXPERIMENTS-1))`; do
+for i in `seq 0 $(($EXPERIMENTS-1))`; do
    sleep 1
    echo "Beginning experiment $(($i+1)) of $EXPERIMENTS..."
    if [ ! -d ../data/rate/$BATCH/${NAME[i]} ]; then
@@ -71,19 +70,28 @@ for i in `seq 30 $(($EXPERIMENTS-1))`; do
    # If the atom count is not fixed, calculate the atom count,
    # incrementing by 0.05% density each experiment
    if [ "$FIXED" = '0' ]; then
-      ATOMS=$(((5*($i+1)*$X*$Y*2+10000)/20000))
+      #ATOMS=$(((5*($i+1)*$X*$Y*2+10000)/20000))
+      ATOMS=$(((20*($i+1)*$X*$Y*2+10000)/20000))
    fi
 
    time (                                                             \
       #../src/metabolism -g -i $ITERS -x $X -y $Y -a $ATOMS            \
-      ../src/metabolism --shuffle -g -i $ITERS -x $X -y $Y -a $ATOMS  \
-         -f ../data/rate/$BATCH/${NAME[i]}/config.${NAME[i]}.out      \
-            ../data/rate/$BATCH/${NAME[i]}/census.${NAME[i]}.out      \
-            ../data/rate/$BATCH/${NAME[i]}/diffusion.${NAME[i]}.out   \
-      &&                                                              \
-      ../scripts/rate_analysis.R                                      \
-            $RXNORDER                                                 \
-            $PROB                                                     \
+      #   -f ../data/rate/$BATCH/${NAME[i]}/config.${NAME[i]}.out      \
+      #      ../data/rate/$BATCH/${NAME[i]}/census.${NAME[i]}.out      \
+      #      ../data/rate/$BATCH/${NAME[i]}/diffusion.${NAME[i]}.out   \
+      #&&                                                              \
+      #../scripts/rate_analysis.R                                      \
+      #      $RXNORDER                                                 \
+      #      $PROB                                                     \
+      #      ../data/rate/$BATCH/${NAME[i]}/config.${NAME[i]}.out      \
+      #      ../data/rate/$BATCH/${NAME[i]}/census.${NAME[i]}.out      \
+      #      ../data/rate/$BATCH/${NAME[i]}/analysis_$BATCH_${NAME[i]} \
+      #      ../data/rate/$BATCH/${NAME[i]}/stats.${NAME[i]}.out       \
+      #      false                                                     \
+      ../scripts/rate_analysis_mm.R                                   \
+            0.5                                                       \
+            0.01                                                      \
+            0.01                                                      \
             ../data/rate/$BATCH/${NAME[i]}/config.${NAME[i]}.out      \
             ../data/rate/$BATCH/${NAME[i]}/census.${NAME[i]}.out      \
             ../data/rate/$BATCH/${NAME[i]}/analysis_$BATCH_${NAME[i]} \

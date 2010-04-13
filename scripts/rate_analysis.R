@@ -226,7 +226,7 @@ if (use_latex == "true")
 
 if (rxn_order == "first")
 {
-   plot(rate_data$iter,   rate_data$A/(x*y), col=green, xlab="Iterations", ylab="Density", ylim=c(0, max(rate_data$A, rate_data$B)/(x*y)))
+   plot(rate_data$iter,   rate_data$A/(x*y), col=green, xlab="Iterations", ylab="Concentration", ylim=c(0, max(rate_data$A, rate_data$B)/(x*y)))
    points(rate_data$iter, rate_data$B/(x*y), col=blue)
    curve(a0_density*exp(-k_density*x), add=TRUE)
    curve(a0_density-a0_density*exp(-k_density*x), add=TRUE)
@@ -235,7 +235,7 @@ if (rxn_order == "first")
 }
 if (rxn_order == "second")
 {
-   plot(rate_data$iter,   rate_data$A/(x*y), col=green, xlab="Iterations", ylab="Density", ylim=c(0,max(rate_data$A, rate_data$B)/(x*y)))
+   plot(rate_data$iter,   rate_data$A/(x*y), col=green, xlab="Iterations", ylab="Concentration", ylim=c(0,max(rate_data$A, rate_data$B)/(x*y)))
    points(rate_data$iter, rate_data$B/(x*y), col=blue)
    if (a0_density != b0_density)
    {
@@ -281,10 +281,10 @@ if (rxn_order == "second")
 {
    if (a0_density != b0_density)
    {
-      plot(rate_data$iter,   log((rate_data$A*b0_density)/(rate_data$B*a0_density))/(a0_density-b0_density), col=green, xlab="Iterations", ylab="1/Density")
+      plot(rate_data$iter,   log((rate_data$A*b0_density)/(rate_data$B*a0_density))/(a0_density-b0_density), col=green, xlab="Iterations", ylab="1/Concentration")
       points(rate_data$iter, log((rate_data$B*a0_density)/(rate_data$A*b0_density))/(b0_density-a0_density), col=blue)
    } else {
-      plot(rate_data$iter,   (x*y)/rate_data$A-1/a0_density, col=green, xlab="Iterations", ylab="1/Density")
+      plot(rate_data$iter,   (x*y)/rate_data$A-1/a0_density, col=green, xlab="Iterations", ylab="1/Concentration")
       points(rate_data$iter, (x*y)/rate_data$B-1/b0_density, col=blue)
    }
    curve(k_density*x, add=TRUE)

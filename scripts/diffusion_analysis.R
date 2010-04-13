@@ -122,7 +122,8 @@ for (i in 1:length(plot_type))
    # open a TikZ graphics device and set a few parameters
    if (use_latex == "true")
    {
-      tikz(file=paste(path_to_plots, "_", plot_type[i], "_qq.tex", sep=""), width=3, height=2.7)
+      #tikz(file=paste(path_to_plots, "_", plot_type[i], "_qq.tex", sep=""), width=3, height=2.7)
+      tikz(file=paste(path_to_plots, "_", plot_type[i], "_qq.tex", sep=""), width=3, height=2.7, bareBones=TRUE)
       par(cex=0.7)
       par(font.main=1)
    }
@@ -151,7 +152,8 @@ for (i in 1:length(plot_type))
    # open a TikZ graphics device and set a few parameters
    if (use_latex == "true")
    {
-      tikz(file=paste(path_to_plots, "_", plot_type[i], "_hist.tex", sep=""), width=3, height=2.7)
+      #tikz(file=paste(path_to_plots, "_", plot_type[i], "_hist.tex", sep=""), width=3, height=2.7)
+      tikz(file=paste(path_to_plots, "_", plot_type[i], "_hist.tex", sep=""), width=3, height=2.7, bareBones=TRUE)
       par(cex=0.7)
       par(font.main=1)
    }
@@ -274,7 +276,8 @@ for (i in 1:length(plot_type))
    # open a TikZ graphics device and set a few parameters
    if (use_latex == "true")
    {
-      tikz(file=paste(path_to_plots, "_", plot_type[i], "_ks.tex", sep=""), width=3, height=2.7)
+      #tikz(file=paste(path_to_plots, "_", plot_type[i], "_ks.tex", sep=""), width=3, height=2.7)
+      tikz(file=paste(path_to_plots, "_", plot_type[i], "_ks.tex", sep=""), width=3, height=2.7, bareBones=TRUE)
       par(cex=0.7)
       par(font.main=1)
    }
