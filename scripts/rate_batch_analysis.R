@@ -2,12 +2,14 @@
 #
 # Analyzes batch reaction rate data in R and creates graphs
 #
-# Usage: ./rate_batch_analysis.R pathtobatch nexperiments pathtoplots uselatex
-#   pathtobatch   the path of the batch directory
-#   nexperiments  the number of experiments in the batch
-#   pathtoplots   the path of the PDF or LaTeX documents that the R script
+# Usage: ./rate_batch_analysis.R pathtobatch nexperiments pathtoplots shufflingused uselatex
+#   pathtobatch    the path of the batch directory
+#   nexperiments   the number of experiments in the batch
+#   pathtoplots    the path of the PDF or LaTeX documents that the R script
 #                    will create without the .pdf or .tex extension
-#   uselatex      if "true" is passed, create individual plots in the form
+#   shufflingused  if "true" is passed, label plots "with Shuffling"; else
+#                    label plots "without Shuffling"
+#   uselatex       if "true" is passed, create individual plots in the form
 #                    of LaTeX documents; else draw all plots in one PDF
 
 # Import command line arguments
@@ -15,7 +17,8 @@ Args = commandArgs()
 path_to_batch  = as.character(Args[6])
 n_experiments  = as.integer(Args[7])
 path_to_plots  = as.character(Args[8])
-use_latex      = as.character(Args[9])
+shuffling_used = as.character(Args[9])
+use_latex      = as.character(Args[10])
 
 # Import experimental parameters and statistics
 config = list()
@@ -54,6 +57,14 @@ blue      = "#0020AB"
 darkblue  = "#001055"
 red       = "#FF0000"
 
+# Plot title
+if (shuffling_used == "true")
+{
+   plot.title = "Rate Constant with Shuffling"
+} else {
+   plot.title = "Rate Constant without Shuffling"
+}
+
 # If all plots are to be drawn in a single PDF,
 # open a PDF graphics device and set a few parameters
 if (use_latex != "true")
@@ -63,9 +74,9 @@ if (use_latex != "true")
    par(font.lab=2)
 }
 
-#########
-# PLOTS #
-#########
+#################
+# PLOT OF ATOMS #
+#################
 
 # If individual LaTeX documents are to be created,
 # open a TikZ graphics device and set a few parameters
@@ -77,8 +88,14 @@ if (use_latex == "true")
 }
 
 # Draw scatter plot of k_atoms against density
-plot(config[,"density"], stats[,"k_atoms"],
-   main="", xlab="Density", ylab="k_atoms", col=green)
+if (use_latex != "true")
+{
+   plot(config[,"density"], stats[,"k_atoms"],
+      main=plot.title, xlab="Density", ylab="k_atoms", col=green)
+} else {
+   plot(config[,"density"], stats[,"k_atoms"],
+      main=plot.title, xlab="Density", ylab="$k_\text{atoms}$", col=green)
+}
 
 # Add expected value line
 abline(h=k_atoms_expected,
@@ -91,6 +108,10 @@ if (use_latex == "true")
    dev.off()
 }
 
+###################
+# PLOT OF DENSITY #
+###################
+
 # If individual LaTeX documents are to be created,
 # open a TikZ graphics device and set a few parameters
 if (use_latex == "true")
@@ -101,8 +122,14 @@ if (use_latex == "true")
 }
 
 # Draw scatter plot of k_density against density
-plot(config[,"density"], stats[,"k_density"],
-   main="", xlab="Density", ylab="k_density", col=green)
+if (use_latex != "true")
+{
+   plot(config[,"density"], stats[,"k_density"],
+      main=plot.title, xlab="Density", ylab="k_density", col=green)
+} else {
+   plot(config[,"density"], stats[,"k_density"],
+      main=plot.title, xlab="Density", ylab="$k$", col=green)
+}
 
 # Add expected value line
 abline(h=k_density_expected,

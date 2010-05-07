@@ -3,7 +3,7 @@
 # Analyzes reaction rate data in R and creates graphs
 #
 # Usage: ./rate_analysis.R rxnorder prob pathtoconfig pathtodata pathtoplots pathtostats uselatex
-#   rxnorder      the order of the reaction; "first" or "second"
+#   rxnorder      the order of the reaction; "zeroth", "first", or "second"
 #   prob          the probability of the reaction occurring
 #   pathtoconfig  the path of the config.out file
 #   pathtodata    the path of the census.out file
@@ -67,7 +67,15 @@ if (rxn_order == "second")
 
 # Calculate k for atoms
 a0_atoms = rate_data$A[1]
-b0_atoms = rate_data$B[1]
+if (rxn_order != "zeroth")
+{
+   b0_atoms = rate_data$B[1]
+}
+if (rxn_order == "zeroth")
+{
+   k_atoms = lm(rate_data$A-a0_atoms ~ 0 + rate_data$iter)$coefficients
+   k_atoms_expected = prob/10 * (x*y)
+}
 if (rxn_order == "first")
 {
    k_atoms = lm(-log(rate_data$A/a0_atoms)
@@ -89,7 +97,15 @@ if (rxn_order == "second")
 
 # Calculate k for densities
 a0_density = rate_data$A[1]/(x*y)
-b0_density = rate_data$B[1]/(x*y)
+if (rxn_order != "zeroth")
+{
+   b0_density = rate_data$B[1]/(x*y)
+}
+if (rxn_order == "zeroth")
+{
+   k_density = lm(rate_data$A/(x*y)-a0_density ~ 0 + rate_data$iter)$coefficients
+   k_density_expected = prob/10
+}
 if (rxn_order == "first")
 {
    k_density = lm(-log((rate_data$A/(x*y))/a0_density)
@@ -137,6 +153,12 @@ if (use_latex == "true")
    par(font.main=1)
 }
 
+if (rxn_order == "zeroth")
+{
+   plot(rate_data$iter,   rate_data$A, col=green, xlab="Iterations", ylab="Atoms", ylim=c(0, max(rate_data$A, rate_data$B)))
+   curve(a0_atoms+k_atoms*x, add=TRUE)
+   curve(a0_atoms+k_atoms_expected*x, col=red, add=TRUE)
+}
 if (rxn_order == "first")
 {
    plot(rate_data$iter,   rate_data$A, col=green, xlab="Iterations", ylab="Atoms", ylim=c(0, max(rate_data$A, rate_data$B)))
@@ -148,7 +170,7 @@ if (rxn_order == "first")
 }
 if (rxn_order == "second")
 {
-   plot(rate_data$iter,   rate_data$A, col=green, xlab="Iterations", ylab="Atoms", ylim=c(0,max(rate_data$A, rate_data$B)))
+   plot(rate_data$iter,   rate_data$A, col=green, xlab="Iterations", ylab="Atoms", ylim=c(0, max(rate_data$A, rate_data$B)))
    points(rate_data$iter, rate_data$B, col=blue)
    if (a0_atoms != b0_atoms)
    {
@@ -184,6 +206,12 @@ if (use_latex == "true")
    par(font.main=1)
 }
 
+if (rxn_order == "zeroth")
+{
+   plot(rate_data$iter, rate_data$A-a0_atoms, col=green, xlab="Iterations", ylab="Atoms")
+   curve(k_atoms*x, add=TRUE)
+   curve(k_atoms_expected*x, col=red, add=TRUE)
+}
 if (rxn_order == "first")
 {
    plot(rate_data$iter, -log(rate_data$A/a0_atoms), col=green, xlab="Iterations", ylab="")
@@ -224,6 +252,12 @@ if (use_latex == "true")
    par(font.main=1)
 }
 
+if (rxn_order == "zeroth")
+{
+   plot(rate_data$iter,   rate_data$A/(x*y), col=green, xlab="Iterations", ylab="Concentration", ylim=c(0, max(rate_data$A, rate_data$B)/(x*y)))
+   curve(a0_density+k_density*x, add=TRUE)
+   curve(a0_density+k_density_expected*x, col=red, add=TRUE)
+}
 if (rxn_order == "first")
 {
    plot(rate_data$iter,   rate_data$A/(x*y), col=green, xlab="Iterations", ylab="Concentration", ylim=c(0, max(rate_data$A, rate_data$B)/(x*y)))
@@ -235,7 +269,7 @@ if (rxn_order == "first")
 }
 if (rxn_order == "second")
 {
-   plot(rate_data$iter,   rate_data$A/(x*y), col=green, xlab="Iterations", ylab="Concentration", ylim=c(0,max(rate_data$A, rate_data$B)/(x*y)))
+   plot(rate_data$iter,   rate_data$A/(x*y), col=green, xlab="Iterations", ylab="Concentration", ylim=c(0, max(rate_data$A, rate_data$B)/(x*y)))
    points(rate_data$iter, rate_data$B/(x*y), col=blue)
    if (a0_density != b0_density)
    {
@@ -271,6 +305,12 @@ if (use_latex == "true")
    par(font.main=1)
 }
 
+if (rxn_order == "zeroth")
+{
+   plot(rate_data$iter, rate_data$A/(x*y)-a0_density, col=green, xlab="Iterations", ylab="Concentration")
+   curve(k_density*x, add=TRUE)
+   curve(k_density_expected*x, col=red, add=TRUE)
+}
 if (rxn_order == "first")
 {
    plot(rate_data$iter, -log((rate_data$A/(x*y))/a0_density), col=green, xlab="Iterations", ylab="")

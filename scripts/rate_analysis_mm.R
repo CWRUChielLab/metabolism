@@ -72,7 +72,11 @@ k3_atoms_expected = prob3/10 * 8
 es_atoms = mean(rate_data$ES)
 #es_atoms_expected = e0_atoms * k1_atoms_expected / (k1_atoms_expected + k2_atoms_expected + k3_atoms_expected)
 
-v0_atoms = lm(rate_data$Product ~ rate_data$iter + 0)$coefficients
+#v0_atoms = lm(rate_data$Product ~ rate_data$iter + 0)$coefficients
+start = round(length(rate_data$Product)/2)
+end = length(rate_data$Product)
+v0_atoms = lm(rate_data$Product[start:end] ~ rate_data$iter[start:end])$coefficients[2]
+intercept_atoms = lm(rate_data$Product[start:end] ~ rate_data$iter[start:end])$coefficients[1]
 #v0_atoms_expected = k3_atoms_expected * es_atoms_expected
 
 v_max_atoms_expected = k3_atoms_expected * e0_atoms
@@ -89,7 +93,11 @@ k3_density_expected = prob3/10 * 8
 es_density = mean(rate_data$ES)/(x*y)
 #es_density_expected = e0_density * k1_density_expected / (k1_density_expected + k2_density_expected + k3_density_expected)
 
-v0_density = lm(rate_data$Product/(x*y) ~ rate_data$iter + 0)$coefficients
+#v0_density = lm(rate_data$Product/(x*y) ~ rate_data$iter + 0)$coefficients
+start = round(length(rate_data$Product)/2)
+end = length(rate_data$Product)
+v0_density = lm(rate_data$Product[start:end]/(x*y) ~ rate_data$iter[start:end])$coefficients[2]
+intercept_density = lm(rate_data$Product[start:end]/(x*y) ~ rate_data$iter[start:end])$coefficients[1]
 #v0_density_expected = k3_density_expected * es_density_expected
 
 v_max_density_expected = k3_density_expected * e0_density
@@ -164,7 +172,8 @@ if (use_latex == "true")
 }
 
 plot(rate_data$iter, rate_data$Product, col=darkblue, xlab="Iterations", ylab="Atoms")
-abline(a=p0_atoms, b=v0_atoms, col=red)
+#abline(a=p0_atoms, b=v0_atoms, col=red)
+abline(a=intercept_atoms, b=v0_atoms, col=red)
 
 # If individual LaTeX documents are to be created,
 # close the current TikZ graphics device
@@ -212,7 +221,8 @@ if (use_latex == "true")
 }
 
 plot(rate_data$iter, rate_data$Product/(x*y), col=darkblue, xlab="Iterations", ylab="Density")
-abline(a=p0_density, b=v0_density, col=red)
+#abline(a=p0_density, b=v0_density, col=red)
+abline(a=intercept_density, b=v0_density, col=red)
 
 # If individual LaTeX documents are to be created,
 # close the current TikZ graphics device

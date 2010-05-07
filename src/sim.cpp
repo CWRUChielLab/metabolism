@@ -74,15 +74,14 @@ Sim::Sim( Options* newOptions )
    tempEle = safeNew( Element( "Solvent", '*', 0, 0 ) );
    periodicTable[ "Solvent" ] = tempEle;
 
-   /*
    for( char symbol = 'A'; symbol <= 'D'; symbol++ )
    {
       std::string name(1,symbol);
       tempEle = safeNew( Element( name, symbol, 0, 0 ) );
       periodicTable[ name ] = tempEle;
    }
-   */
 
+   /*
    tempEle = safeNew( Element( "Enzyme", 'E', 0, 0 ) );
    periodicTable[ "Enzyme" ] = tempEle;
 
@@ -94,30 +93,28 @@ Sim::Sim( Options* newOptions )
 
    tempEle = safeNew( Element( "Product", 'P', 0, 0 ) );
    periodicTable[ "Product" ] = tempEle;
-
-   /*
-   for( char symbol = 'X'; symbol <= 'Z'; symbol++ )
-   {
-      std::string name(1,symbol);
-      tempEle = safeNew( Element( name, symbol, 0, 0 ) );
-      periodicTable[ name ] = tempEle;
-   }
    */
 
    // Initialize the rxnTable
    Reaction* tempRxn;
 
+   tempRxn = safeNew( Reaction( ev(2,"A","B"), ev(2,"C","D"), 0.5 ) );
+   rxnTable[ tempRxn->getKey() ] = tempRxn;
+
+   /*
    tempRxn = safeNew( Reaction( ev(2,"Enzyme","Substrate"), ev(2,"ES","Solvent"), 0.5 ) );
    rxnTable[ tempRxn->getKey() ] = tempRxn;
 
    tempRxn = safeNew( Reaction( ev(2,"ES","Solvent"), ev(2,"Enzyme","Substrate"), 0.01, ev(2,"Enzyme","Product"), 0.01 ) );
    rxnTable[ tempRxn->getKey() ] = tempRxn;
+   */
 
    // Fill the array of random numbers
    generateRandNums();
 
    // Initialize the world with random atoms
-   ElementVector initialTypes = ev(2,"Enzyme","Substrate");
+   ElementVector initialTypes = ev(2,"A","B");
+   //ElementVector initialTypes = ev(2,"Enzyme","Substrate");
    Atom* tempAtom;
    int x, y;
    o->atomCount = std::min( o->atomCount, o->worldX * o->worldY );
@@ -125,15 +122,8 @@ Sim::Sim( Options* newOptions )
    {
       x = positions[i] % o->worldX;
       y = positions[i] / o->worldX;
-      //tempEle = initialTypes[ randNums[i] % initialTypes.size() ];
-      if( i < 64 )
-      {
-         tempEle = initialTypes[0];
-      }
-      else
-      {
-         tempEle = initialTypes[1];
-      }
+      tempEle = initialTypes[ randNums[i] % initialTypes.size() ];
+      //if( i < 64 ) tempEle = initialTypes[0]; else tempEle = initialTypes[1];
       tempAtom = safeNew( Atom( tempEle, x, y ) );
       world[ getWorldIndex(x,y) ] = tempAtom;
    }
@@ -800,14 +790,16 @@ Sim::writeConfig()
                  "iters" << std::setw(colwidth) <<
                  "x" << std::setw(colwidth) <<
                  "y" << std::setw(colwidth) <<
-                 "atoms" << std::endl;
+                 "atoms" << std::setw(colwidth) <<
+                 "shuffle" << std::endl;
    configFile << std::setw(20) <<
                  GIT_TAG << std::setw(colwidth) <<
                  o->seed << std::setw(colwidth) <<
                  o->maxIters << std::setw(colwidth) <<
                  o->worldX << std::setw(colwidth) <<
                  o->worldY << std::setw(colwidth) <<
-                 o->atomCount << std::endl;
+                 o->atomCount << std::setw(colwidth) <<
+                 (o->doShuffle?"true":"false") << std::endl;
    configFile.close();
 }
 
