@@ -10,13 +10,18 @@ LIBS    = -L/usr/lib
 
 all: metabolism
 
+check: clean metabolism-no-ncurses
+	./metabolism -g --iters 100 -x 128 -y 128 --atoms 150 --seed 42
+	diff census.out check/census.check.out | wc -l
+	diff diffusion.out check/diffusion.check.out | wc -l
+
 metabolism: LIBS+=-lncurses
 
-no-ncurses: DEFINES+=-D_NO_NCURSES
+metabolism-no-ncurses: DEFINES+=-D_NO_NCURSES
 
-metabolism no-ncurses: atom.o element.o main.o options.o reaction.o safecalls.o sim.o SFMT.o
-	g++ -Wl,-O1 -o metabolism atom.o element.o main.o options.o reaction.o safecalls.o sim.o SFMT.o $(LIBS)
-	#g++ -o metabolism atom.o element.o main.o options.o reaction.o safecalls.o sim.o SFMT.o $(LIBS)
+metabolism metabolism-no-ncurses: atom.o element.o main.o options.o reaction.o safecalls.o sim.o SFMT.o
+	g++ -Wl,-O1 -o $@ atom.o element.o main.o options.o reaction.o safecalls.o sim.o SFMT.o $(LIBS)
+	#g++ -o $@ atom.o element.o main.o options.o reaction.o safecalls.o sim.o SFMT.o $(LIBS)
 
 atom.o: atom.cpp atom.h \
 		element.h
