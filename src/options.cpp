@@ -42,6 +42,7 @@ Options::Options( int argc, char* argv[] )
    {
    // { "long_option_name", "noarg(0), requiredarg(1), optarg(2)", NULL, retval }
       { "atoms",             1, 0, 'a' },
+      { "import",            1, 0, 'c' },
       { "files",             1, 0, 'f' },
       { "no-gui",            0, 0, 'g' },
       { "help",              0, 0, 'h' },
@@ -69,7 +70,7 @@ Options::Options( int argc, char* argv[] )
       // getopt_long to properly handle the multiple parameters
       // that can be passed to --files by assigning the second
       // and third parameters passed to --files with c=1.
-      c = getopt_long( argc, argv, "-a:f:ghi:prs:SvVx:y:z:", long_options, &option_index );
+      c = getopt_long( argc, argv, "-a:c:f:ghi:prs:SvVx:y:z:", long_options, &option_index );
       if( c == -1 )
       {
          break;
@@ -106,6 +107,9 @@ Options::Options( int argc, char* argv[] )
             break;
          case 'a':
             atomCount = safeStrtol( optarg );
+            break;
+         case 'c':
+            importFile = optarg;
             break;
          case 'f':
             // The first parameter read in for --files will
