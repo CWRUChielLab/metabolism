@@ -28,7 +28,7 @@ Reaction::Reaction( std::vector<Element*> initReactants, std::vector<Element*> i
    std::vector<Element*> temp;
    secondProducts = temp;
    firstProb = initFirstProb;
-   secondProb = NULL;
+   secondProb = 0.0;
 }
 
 

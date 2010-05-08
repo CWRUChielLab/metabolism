@@ -18,6 +18,9 @@
 #include <ncurses.h>
 #endif
 #include <SFMT.h>
+#ifdef BLR_USEMAC
+#include <sys/malloc.h>
+#endif
 #include <vector>
 #include "safecalls.h"
 #include "sim.h"
@@ -225,7 +228,7 @@ Sim::initRNG( int initSeed )
       // 2*((MEXP/128)+1) = 2064.
       int min_rand_nums_needed = o->worldX * o->worldY;
       int min_bytes_needed = min_rand_nums_needed * sizeof( *randNums );
-      int min_64_bit_ints_needed = ceil( min_bytes_needed / 8.0 );
+      int min_64_bit_ints_needed = (int)ceil( min_bytes_needed / 8.0 );
 
       // Make sure we have at least the minimum
       // length needed
@@ -241,7 +244,18 @@ Sim::initRNG( int initSeed )
       int bytes_to_be_allocated = randNums_length_in_64_bit_ints * 8;
 
       int rc = 0;
+#ifdef BLR_USELINUX
       rc = posix_memalign( (void**)&randNums, getpagesize(), bytes_to_be_allocated );
+#else
+#ifdef BLR_USEMAC
+      randNums = (uint32_t*)malloc( bytes_to_be_allocated );
+#else
+#ifdef BLR_USEWIN
+      randNums = (unsigned char*)malloc( bytes_to_be_allocated + 16 );
+      randNums += 16 - (long int)randNums % 16;
+#endif
+#endif
+#endif
       assert( rc == 0 );
       assert( randNums );
 

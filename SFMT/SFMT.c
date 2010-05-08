@@ -14,7 +14,7 @@
 #include <assert.h>
 #include "SFMT.h"
 #include "SFMT-params.h"
-
+#include <stdio.h>      //BLR debugging
 #if defined(__BIG_ENDIAN__) && !defined(__amd64) && !defined(BIG_ENDIAN64)
 #define BIG_ENDIAN64 1
 #endif
@@ -581,6 +581,23 @@ void init_by_array(uint32_t *init_key, int key_length) {
     } else {
 	count = N32;
     }
+/*
+ g++-4.3.2   -c -msse2 -pipe -O3 -Wall -W -D_REENTRANT -DMEXP=132049 -DBLR_USELINUX -DHAVE_SSE2 -DGIT_TAG=`git describe --tags | sed "s/\(.*\)/\"\1\"/"` -I. -I../SFMT -o SFMT.o ../SFMT/SFMT.c
+ ../SFMT/SFMT.c: In function 'void init_by_array(uint32_t*, int)':
+ ../SFMT/SFMT.c:585: warning: array subscript is above array bounds
+ ../SFMT/SFMT.c:585: warning: array subscript is above array bounds
+ ../SFMT/SFMT.c:586: warning: array subscript is above array bounds
+ ../SFMT/SFMT.c:588: warning: array subscript is above array bounds
+ ../SFMT/SFMT.c:588: warning: array subscript is above array bounds 
+
+The line containing "^ psfmt32[idxof(N32 - 1)]);" resvoled to 585 in the
+above warning.  Not sure if this function gets called at all, so I'm 
+going to put an assert here to catch it if it does.  If it doesn't, 
+not worth investigating.  If it does, take out the assert and use the
+printf and make sure the index values are sane.  --blr
+*/
+    assert(0);
+    fprintf(stderr, "BLR DEBUG:  %s::%d  idxof(0)=%d, idxof(mid)=%d, idxof(N32-1)=%d\n", __FILE__, __LINE__, idxof(0), idxof(mid), idxof(N32-1));
     r = func1(psfmt32[idxof(0)] ^ psfmt32[idxof(mid)] 
 	      ^ psfmt32[idxof(N32 - 1)]);
     psfmt32[idxof(mid)] += r;

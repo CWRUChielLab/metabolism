@@ -4,6 +4,9 @@
 #include <cassert>
 #include <ctime>
 #include <iostream>
+#ifdef BLR_USEMAC
+#include <sys/malloc.h>
+#endif
 #include "options.h"
 #include "safecalls.h"
 using namespace SafeCalls;
