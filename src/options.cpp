@@ -18,7 +18,11 @@ Options::Options( int argc, char* argv[] )
    worldX = 16;
    worldY = 16;
    atomCount = 64;
+#ifndef _NO_NCURSES
    useGUI = 1;
+#else
+   useGUI = 0;
+#endif
    doRxns = 1;
    doShuffle = 0;
    sleep = 0;
@@ -174,7 +178,9 @@ Options::printHelp()
    std::cout << "-a, --atoms        Number of atoms in the world. Default: 64"                << std::endl;
    std::cout << "-f, --files        Specify the names of the three output files."             << std::endl;
    std::cout << "                     Default: config.out census.out diffusion.out"           << std::endl;
+#ifndef _NO_NCURSES
    std::cout << "-g, --no-gui       Disable the GUI. The GUI is enabled by default."          << std::endl;
+#endif
    std::cout << "-h, --help         Display this information."                                << std::endl;
    std::cout << "-i, --iters        Number of iterations. Default: 100000"                    << std::endl;
    std::cout << "-p, --progress     Disable simulation progress reporting (percent"           << std::endl;

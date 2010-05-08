@@ -14,7 +14,9 @@
 #include <fstream>
 #include <iomanip>
 #include <map>
+#ifndef _NO_NCURSES
 #include <ncurses.h>
+#endif
 #include <SFMT.h>
 #include <vector>
 #include "safecalls.h"
@@ -886,6 +888,7 @@ Sim::dumpAtoms()
 void
 Sim::printWorld()
 {
+#ifndef _NO_NCURSES
    for( int y = 0; y < o->worldY; y++ )
    {
       for( int x = 0; x < o->worldX; x++ )
@@ -903,6 +906,7 @@ Sim::printWorld()
    }
    printw( "\n" );
    refresh();
+#endif
 }
 
 
@@ -914,6 +918,7 @@ Sim::printElements()
    // Print using ncurses
    // **********************
    {
+#ifndef _NO_NCURSES
       printw( "There are %d elements.\n", periodicTable.size() );
       for( ElementMap::iterator i = periodicTable.begin(); i != periodicTable.end(); i++ )
       {
@@ -921,6 +926,7 @@ Sim::printElements()
          printw( "periodicTable[\"%s\"] has key:\t%d\n", ele->getName().c_str(), periodicTable[ele->getName()]->getKey() );
       }
       refresh();
+#endif
    }
    else
    // **********************
@@ -971,6 +977,7 @@ Sim::printReactions()
       // Print first reaction using ncurses
       // **********************************
       {
+#ifndef _NO_NCURSES
          printw( "Key: %d  Prob: %f  \t", rxn->getKey(), rxn->getFirstProb() );
 
          // Print the reactants, grouping copies of one type together
@@ -1105,6 +1112,7 @@ Sim::printReactions()
 
             printw( "\n" );
          }
+#endif
       }
       else
       // *******************************

@@ -4,7 +4,9 @@
 #include <csignal>
 #include <ctime>
 #include <iostream>
+#ifndef _NO_NCURSES
 #include <ncurses.h>
+#endif
 #include <unistd.h>   // Might not be compatible with Windows
 #include "options.h"
 #include "safecalls.h"
@@ -41,20 +43,24 @@ main ( int argc, char* argv[] )
    if( o->useGUI )
    {
       // Initialize ncurses
+#ifndef _NO_NCURSES
       initscr();   // Startup
       timeout(0);  // Makes getch a nonblocking call
+#endif
    }
 
    // Print extra information about the simulation
    if( o->verbose && o->useGUI )
    {
       // Print using ncurses
+#ifndef _NO_NCURSES
       printw( "Press Ctrl-c to quit.\n" );
       printw( "------\n" );
       mySim->printElements();
       printw( "------\n" );
       mySim->printReactions();
       printw( "------\n" );
+#endif
    }
    else if( o->verbose && !o->useGUI )
    {
@@ -67,14 +73,18 @@ main ( int argc, char* argv[] )
       std::cout << "------" << std::endl;
    }
 
+#ifndef _NO_NCURSES
    int x = 0;
    int y = 0;
+#endif
    int lastProgressUpdate = 0;
 
    if( o->useGUI )
    {
+#ifndef _NO_NCURSES
       getyx( stdscr, y, x );
       mySim->printWorld();
+#endif
    }
 
    // Execute the simulation
@@ -85,6 +95,7 @@ main ( int argc, char* argv[] )
       // Print using ncurses
       // **********************
       {
+#ifndef _NO_NCURSES
          // Move the cursor to the appropriate location
          // for printing with ncurses and print the
          // world
@@ -105,6 +116,7 @@ main ( int argc, char* argv[] )
                refresh();
             }
          }
+#endif
       }
       else if( o->progress )
       // **********************
@@ -155,7 +167,9 @@ main ( int argc, char* argv[] )
    mySim->dumpAtoms();
    if( o->useGUI )
    {
+#ifndef _NO_NCURSES
       endwin();
+#endif
    }
 
    return 0;

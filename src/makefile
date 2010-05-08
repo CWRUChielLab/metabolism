@@ -5,11 +5,15 @@
 DEFINES = -DMEXP=132049 -DBLR_USELINUX -DHAVE_SSE2 -DGIT_TAG=`git describe --tags | sed "s/\(.*\)/\"\1\"/"`
 FLAGS   = -pipe -O3 -Wall -W -D_REENTRANT $(DEFINES)
 INCPATH = -I. -I../SFMT
-LIBS    = -L/usr/lib -lncurses
+LIBS    = -L/usr/lib
 
 all: metabolism
 
-metabolism: atom.o element.o main.o options.o reaction.o safecalls.o sim.o SFMT.o
+metabolism: LIBS+=-lncurses
+
+no-ncurses: DEFINES+=-D_NO_NCURSES
+
+metabolism no-ncurses: atom.o element.o main.o options.o reaction.o safecalls.o sim.o SFMT.o
 	g++ -Wl,-O1 -o metabolism atom.o element.o main.o options.o reaction.o safecalls.o sim.o SFMT.o $(LIBS)
 
 atom.o: atom.cpp atom.h \

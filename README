@@ -1,31 +1,142 @@
 Chemical Metabolism Simulator
 =============================
 
-Chemical Metabolism Simulator is a work in progress.  
+An open-source chemical reaction modeling platform.
+
+This project is available at:
+http://github.com/jpg18/metabolism/
+
 
 Dependencies
 ============
 
-This project uses code developed by the Qt, Qwt, and SFMT projects. 
+This project uses the following:
 
-To build this program, you will need to install the development tools for 
-Qt 4 (version 4.3 or later, available from www.trolltech.com) and the Qwt 
-libraries (available from qwt.sourceforge.net).  The SFMT libraries have
-been modified and are included with the source code, but the project page
-can be found at http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT ).
+   SIMD-oriented Fast Mersenne Twister (SFMT)
+      A random number generator. The SFMT libraries have
+      been modified for saving and restoring state and are
+      included with the source code, but the project page
+      can be found at
+      http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/.
+
+   ncurses
+      An API for building text user interfaces. Available at
+      http://www.gnu.org/software/ncurses/.
+
+   R
+      Statistical computing software. Scripts provided for
+      analysis. Not required for compiling or running the
+      simulation. Available at
+      http://www.r-project.org/.
+
 
 Compilation Instructions
 ========================
-This program uses the standard Qt build process run from the src directory:
 
-  cd src
-  qmake
-  make
+Compiles with g++ (Ubuntu 4.4.1-4ubuntu9) 4.4.1.
 
-Requires Qt 4 or later.  If you have an older version of Qt installed
-in addition to Qt 4, use:
+Execute the following for a standard compilation:
 
-  cd src
-  qmake-qt4
-  make
+   cd metabolism/src
+   make
+
+By default, ncurses is linked to the program. If developer's
+libraries are not available, the program can be compiled
+without ncurses using the following:
+
+   cd metabolism/src
+   make no-ncurses
+
+
+Using the Simulator
+===================
+
+All command line options are available via --help. To change
+the types of particles ("Atoms") in the lattice or the
+Reactions that are defined in the reaction table, you will
+need to change the code and recompile.  The relevant code is
+in src/sim.cpp, in the constructor.  In version 0.1.9, lines
+71-96 specify the Atom types ("Elements") that exist, i.e.
+the periodicTable. For example, the code below would create
+an "Enzyme" Element:
+
+   Element* tempEle;
+   tempEle = safeNew( Element( "Enzyme", 'E', 0, 0 ) );
+   periodicTable[ "Enzyme" ] = tempEle;
+
+The symbol 'E' is used by the ncurses UI to represent the
+Atom.  The zeros are for the color and charge of the Element
+(ignore these; colors are not working yet in the ncurses
+text interface).
+
+Lines 98-110 specify the defined Reactions, i.e. the
+reactionTable. The following code would create the Reaction
+E + S -> P:
+
+   Reaction* tempRxn;
+   tempRxn = safeNew( Reaction( ev(2,"Enzyme","Substrate"), ev(2,"Product","Solvent"), 0.5 ) );
+   rxnTable[ tempRxn->getKey() ] = tempRxn;
+
+The Element "Solvent" is special and is expected to always
+exist (it is a placeholder for empty spaces in the lattice).
+The function ev() creates a vector of Element pointers, and
+the number specifies its length. When a Reaction is
+imbalanced by Atom count, such as E + S -> P (2 reactants, 1
+product), "Solvent" must be specified in the Reaction
+because one of the reactants changes type into "Product" and
+the other into "Solvent" (i.e., an empty space).  The number
+"0.5" is the probability that the Reaction will happen when
+the reactants encounter one another.  The rate constant k
+depends on this value and the Reaction type (zeroth-,
+first-, or second-order).
+
+Finally, although the number of Atoms placed in the lattice
+is set by a command line option, the type for each Atom is
+hard-coded on lines 116 and 125.  For our example, we might
+want:
+
+   ElementVector initialTypes = ev(2,"Enzyme","Substrate");
+   .
+   .
+   .
+   if( i < 64 ) tempEle = initialTypes[0]; else tempEle = initialTypes[1];
+
+This specifies that the first 64 Atoms (placed at random)
+should have type "Enzyme", and the remainder would have type
+"Substrate".
+
+In version 0.1.9, once the repository is cloned, it will be
+ready to run with the following chemistry:
+
+   Elements: A, B, C, D
+   Reactions: A + B -> C + D, P = 0.5
+   Atom types: Roughly 50% A, 50% B
+
+Once compiled, try running:
+
+   ./metabolism -g -x 512 -y 512 -i 200 -a 39322
+
+This will run a very quick simulation with the second-order
+reaction enabled.  Data is output to the files diffusion.out
+and census.out, and the simulation parameters are recorded
+in config.out.  To conduct a reaction rate analysis, run:
+
+   ../scripts/rate_analysis.R second 0.5 config.out census.out plots stats.out false
+
+(The parameters here are explained at the beginning of the
+script's comments.) A PDF file is generated and some
+statistics are stored in the file stats.out.  View the PDF:
+
+   evince plots.pdf
+
+Notice that the red expectation line does not match the data
+well.  Now try:
+
+   ./metabolism -g -x 512 -y 512 -i 200 -a 39322 --shuffle
+   ../scripts/rate_analysis.R second 0.5 config.out census.out plots stats.out false
+   evince plots.pdf
+
+This will run the same simulation with shuffling of Atom
+positions each iteration.  Shuffline simulates mixing.  Now
+the red line fits much better.
 
