@@ -29,9 +29,11 @@ class Options
       int sleep;
       int verbose;
       int progress;
+      std::string importFile;
       std::string configFile;
       std::string censusFile;
       std::string diffusionFile;
+      std::string rateFile;
 };
 
 #endif /* OPTIONS_H */

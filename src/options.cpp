@@ -34,6 +34,7 @@ Options::Options( int argc, char* argv[] )
    configFile = "config.out";
    censusFile = "census.out";
    diffusionFile = "diffusion.out";
+   rateFile = "rate.out";
 
    // Store command line names for options.
    // Order by short name.
@@ -77,13 +78,13 @@ Options::Options( int argc, char* argv[] )
       switch( c )
       {
          case 1:
-            // When more than one file is passed to --files, all but the
-            // first file will have c=1 instead of c='f'.  For a call
-            // such as "./metabolism -f file1 file2 file3", file1 will
-            // have c='f' and will be processed first, thereby
-            // incrementing files_read_in_so_far to 1.  file2 and file3
-            // will have c=1 and increment files_read_in_so_far to 2 and
-            // 3.
+            // When more than one file is passed to --files, the first
+            // file will have c='f', and the rest will have c=1.  For a
+            // call such as "./metabolism -f file1 file2 file3 file4",
+            // file1 will have c='f' and will be processed first, thereby
+            // incrementing files_read_in_so_far to 1.  file2, file3, and
+            // file4 will have c=1 and increment files_read_in_so_far to
+            // 2, 3, and 4.
             switch( files_read_in_so_far )
             {
                case 1:
@@ -94,8 +95,12 @@ Options::Options( int argc, char* argv[] )
                   diffusionFile = optarg;
                   files_read_in_so_far++;
                   break;
+               case 3:
+                  rateFile = optarg;
+                  files_read_in_so_far++;
+                  break;
                default:
-                  assert( files_read_in_so_far != 0 && files_read_in_so_far < 3 );
+                  assert( files_read_in_so_far != 0 && files_read_in_so_far < 4 );
                   break;
             }
             break;

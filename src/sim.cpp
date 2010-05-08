@@ -277,7 +277,7 @@ Sim::generateRandNums()
    if (firstTime)
    {
       static std::ofstream randFile;
-      randFile.open( "rand.out" );
+      randFile.open( o->rateFile.c_str() );
 
       for( int i=0; i<10; i++ )
       {
