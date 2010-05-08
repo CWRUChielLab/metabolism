@@ -31,6 +31,7 @@ Options::Options( int argc, char* argv[] )
    sleep = 0;
    verbose = 0;
    progress = 1;
+   inputFile = "";
    configFile = "config.out";
    censusFile = "census.out";
    diffusionFile = "diffusion.out";
