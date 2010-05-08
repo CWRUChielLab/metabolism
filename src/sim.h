@@ -46,7 +46,7 @@ class Sim
       
       // RNG parameters
       int randNums_length_in_64_bit_ints;
-      uint32_t* randNums;
+      uint64_t* randNums;
 
       // Private methods
       void initRNG( int initSeed );

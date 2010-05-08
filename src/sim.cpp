@@ -248,7 +248,7 @@ Sim::initRNG( int initSeed )
       rc = posix_memalign( (void**)&randNums, getpagesize(), bytes_to_be_allocated );
 #else
 #ifdef BLR_USEMAC
-      randNums = (uint32_t*)malloc( bytes_to_be_allocated );
+      randNums = (uint64_t*)malloc( bytes_to_be_allocated );
 #else
 #ifdef BLR_USEWIN
       randNums = (unsigned char*)malloc( bytes_to_be_allocated + 16 );
@@ -578,7 +578,7 @@ Sim::executeRxns()
          }
 
          if( (double)(randNums[ getWorldIndex(x,y) ] >> 3) /
-             (double)(1 << (8 * sizeof(*randNums) - 3))
+             (double)((uint64_t)1 << (8 * sizeof(*randNums) - 3))
                < thisRxnProb )
          // If the reactant have enough energy
          {
@@ -758,7 +758,7 @@ Sim::executeRxns()
             }
 
             if( (double)(randNums[ getWorldIndex(x,y) ] >> 3) /
-                (double)(1 << (8 * sizeof(*randNums) - 3))
+                (double)((uint64_t)1 << (8 * sizeof(*randNums) - 3))
                   < thisRxnProb )
             // If the reactant have enough energy
             {
