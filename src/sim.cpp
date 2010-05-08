@@ -277,7 +277,7 @@ Sim::generateRandNums()
    if (firstTime)
    {
       static std::ofstream randFile;
-      randFile.open( o->rateFile.c_str() );
+      randFile.open( o->randFile.c_str() );
 
       for( int i=0; i<10; i++ )
       {
@@ -810,28 +810,19 @@ Sim::executeRxns()
 void
 Sim::writeConfig()
 {
-   int colwidth = 12;
    static std::ofstream configFile;
    configFile.open( o->configFile.c_str() );
 
    // Write parameters to file
-   configFile.flags(std::ios::left);
-   configFile << std::setw(20) <<
-                 "version" << std::setw(colwidth) <<
-                 "seed" << std::setw(colwidth) <<
-                 "iters" << std::setw(colwidth) <<
-                 "x" << std::setw(colwidth) <<
-                 "y" << std::setw(colwidth) <<
-                 "atoms" << std::setw(colwidth) <<
-                 "shuffle" << std::endl;
-   configFile << std::setw(20) <<
-                 GIT_TAG << std::setw(colwidth) <<
-                 o->seed << std::setw(colwidth) <<
-                 o->maxIters << std::setw(colwidth) <<
-                 o->worldX << std::setw(colwidth) <<
-                 o->worldY << std::setw(colwidth) <<
-                 o->atomCount << std::setw(colwidth) <<
-                 (o->doShuffle?"true":"false") << std::endl;
+   configFile << "version "   << GIT_TAG << std::endl;
+   configFile << "seed "      << o->seed << std::endl;
+   configFile << "iters "     << o->maxIters << std::endl;
+   configFile << "x "         << o->worldX << std::endl;
+   configFile << "y "         << o->worldY << std::endl;
+   configFile << "atoms "     << o->atomCount << std::endl;
+   configFile << "reactions " << (o->doRxns ? "on" : "off") << std::endl;
+   configFile << "shuffle "   << (o->doShuffle ? "on" : "off") << std::endl;
+   configFile << std::endl;
    configFile.close();
 }
 

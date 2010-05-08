@@ -3,7 +3,7 @@
 
 #include <cassert>
 #include <ctime>
-#include <iostream>
+#include <fstream>
 #ifdef BLR_USEMAC
 #include <sys/malloc.h>
 #endif
@@ -31,11 +31,11 @@ Options::Options( int argc, char* argv[] )
    sleep = 0;
    verbose = 0;
    progress = 1;
-   importFile = "";
+   loadFile = "";
    configFile = "config.out";
    censusFile = "census.out";
    diffusionFile = "diffusion.out";
-   rateFile = "rate.out";
+   randFile = "rand.out";
 
    // Store command line names for options.
    // Order by short name.
@@ -43,11 +43,11 @@ Options::Options( int argc, char* argv[] )
    {
    // { "long_option_name", "noarg(0), requiredarg(1), optarg(2)", NULL, retval }
       { "atoms",             1, 0, 'a' },
-      { "import",            1, 0, 'c' },
       { "files",             1, 0, 'f' },
       { "no-gui",            0, 0, 'g' },
       { "help",              0, 0, 'h' },
       { "iters",             1, 0, 'i' },
+      { "load",              1, 0, 'l' },
       { "no-progress",       0, 0, 'p' },
       { "no-rxns",           0, 0, 'r' },
       { "seed",              1, 0, 's' },
@@ -61,6 +61,9 @@ Options::Options( int argc, char* argv[] )
 
    int option_index = 0, c;
    int files_read_in_so_far = 0;
+   std::ifstream load;
+   std::string keyword;
+   std::string onOrOff;
    while( 1 )
    {
       // The string passed to getopt_long lists each valid
@@ -71,7 +74,7 @@ Options::Options( int argc, char* argv[] )
       // getopt_long to properly handle the multiple parameters
       // that can be passed to --files by assigning the second
       // and third parameters passed to --files with c=1.
-      c = getopt_long( argc, argv, "-a:c:f:ghi:prs:SvVx:y:z:", long_options, &option_index );
+      c = getopt_long( argc, argv, "-a:f:ghi:l:prs:SvVx:y:z:", long_options, &option_index );
       if( c == -1 )
       {
          break;
@@ -98,7 +101,7 @@ Options::Options( int argc, char* argv[] )
                   files_read_in_so_far++;
                   break;
                case 3:
-                  rateFile = optarg;
+                  randFile = optarg;
                   files_read_in_so_far++;
                   break;
                default:
@@ -108,9 +111,6 @@ Options::Options( int argc, char* argv[] )
             break;
          case 'a':
             atomCount = safeStrtol( optarg );
-            break;
-         case 'c':
-            importFile = optarg;
             break;
          case 'f':
             // The first parameter read in for --files will
@@ -128,6 +128,89 @@ Options::Options( int argc, char* argv[] )
             break;
          case 'i':
             maxIters = safeStrtol( optarg );
+            break;
+         case 'l':
+            loadFile = optarg;
+            load.open( loadFile.c_str() );
+            while( load.good() )
+            {
+               load >> keyword;
+               if( keyword == "version" )
+               {
+                  load.ignore(512,'\n');
+               } else {
+                  if( keyword == "atoms" )
+                  {
+                     load >> atomCount;
+                  } else {
+                     if( keyword == "iters" )
+                     {
+                        load >> maxIters;
+                     } else {
+                        if( keyword == "reactions" )
+                        {
+                           onOrOff = "";
+                           load >> onOrOff;
+                           if( onOrOff == "on" )
+                           {
+                              doRxns = 1;
+                           } else {
+                              if( onOrOff == "off" )
+                              {
+                                 doRxns = 0;
+                              } else {
+                                 std::cout << "Import: \"reactions\" must have value \"on\" or \"off\"!" << std::endl;
+                                 assert(0);
+                              }
+                           }
+                        } else {
+                           if( keyword == "seed" )
+                           {
+                              load >> seed;
+                           } else {
+                              if( keyword == "shuffle" )
+                              {
+                                 onOrOff = "";
+                                 load >> onOrOff;
+                                 if( onOrOff == "on" )
+                                 {
+                                    doShuffle = 1;
+                                 } else {
+                                    if( onOrOff == "off" )
+                                    {
+                                       doShuffle = 0;
+                                    } else {
+                                       std::cout << "Import: \"shuffle\" must have value \"on\" or \"off\"!" << std::endl;
+                                       std::cout << onOrOff << std::endl;
+                                       assert(0);
+                                    }
+                                 }
+                              } else {
+                                 if( keyword == "x" )
+                                 {
+                                    load >> worldX;
+                                 } else {
+                                    if( keyword == "y" )
+                                    {
+                                       load >> worldY;
+                                    } else {
+                                       if( keyword == "" )
+                                       {
+                                          break;
+                                       } else {
+                                          std::cout << "Import: Unrecognized keyword \"" << keyword << "\"!" << std::endl;
+                                          assert(0);
+                                       }
+                                    }
+                                 }
+                              }
+                           }
+                        }
+                     }
+                  }
+               }
+               keyword = "";
+            }
             break;
          case 'p':
             progress = 0;
@@ -196,6 +279,13 @@ Options::printHelp()
 #endif
    std::cout << "-h, --help         Display this information."                                << std::endl;
    std::cout << "-i, --iters        Number of iterations. Default: 100000"                    << std::endl;
+   std::cout << "-l, --load         Specify the name of a config file to load settings"       << std::endl;
+   std::cout << "                     from. Settings are overwritten in the order specified"  << std::endl;
+   std::cout << "                     on the command line. For example, the command"          << std::endl;
+   std::cout << "                       metabolism -x 512 -l config.out -y 1024"              << std::endl;
+   std::cout << "                     the value 512 for x would be overriden by the value"    << std::endl;
+   std::cout << "                     for x in config.out, but the value 1024 for y would"    << std::endl;
+   std::cout << "                     override the value for y in config.out."                << std::endl;
    std::cout << "-p, --progress     Disable simulation progress reporting (percent"           << std::endl;
    std::cout << "                     complete)."                                             << std::endl;
    std::cout << "-r, --no-rxns      Disable the execution of chemical reactions. Reactions"   << std::endl;
