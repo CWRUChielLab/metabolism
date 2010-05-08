@@ -2,6 +2,8 @@
 # metabolism makefile #
 #######################
 
+#thisisatest
+
 OS := $(shell sh -c 'uname -s 2>/dev/null || echo not')
 PROCESSOR := $(shell sh -c 'uname -p 2>/dev/null || echo not')
 DEFINES = -DMEXP=132049 -DGIT_TAG=`git describe --tags | sed "s/\(.*\)/\"\1\"/"` -D_REENTRANT
