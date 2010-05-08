@@ -9,6 +9,7 @@ debug
 release
 object_script*
 metabolism
+metabolism-no-ncurses
 metabolism.app
 Chemical Metabolism Simulator
 Chemical Metabolism Simulator.app

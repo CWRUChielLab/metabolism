@@ -10,10 +10,17 @@ LIBS    = -L/usr/lib
 
 all: metabolism
 
+bless: clean metabolism
+	./metabolism -g --iters 100 -x 128 -y 128 --atoms 150 --seed 42 \
+		--files check/config.check.out check/census.check.out check/diffusion.check.out
+	cp rand.out check/rand.check.out
+
 check: clean metabolism-no-ncurses
-	./metabolism -g --iters 100 -x 128 -y 128 --atoms 150 --seed 42
+	./metabolism-no-ncurses -g --iters 100 -x 128 -y 128 --atoms 150 --seed 42
+	diff config.out check/config.check.out | wc -l
 	diff census.out check/census.check.out | wc -l
 	diff diffusion.out check/diffusion.check.out | wc -l
+	diff rand.out check/rand.check.out | wc -l
 
 metabolism: LIBS+=-lncurses
 
@@ -75,7 +82,7 @@ SFMT.o: ../SFMT/SFMT.c ../SFMT/SFMT.h \
 	gcc -c -msse2 $(FLAGS) $(INCPATH) -o SFMT.o ../SFMT/SFMT.c
 
 clean:
-	rm -f atom.o element.o main.o options.o reaction.o safecalls.o sim.o SFMT.o *~
+	rm -f metabolism metabolism-no-ncurses atom.o element.o main.o options.o reaction.o safecalls.o sim.o SFMT.o *.out *~
 
 # End
 

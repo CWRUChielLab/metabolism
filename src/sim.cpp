@@ -268,9 +268,25 @@ Sim::initRNG( int initSeed )
 void
 Sim::generateRandNums()
 {
+   static int firstTime = 1;
+   
    // fill_array64 fills randNums with 64-bit ints.
    // See initRNG method for more information.
    fill_array64( (uint64_t*)(randNums), randNums_length_in_64_bit_ints );
+
+   if (firstTime)
+   {
+      static std::ofstream randFile;
+      randFile.open( "rand.out" );
+
+      for( int i=0; i<10; i++ )
+      {
+         randFile << randNums[i] << std::endl;
+      }
+      randFile.close();
+
+      firstTime = 0;
+   }
 }
 
 
