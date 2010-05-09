@@ -307,7 +307,7 @@ Options::printHelp()
    std::cout << "-i, --iters        Number of iterations. Default: 100000"                    << std::endl;
    std::cout << "-l, --load         Specify the name of a config file to load settings"       << std::endl;
    std::cout << "                     from. Settings are overwritten in the order specified"  << std::endl;
-   std::cout << "                     on the command line. For example, the command"          << std::endl;
+   std::cout << "                     on the command line. For example, for the command"      << std::endl;
    std::cout << "                       metabolism -x 512 -l config.out -y 1024"              << std::endl;
    std::cout << "                     the value 512 for x would be overriden by the value"    << std::endl;
    std::cout << "                     for x in config.out, but the value 1024 for y would"    << std::endl;

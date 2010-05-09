@@ -40,6 +40,7 @@ class Sim
 
       ElementMap periodicTable;
       ReactionMap rxnTable;
+      ElementVector initialTypes;
       Atom** world;
       uint8_t* claimed;
       unsigned int* positions;

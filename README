@@ -40,83 +40,149 @@ Execute the following for a standard compilation:
    cd metabolism/src
    make
 
-By default, ncurses is linked to the program. If developer's
-libraries are not available, the program can be compiled
-without ncurses using the following:
+The program created is called "metabolism". By default,
+ncurses is linked to the program. If developer's libraries
+are not available, the program can be compiled without
+ncurses using the following:
 
    cd metabolism/src
    make no-ncurses
+
+The program created will then be called
+"metabolism-no-ncurses".
 
 
 Using the Simulator
 ===================
 
-All command line options are available via --help. To change
-the types of particles ("Atoms") in the lattice or the
-Reactions that are defined in the reaction table, you will
-need to change the code and recompile.  The relevant code is
-in src/sim.cpp, in the constructor.  In version 0.1.9, lines
-71-96 specify the Atom types ("Elements") that exist, i.e.
-the periodicTable. For example, the code below would create
-an "Enzyme" Element:
+All command line options are available via --help and can be
+used to specify simulation parameters such as the size of
+the lattice or the number of particles. By default, the
+program produces a configuration file named config.out (the
+name can be specified using --files) which records the
+simulation parameters. config files can be loaded to run
+exact reproductions of simulations using --load.
 
-   Element* tempEle;
-   tempEle = safeNew( Element( "Enzyme", 'E', 0, 0 ) );
-   periodicTable[ "Enzyme" ] = tempEle;
+To change the types of particles in the lattice or the
+reactions that are defined in the reaction table, you will
+need to create a custom config file. Create a new file and
+fill it with any parameters you would like to specify in the
+format:
 
-The symbol 'E' is used by the ncurses UI to represent the
-Atom.  The zeros are for the color and charge of the Element
-(ignore these; colors are not working yet in the ncurses
-text interface).
+   keyword value
 
-Lines 98-110 specify the defined Reactions, i.e. the
-reactionTable. The following code would create the Reaction
-E + S -> P:
+with separate lines for each parameter. Parameters that can
+be specified and examples of valid values are:
 
-   Reaction* tempRxn;
-   tempRxn = safeNew( Reaction( ev(2,"Enzyme","Substrate"), ev(2,"Product","Solvent"), 0.5 ) );
-   rxnTable[ tempRxn->getKey() ] = tempRxn;
+   atoms 99
+   iters 5000
+   seed 1234567890
+   x 2000
+   y 1000
+   shuffle on
+   reactions off
 
-The Element "Solvent" is special and is expected to always
-exist (it is a placeholder for empty spaces in the lattice).
-The function ev() creates a vector of Element pointers, and
-the number specifies its length. When a Reaction is
-imbalanced by Atom count, such as E + S -> P (2 reactants, 1
-product), "Solvent" must be specified in the Reaction
-because one of the reactants changes type into "Product" and
-the other into "Solvent" (i.e., an empty space).  The number
-"0.5" is the probability that the Reaction will happen when
-the reactants encounter one another.  The rate constant k
-depends on this value and the Reaction type (zeroth-,
-first-, or second-order).
+In addition to these (which are described in more detail in
+--help), particle types and reactions can be specified using
+the keywords "ele", "rxn", and "init". Add one line
+beginning with "ele" for each particle type ("element")
+using the following format:
 
-Finally, although the number of Atoms placed in the lattice
-is set by a command line option, the type for each Atom is
-hard-coded on lines 116 and 125.  For our example, we might
-want:
+   ele name symbol color charge
 
-   ElementVector initialTypes = ev(2,"Enzyme","Substrate");
-   .
-   .
-   .
-   if( i < 64 ) tempEle = initialTypes[0]; else tempEle = initialTypes[1];
+"name" is a string, "symbol" is a single character that is
+used to represent particles of that type in the GUI, and
+"color" and "charge" are integers (currently not used).
 
-This specifies that the first 64 Atoms (placed at random)
-should have type "Enzyme", and the remainder would have type
-"Substrate".
+An example will help clarify how to build a config file. The
+Michaelis-Menten enzyme kinetics system consists of three
+reactions: E + S -> ES, ES -> E + S, and ES -> E + P. The
+particle types for this system could be listed using:
 
-In version 0.1.9, once the repository is cloned, it will be
-ready to run with the following chemistry:
+   ele Enzyme E 0 0
+   ele Substrate S 0 0
+   ele ES F 0 0
+   ele Product P 0 0
 
-   Elements: A, B, C, D
-   Reactions: A + B -> C + D, P = 0.5
-   Atom types: Roughly 50% A, 50% B
+When specifying reactions, each unique set of reactants
+should receive its own line beginning with "rxn". Up to
+two reactants can be specified (reaction orders higher than
+2 are not supported). One set of products must be specified,
+and an optional second set can be specified as well. Using
+both sets allows you to design a reaction system such as the
+Michaelis-Menten enzyme kinetics system, which uses the
+reactions ES -> E + S and ES -> E + P. Because the enzyme-
+substrate complex can decompose into two different sets of
+reaction products, both would be specified on the same line
+in a config file. The reaction format is:
+
+   rxn prob1 n1 reactant [reactant] n2 product [product] [prob2] [n3] [product] [product]
+
+"prob1" and "prob2" are the probabilities between 0 and 1 of
+the reaction occurring when reactants "collide" and the
+first or second set of products, respectively, are selected
+to result from the process. Which set of products is chosen
+at any given point in the simulation is independent of these
+probabilities, and so they do not need to add to 1.
+"reactant" and "product" are the names of particle types.
+Reactions must be balanced, and so if two reactants are
+specified, two products must be specified. To specify a
+reaction such as A -> B + C, use the placeholder particle
+type "Solvent" as the second reactant. This particle type is
+always already defined in the simulation. "n1" is the number
+(1 or 2) of reactants (including "Solvent"), "n2" is the
+number (1 or 2) of products in the first set, and "n3" is
+the number (1 or 2) of products in the second set. These
+three numbers most be the same to balance the reaction. All
+particle types must be listed in a config file before any
+reactions that use them.
+
+For our example, the Michaelis-Menten reactions could be
+listed using:
+
+   rxn 0.5 2 Enzyme Substrate 2 ES Solvent
+   rxn 0.01 2 ES Solvent 2 Enzyme Substrate 0.01 2 Enzyme Product
+
+with prob1 = 0.5, prob2 = 0.01, and prob3 = 0.01.
+
+Finally, although the number of particles placed in the
+lattice is set by a command line option, the initial types
+for each particle must be specified in the config file. Use
+the keyword "init" to start a list of initial particle
+types:
+
+   init n name [name] [name] [name]
+
+"n" is the number of types in the list (up to a maximum of
+4), and "name"s are the names of the particle types.
+The type for each particle when it is created at the start
+of the simulation will be chosen at random from this list.
+Types included in this list must be defined earlier in the
+config file.
+
+For the Michaelis-Menten example, we could use:
+
+   init 4 Enzyme Substrate Substrate Substrate
+
+to create a 3:1 ratio of Substrate to Enzyme for the
+particles initially placed in the lattice.
+
+If a config file is used and lacks any lines that begin with
+"ele" then the types "A", "B", "C", and "D" are defined by
+default. If the config file lacks "rxn" lines, the reaction
+A + B -> C + D (prob = 0.5) is defined. If the config file
+had no line beginning with "init", then the particles will
+start with types A and B in roughly a 1:1 ratio.
+
+
+An Example Simulation and Analysis
+==================================
 
 Once compiled, try running:
 
    ./metabolism -g -x 512 -y 512 -i 200 -a 39322
 
-This will run a very quick simulation with the second-order
+This will run a very quick simulation with the default
 reaction enabled.  Data is output to the files diffusion.out
 and census.out, and the simulation parameters are recorded
 in config.out.  To conduct a reaction rate analysis, run:

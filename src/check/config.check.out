@@ -1,0 +1,19 @@
+version v0.1.9-16-g690b4de
+seed 42
+iters 100
+x 128
+y 128
+atoms 500
+reactions on
+shuffle on
+
+ele ES F 0 0
+ele Enzyme E 0 0
+ele Product P 0 0
+ele Substrate S 0 0
+
+rxn 0.01 2 ES Solvent 2 Enzyme Substrate 0.01 2 Enzyme Product 
+rxn 0.5 2 Enzyme Substrate 2 ES Solvent 
+
+init 4 Enzyme Substrate Substrate Substrate 
+
