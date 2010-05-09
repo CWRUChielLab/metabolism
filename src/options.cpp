@@ -135,18 +135,24 @@ Options::Options( int argc, char* argv[] )
             while( load.good() )
             {
                load >> keyword;
-               if( keyword == "version" )
+               if( keyword == "version" || keyword == "ele" || keyword == "rxn" || keyword == "init" )
                {
                   load.ignore(512,'\n');
-               } else {
+               }
+               else
+               {
                   if( keyword == "atoms" )
                   {
                      load >> atomCount;
-                  } else {
+                  }
+                  else
+                  {
                      if( keyword == "iters" )
                      {
                         load >> maxIters;
-                     } else {
+                     }
+                     else
+                     {
                         if( keyword == "reactions" )
                         {
                            onOrOff = "";
@@ -154,20 +160,28 @@ Options::Options( int argc, char* argv[] )
                            if( onOrOff == "on" )
                            {
                               doRxns = 1;
-                           } else {
+                           }
+                           else
+                           {
                               if( onOrOff == "off" )
                               {
                                  doRxns = 0;
-                              } else {
-                                 std::cout << "Import: \"reactions\" must have value \"on\" or \"off\"!" << std::endl;
+                              }
+                              else
+                              {
+                                 std::cout << "Load settings: \"reactions\" must have value \"on\" or \"off\"!" << std::endl;
                                  assert(0);
                               }
                            }
-                        } else {
+                        }
+                        else
+                        {
                            if( keyword == "seed" )
                            {
                               load >> seed;
-                           } else {
+                           }
+                           else
+                           {
                               if( keyword == "shuffle" )
                               {
                                  onOrOff = "";
@@ -175,30 +189,42 @@ Options::Options( int argc, char* argv[] )
                                  if( onOrOff == "on" )
                                  {
                                     doShuffle = 1;
-                                 } else {
+                                 }
+                                 else
+                                 {
                                     if( onOrOff == "off" )
                                     {
                                        doShuffle = 0;
-                                    } else {
-                                       std::cout << "Import: \"shuffle\" must have value \"on\" or \"off\"!" << std::endl;
+                                    }
+                                    else
+                                    {
+                                       std::cout << "Load settings: \"shuffle\" must have value \"on\" or \"off\"!" << std::endl;
                                        std::cout << onOrOff << std::endl;
                                        assert(0);
                                     }
                                  }
-                              } else {
+                              }
+                              else
+                              {
                                  if( keyword == "x" )
                                  {
                                     load >> worldX;
-                                 } else {
+                                 }
+                                 else
+                                 {
                                     if( keyword == "y" )
                                     {
                                        load >> worldY;
-                                    } else {
+                                    }
+                                    else
+                                    {
                                        if( keyword == "" )
                                        {
                                           break;
-                                       } else {
-                                          std::cout << "Import: Unrecognized keyword \"" << keyword << "\"!" << std::endl;
+                                       }
+                                       else
+                                       {
+                                          std::cout << "Load settings: Unrecognized keyword \"" << keyword << "\"!" << std::endl;
                                           assert(0);
                                        }
                                     }

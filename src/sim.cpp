@@ -73,53 +73,179 @@ Sim::Sim( Options* newOptions )
    // worldX*worldY-1
    shufflePositions();
 
-   // Initialize the periodicTable
+   // Create Solvent Element
    Element* tempEle;
-
    tempEle = safeNew( Element( "Solvent", '*', 0, 0 ) );
    periodicTable[ "Solvent" ] = tempEle;
 
-   for( char symbol = 'A'; symbol <= 'D'; symbol++ )
+   // Load periodicTable, rxnTable, and initialType if available
+   int elesLoaded = 0;
+   int rxnsLoaded = 0;
+   int initsLoaded = 0;
+   std::ifstream load;
+   std::string keyword;
+   Reaction* tempRxn;
+   ElementVector initialTypes;
+
+   if( o->loadFile != "" )
    {
-      std::string name(1,symbol);
-      tempEle = safeNew( Element( name, symbol, 0, 0 ) );
-      periodicTable[ name ] = tempEle;
+      load.open( o->loadFile.c_str() );
+      while( load.good() )
+      {
+         load >> keyword;
+         if( keyword == "ele")
+         {
+            std::string name;
+            char symbol;
+            int color, charge;
+
+            load >> name >> symbol >> color >> charge;
+            tempEle = safeNew( Element( name, symbol, color, charge ) );
+            periodicTable[ name ] = tempEle;
+            elesLoaded++;
+         }
+         else
+         {
+            if( keyword == "rxn")
+            {
+               int n;
+               char c;
+               std::string firstEle, secondEle;
+               double firstProb, secondProb;
+               ElementVector reactants, firstProducts, secondProducts;
+
+               load >> firstProb >> n;
+               switch( n )
+               {
+                  case 1:
+                     load >> firstEle;
+                     reactants = ev( 1, firstEle.c_str() );
+                     break;
+                  case 2:
+                     load >> firstEle >> secondEle;
+                     reactants = ev( 2, firstEle.c_str(), secondEle.c_str() );
+                     break;
+                  default:
+                     std::cout << "Load settings: " << n << " is not an acceptable number of reactants!" << std::endl;
+                     assert(0);
+                     break;
+               }
+               load >> n;
+               switch( n )
+               {
+                  case 1:
+                     load >> firstEle;
+                     firstProducts = ev( 1, firstEle.c_str() );
+                     break;
+                  case 2:
+                     load >> firstEle >> secondEle;
+                     firstProducts = ev( 2, firstEle.c_str(), secondEle.c_str() );
+                     break;
+                  default:
+                     std::cout << "Load settings: " << n << " is not an acceptable number of products!" << std::endl;
+                     assert(0);
+                     break;
+               }
+               while( load.peek() == ' ' && load.good() )
+               {
+                  c = load.get();
+               }
+               c = load.peek();
+               if( c == '0' || c == '1' )
+               {
+                  load >> secondProb >> n;
+                  switch( n )
+                  {
+                     case 1:
+                        load >> firstEle;
+                        secondProducts = ev( 1, firstEle.c_str() );
+                        break;
+                     case 2:
+                        load >> firstEle >> secondEle;
+                        secondProducts = ev( 2, firstEle.c_str(), secondEle.c_str() );
+                        break;
+                     default:
+                        std::cout << "Load settings: " << n << " is not an acceptable number of products!" << std::endl;
+                        assert(0);
+                        break;
+                  }
+                  tempRxn = safeNew( Reaction( reactants, firstProducts, firstProb, secondProducts, secondProb ) );
+               }
+               else
+               {
+                  tempRxn = safeNew( Reaction( reactants, firstProducts, firstProb ) );
+               }
+               rxnTable[ tempRxn->getKey() ] = tempRxn;
+               rxnsLoaded++;
+            }
+            else
+            {
+               if( keyword == "init" )
+               {
+                  int n;
+                  std::string firstEle, secondEle, thirdEle, fourthEle;
+
+                  load >> n;
+                  switch( n )
+                  {
+                     case 1:
+                        load >> firstEle;
+                        initialTypes = ev( 1, firstEle.c_str() );
+                        break;
+                     case 2:
+                        load >> firstEle >> secondEle;
+                        initialTypes = ev( 2, firstEle.c_str(), secondEle.c_str() );
+                        break;
+                     case 3:
+                        load >> firstEle >> secondEle >> thirdEle;
+                        initialTypes = ev( 3, firstEle.c_str(), secondEle.c_str(), thirdEle.c_str() );
+                        break;
+                     case 4:
+                        load >> firstEle >> secondEle >> thirdEle >> fourthEle;
+                        initialTypes = ev( 4, firstEle.c_str(), secondEle.c_str(), thirdEle.c_str(), fourthEle.c_str() );
+                        break;
+                     default:
+                        std::cout << "Load settings: only allowed between 1 and 4 initial types!" << std::endl;
+                        assert(0);
+                        break;
+                  }
+                  initsLoaded++;
+                  assert( initsLoaded < 2 );
+               }
+            }
+         }
+         keyword = "";
+      }
    }
 
-   /*
-   tempEle = safeNew( Element( "Enzyme", 'E', 0, 0 ) );
-   periodicTable[ "Enzyme" ] = tempEle;
+   // Set up default periodicTable if one was not loaded
+   if( elesLoaded == 0 )
+   {
+      for( char symbol = 'A'; symbol <= 'D'; symbol++ )
+      {
+         std::string name(1,symbol);
+         tempEle = safeNew( Element( name, symbol, 0, 0 ) );
+         periodicTable[ name ] = tempEle;
+      }
+   }
 
-   tempEle = safeNew( Element( "Substrate", 'S', 0, 0 ) );
-   periodicTable[ "Substrate" ] = tempEle;
+   // Set up default rxnTable if one was not loaded
+   if( rxnsLoaded == 0 )
+   {
+      tempRxn = safeNew( Reaction( ev(2,"A","B"), ev(2,"C","D"), 0.5 ) );
+      rxnTable[ tempRxn->getKey() ] = tempRxn;
+   }
 
-   tempEle = safeNew( Element( "ES", 'F', 0, 0 ) );
-   periodicTable[ "ES" ] = tempEle;
-
-   tempEle = safeNew( Element( "Product", 'P', 0, 0 ) );
-   periodicTable[ "Product" ] = tempEle;
-   */
-
-   // Initialize the rxnTable
-   Reaction* tempRxn;
-
-   tempRxn = safeNew( Reaction( ev(2,"A","B"), ev(2,"C","D"), 0.5 ) );
-   rxnTable[ tempRxn->getKey() ] = tempRxn;
-
-   /*
-   tempRxn = safeNew( Reaction( ev(2,"Enzyme","Substrate"), ev(2,"ES","Solvent"), 0.5 ) );
-   rxnTable[ tempRxn->getKey() ] = tempRxn;
-
-   tempRxn = safeNew( Reaction( ev(2,"ES","Solvent"), ev(2,"Enzyme","Substrate"), 0.01, ev(2,"Enzyme","Product"), 0.01 ) );
-   rxnTable[ tempRxn->getKey() ] = tempRxn;
-   */
+   // Set up default initialTypes if one was not loaded
+   if( initsLoaded == 0 )
+   {
+      initialTypes = ev(2,"A","B");
+   }
 
    // Fill the array of random numbers
    generateRandNums();
 
    // Initialize the world with random atoms
-   ElementVector initialTypes = ev(2,"A","B");
-   //ElementVector initialTypes = ev(2,"Enzyme","Substrate");
    Atom* tempAtom;
    int x, y;
    o->atomCount = std::min( o->atomCount, o->worldX * o->worldY );
@@ -915,13 +1041,9 @@ Sim::printWorld()
       for( int x = 0; x < o->worldX; x++ )
       {
          if( world[ getWorldIndex(x,y) ] != NULL )
-         {
             printw( "%c ", world[ getWorldIndex(x,y) ]->getType()->getSymbol() );
-         }
          else
-         {
             printw( ". " );
-         }
       }
       printw( "\n" );
    }
@@ -967,13 +1089,12 @@ Sim::printElements()
 void
 Sim::printReactions()
 {
-   std::map<char,int> reactantCount;
-   std::map<char,int> firstProductCount;
-   std::map<char,int> secondProductCount;
-
    // Loop through the rxnTable, printing each Reaction
    for( ReactionMap::iterator i = rxnTable.begin(); i != rxnTable.end(); i++ )
    {
+      std::map<char,int> reactantCount;
+      std::map<char,int> firstProductCount;
+      std::map<char,int> secondProductCount;
       Reaction* rxn = i->second;
 
       // Count up the number of each type of reactant and product
@@ -1009,24 +1130,16 @@ Sim::printReactions()
             if( coefficient == 1 )
             {
                if( j == reactantCount.begin() )
-               {
                   printw( "%c", j->first );
-               }
                else
-               {
                   printw( " + %c", j->first );
-               }
             }
             else
             {
                if( j == reactantCount.begin() )
-               {
                   printw( "%d%c", j->second, j->first );
-               }
                else
-               {
                   printw( " + %d%c", j->second, j->first );
-               }
             }
          }
 
@@ -1040,24 +1153,16 @@ Sim::printReactions()
             if( coefficient == 1 )
             {
                if( j == firstProductCount.begin() )
-               {
                   printw( "%c", j->first );
-               }
                else
-               {
                   printw( " + %c", j->first );
-               }
             }
             else
             {
                if( j == firstProductCount.begin() )
-               {
                   printw( "%d%c", j->second, j->first );
-               }
                else
-               {
                   printw( " + %d%c", j->second, j->first );
-               }
             }
          }
 
@@ -1079,24 +1184,16 @@ Sim::printReactions()
                if( coefficient == 1 )
                {
                   if( j == reactantCount.begin() )
-                  {
                      printw( "%c", j->first );
-                  }
                   else
-                  {
                      printw( " + %c", j->first );
-                  }
                }
                else
                {
                   if( j == reactantCount.begin() )
-                  {
                      printw( "%d%c", j->second, j->first );
-                  }
                   else
-                  {
                      printw( " + %d%c", j->second, j->first );
-                  }
                }
             }
 
@@ -1110,24 +1207,16 @@ Sim::printReactions()
                if( coefficient == 1 )
                {
                   if( j == secondProductCount.begin() )
-                  {
                      printw( "%c", j->first );
-                  }
                   else
-                  {
                      printw( " + %c", j->first );
-                  }
                }
                else
                {
                   if( j == secondProductCount.begin() )
-                  {
                      printw( "%d%c", j->second, j->first );
-                  }
                   else
-                  {
                      printw( " + %d%c", j->second, j->first );
-                  }
                }
             }
 
@@ -1150,24 +1239,16 @@ Sim::printReactions()
             if( coefficient == 1 )
             {
                if( j == reactantCount.begin() )
-               {
                   std::cout << j->first;
-               }
                else
-               {
                   std::cout << " + " << j->first;
-               }
             }
             else
             {
                if( j == reactantCount.begin() )
-               {
                   std::cout << j->second << j->first;
-               }
                else
-               {
                   std::cout << " + " << j->second << j->first;
-               }
             }
          }
 
@@ -1181,24 +1262,16 @@ Sim::printReactions()
             if( coefficient == 1 )
             {
                if( j == firstProductCount.begin() )
-               {
                   std::cout << j->first;
-               }
                else
-               {
                   std::cout << " + " << j->first;
-               }
             }
             else
             {
                if( j == firstProductCount.begin() )
-               {
                   std::cout << j->second << j->first;
-               }
                else
-               {
                   std::cout << " + " << j->second << j->first;
-               }
             }
          }
 
@@ -1220,24 +1293,16 @@ Sim::printReactions()
                if( coefficient == 1 )
                {
                   if( j == reactantCount.begin() )
-                  {
                      std::cout << j->first;
-                  }
                   else
-                  {
                      std::cout << " + " << j->first;
-                  }
                }
                else
                {
                   if( j == reactantCount.begin() )
-                  {
                      std::cout << j->second << j->first;
-                  }
                   else
-                  {
                      std::cout << " + " << j->second << j->first;
-                  }
                }
             }
 
@@ -1251,24 +1316,16 @@ Sim::printReactions()
                if( coefficient == 1 )
                {
                   if( j == secondProductCount.begin() )
-                  {
                      std::cout << j->first;
-                  }
                   else
-                  {
                      std::cout << " + " << j->first;
-                  }
                }
                else
                {
                   if( j == secondProductCount.begin() )
-                  {
                      std::cout << j->second << j->first;
-                  }
                   else
-                  {
                      std::cout << " + " << j->second << j->first;
-                  }
                }
             }
 
