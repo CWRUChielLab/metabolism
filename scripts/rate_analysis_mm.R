@@ -236,7 +236,12 @@ if (use_latex == "true")
 }
 
 # Export statistical test results
-write.table(stats_data, file=path_to_stats, row.names=FALSE, quote=FALSE)
+f = file(path_to_stats, "w");
+for( i in 1:length(stats_data) )
+{
+   cat(names(stats_data)[i], as.numeric(stats_data[i]), "\n", file=f);
+}
+close(f);
 
 # End
 
