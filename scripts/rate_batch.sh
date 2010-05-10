@@ -84,12 +84,12 @@ for i in `seq 0 $(($EXPERIMENTS-1))`; do
       ATOMS=$(((50*($i+1)*$X*$Y*2+10000)/20000))
    fi
 
-
    time (                                                             \
       ../src/metabolism -g -i $ITERS -x $X -y $Y -a $ATOMS $SHUFFLE   \
          -f ../data/rate/$BATCH/${NAME[i]}/config.${NAME[i]}.out      \
             ../data/rate/$BATCH/${NAME[i]}/census.${NAME[i]}.out      \
             ../data/rate/$BATCH/${NAME[i]}/diffusion.${NAME[i]}.out   \
+            ../data/rate/$BATCH/${NAME[i]}/rand.${NAME[i]}.out        \
       &&                                                              \
       ../scripts/rate_analysis.R                                      \
             $RXNORDER                                                 \

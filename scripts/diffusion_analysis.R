@@ -2,27 +2,38 @@
 #
 # Analyzes diffusion data in R and creates graphs
 #
-# Usage: ./diffusion_analysis.R pathtoconfig pathtodata pathtoplots pathtostats uselatex
-#   pathtoconfig  the path of the config.out file
-#   pathtodata    the path of the diffusion.out file
-#   pathtoplots   the path of the PDF or LaTeX documents that the R script
-#                    will create without the .pdf or .tex extension
-#   pathtostats   the path of the text file that the R script will create
-#   uselatex      if "true" is passed, create individual plots in the form
-#                    of LaTeX documents; else draw all plots in one PDF
+# Usage: ./diffusion_analysis.R pathtoconfig pathtodiffusion pathtoplots pathtostats uselatex
+#   pathtoconfig     the path of the config.out file
+#   pathtodiffusion  the path of the diffusion.out file
+#   pathtoplots      the path of the PDF or LaTeX documents that the R script
+#                       will create without the .pdf or .tex extension
+#   pathtostats      the path of the text file that the R script will create
+#   uselatex         if "true" is passed, create individual plots in the form
+#                       of LaTeX documents; else draw all plots in one PDF
 
 # Import command line arguments
 Args = commandArgs()
-path_to_config = as.character(Args[6])
-path_to_data   = as.character(Args[7])
-path_to_plots  = as.character(Args[8])
-path_to_stats  = as.character(Args[9])
-use_latex      = as.character(Args[10])
+if (length(Args) != 10)
+{
+   sink(stderr())
+   print("ANALYSIS FAILED: Incorrect number of parameters!")
+   print("  Usage: ./diffusion_analysis.R pathtoconfig pathtodiffusion pathtoplots pathtostats uselatex")
+   sink()
+   q(save="no", status=1, runLast=FALSE)
+}
+path_to_config    = as.character(Args[6])
+path_to_diffusion = as.character(Args[7])
+path_to_plots     = as.character(Args[8])
+path_to_stats     = as.character(Args[9])
+use_latex         = as.character(Args[10])
 
 # Import experimental parameters
-config = read.table(path_to_config, header=TRUE)
-version = as.character(config["version"])
-seed = as.integer(config["seed"])
+keepers = c("version", "seed", "iters", "x", "y", "atoms", "reactions", "shuffle")
+temp = readLines(path_to_config); f = file(); cat(temp[charmatch(keepers, temp)], sep="\n", file=f); temp = read.table(f, colClasses=c("character", "character"))
+write(as.matrix(temp), ncolumns=length(keepers), file=f)
+config = read.table(f, header=TRUE)
+close(f)
+
 iters = as.integer(config["iters"])
 x = as.integer(config["x"])
 y = as.integer(config["y"])
@@ -101,7 +112,7 @@ plot_color = c(green,
                darkblue)
 
 # Import diffusion data
-diffusion_data = read.table(path_to_data, header=TRUE)
+diffusion_data = read.table(path_to_diffusion, header=TRUE)
 
 # If all plots are to be drawn in a single PDF,
 # open a PDF graphics device and set a few parameters
@@ -321,7 +332,12 @@ for (i in 1:length(plot_type))
 }
 
 # Export statistical test results
-write.table(stats_data, file=path_to_stats, row.names=FALSE, quote=FALSE)
+f = file(path_to_stats, "w")
+for( i in 1:length(stats_data) )
+{
+   cat(names(stats_data)[i], as.numeric(stats_data[i]), "\n", file=f)
+}
+close(f)
 
 # End
 

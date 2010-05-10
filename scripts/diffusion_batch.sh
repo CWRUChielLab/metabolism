@@ -1,8 +1,7 @@
 #!/bin/bash
 #
-# Conducts a series of experiments, stores the
-# output in unique locations, and analyses the
-# diffusion data
+# Conducts a series of experiments, stores the output in unique locations,
+# and analyses the diffusion data
 #
 # Usage: ./diffusion_batch.sh batch experiments iters x y atoms
 #   batch        the name for the batch of experiments
@@ -70,24 +69,26 @@ for i in `seq 0 $(($EXPERIMENTS-1))`; do
    fi
 
    time (                                                                  \
-      ../src/metabolism -g -i $ITERS -x $X -y $Y -a $ATOMS                 \
+      ../src/metabolism -g -i $ITERS -x $X -y $Y -a $ATOMS -r              \
          -f ../data/diffusion/$BATCH/${NAME[i]}/config.${NAME[i]}.out      \
             ../data/diffusion/$BATCH/${NAME[i]}/census.${NAME[i]}.out      \
             ../data/diffusion/$BATCH/${NAME[i]}/diffusion.${NAME[i]}.out   \
+            ../data/diffusion/$BATCH/${NAME[i]}/rand.${NAME[i]}.out        \
       &&                                                                   \
-      ./diffusion_analysis.R                                               \
+      ../scripts/diffusion_analysis.R                                      \
             ../data/diffusion/$BATCH/${NAME[i]}/config.${NAME[i]}.out      \
             ../data/diffusion/$BATCH/${NAME[i]}/diffusion.${NAME[i]}.out   \
             ../data/diffusion/$BATCH/${NAME[i]}/analysis_$BATCH_${NAME[i]} \
             ../data/diffusion/$BATCH/${NAME[i]}/stats.${NAME[i]}.out       \
             false                                                          \
         )
+
    echo
 done
 
 # Run batch analysis if atom count was not fixed
 if [ "$FIXED" = '0' ]; then
-   ./diffusion_batch_analysis.R                \
+   ../scripts/diffusion_batch_analysis.R       \
       ../data/diffusion/$BATCH                 \
       $EXPERIMENTS                             \
       ../data/diffusion/$BATCH/analysis_$BATCH \

@@ -2,12 +2,12 @@
 #
 # Analyzes Michaelis-Menten kinetics in R and creates graphs
 #
-# Usage: ./rate_analysis_mm.R prob1 prob2 prob3 pathtoconfig pathtodata pathtoplots pathtostats uselatex
+# Usage: ./rate_analysis_mm.R prob1 prob2 prob3 pathtoconfig pathtocensus pathtoplots pathtostats uselatex
 #   prob1         the probability of the E + S -> ES reaction occurring
 #   prob2         the probability of the ES -> E + S reaction occurring
 #   prob3         the probability of the ES -> E + P reaction occurring
 #   pathtoconfig  the path of the config.out file
-#   pathtodata    the path of the census.out file
+#   pathtocensus  the path of the census.out file
 #   pathtoplots   the path of the PDF or LaTeX documents that the R script
 #                    will create without the .pdf or .tex extension
 #   pathtostats   the path of the text file that the R script will create
@@ -20,7 +20,7 @@ if (length(Args) != 13)
 {
    sink(stderr())
    print("ANALYSIS FAILED: Incorrect number of parameters!")
-   print("  Usage: ./rate_analysis_mm.R prob1 prob2 prob3 pathtoconfig pathtodata pathtoplots pathtostats uselatex")
+   print("  Usage: ./rate_analysis_mm.R prob1 prob2 prob3 pathtoconfig pathtocensus pathtoplots pathtostats uselatex")
    sink()
    q(save="no", status=1, runLast=FALSE)
 }
@@ -28,7 +28,7 @@ prob1          = as.numeric(Args[6])
 prob2          = as.numeric(Args[7])
 prob3          = as.numeric(Args[8])
 path_to_config = as.character(Args[9])
-path_to_data   = as.character(Args[10])
+path_to_census = as.character(Args[10])
 path_to_plots  = as.character(Args[11])
 path_to_stats  = as.character(Args[12])
 use_latex      = as.character(Args[13])
@@ -40,7 +40,6 @@ write(as.matrix(temp), ncolumns=length(keepers), file=f)
 config = read.table(f, header=TRUE)
 close(f)
 
-seed = as.integer(config["seed"])
 iters = as.integer(config["iters"])
 x = as.integer(config["x"])
 y = as.integer(config["y"])
@@ -67,7 +66,7 @@ darkblue  = "#001055"
 red       = "#FF0000"
 
 # Import rate data
-rate_data = read.table(path_to_data, header=TRUE)
+rate_data = read.table(path_to_census, header=TRUE)
 
 # Remove timesteps that have zero reactant atoms
 rate_data = rate_data[which(rate_data$Substrate != 0),]
