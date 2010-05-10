@@ -62,6 +62,13 @@ else
    FIXED=1
 fi
 
+# If atom position shuffling is turned on, create a flag that can be passed as a command line option
+if [ "$SHUFFLE" = 'true' ]; then
+   SHUFFLE=-S
+else
+   SHUFFLE=
+fi
+
 # Run the experiments and conduct individual analyses
 for i in `seq 0 $(($EXPERIMENTS-1))`; do
    sleep 1
@@ -78,16 +85,9 @@ for i in `seq 0 $(($EXPERIMENTS-1))`; do
       ATOMS=$(((50*($i+1)*$X*$Y*2+10000)/20000))
    fi
 
-   # If atom position shuffling is turned on, create a flag that
-   # can be passed as a command line option
-   if [ "$SHUFFLE" = 'true' ]; then
-      S=-S
-   else
-      S=
-   fi
 
    time (                                                             \
-      ../src/metabolism -g -i $ITERS -x $X -y $Y -a $ATOMS $S         \
+      ../src/metabolism -g -i $ITERS -x $X -y $Y -a $ATOMS $SHUFFLE   \
          -f ../data/rate/$BATCH/${NAME[i]}/config.${NAME[i]}.out      \
             ../data/rate/$BATCH/${NAME[i]}/census.${NAME[i]}.out      \
             ../data/rate/$BATCH/${NAME[i]}/diffusion.${NAME[i]}.out   \
@@ -121,7 +121,6 @@ if [ "$FIXED" = '0' ]; then
       ../data/rate/$BATCH                 \
       $EXPERIMENTS                        \
       ../data/rate/$BATCH/analysis_$BATCH \
-      $SHUFFLE                            \
       false
 fi
 

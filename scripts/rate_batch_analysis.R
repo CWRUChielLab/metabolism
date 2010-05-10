@@ -2,13 +2,11 @@
 #
 # Analyzes batch reaction rate data in R and creates graphs
 #
-# Usage: ./rate_batch_analysis.R pathtobatch nexperiments pathtoplots shufflingused uselatex
+# Usage: ./rate_batch_analysis.R pathtobatch nexperiments pathtoplots uselatex
 #   pathtobatch    the path of the batch directory
 #   nexperiments   the number of experiments in the batch
 #   pathtoplots    the path of the PDF or LaTeX documents that the R script
 #                    will create without the .pdf or .tex extension
-#   shufflingused  if "true" is passed, label plots "with Shuffling"; else
-#                    label plots "without Shuffling"
 #   uselatex       if "true" is passed, create individual plots in the form
 #                    of LaTeX documents; else draw all plots in one PDF
 
@@ -17,8 +15,7 @@ Args = commandArgs()
 path_to_batch  = as.character(Args[6])
 n_experiments  = as.integer(Args[7])
 path_to_plots  = as.character(Args[8])
-shuffling_used = as.character(Args[9])
-use_latex      = as.character(Args[10])
+use_latex      = as.character(Args[9])
 
 # Import experimental parameters and statistics
 config = list()
@@ -28,8 +25,13 @@ for (i in 1:n_experiments)
    this_experiment = formatC(i, flag="0", width=nchar(n_experiments))
    this_config = paste(path_to_batch, "/", this_experiment, "/config.", this_experiment, ".out", sep="")
    this_stats  = paste(path_to_batch, "/", this_experiment, "/stats.",  this_experiment, ".out", sep="")
-   config = rbind(config, read.table(this_config, header=TRUE))
-   stats  = rbind(stats,  read.table(this_stats,  header=TRUE))
+
+   keepers = c("version", "seed", "iters", "x", "y", "atoms", "reactions", "shuffle")
+   temp = readLines(this_config); f = file(); cat(temp[charmatch(keepers, temp)], sep="\n", file=f); temp = read.table(f, colClasses=c("character", "character"));
+   write(as.matrix(temp), ncolumns=length(keepers), file=f)
+   config = rbind(config, read.table(f,          header=TRUE))
+   close(f);
+   stats  = rbind(stats,  read.table(this_stats, header=TRUE))
 }
 
 # Calculate densities and extract batch parameters
@@ -58,7 +60,7 @@ darkblue  = "#001055"
 red       = "#FF0000"
 
 # Plot title
-if (shuffling_used == "true")
+if (config[1, "shuffle"] == "on")
 {
    plot.title = "Rate Constant with Shuffling"
 } else {

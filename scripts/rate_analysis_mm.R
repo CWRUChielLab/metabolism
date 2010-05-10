@@ -26,8 +26,12 @@ path_to_stats  = as.character(Args[12])
 use_latex      = as.character(Args[13])
 
 # Import experimental parameters
-config = read.table(path_to_config, header=TRUE)
-version = as.character(config["version"])
+keepers = c("version", "seed", "iters", "x", "y", "atoms", "reactions", "shuffle")
+temp = readLines(path_to_config); f = file(); cat(temp[charmatch(keepers, temp)], sep="\n", file=f); temp = read.table(f, colClasses=c("character", "character"));
+write(as.matrix(temp), ncolumns=length(keepers), file=f)
+config = read.table(f, header=TRUE)
+close(f);
+
 seed = as.integer(config["seed"])
 iters = as.integer(config["iters"])
 x = as.integer(config["x"])
