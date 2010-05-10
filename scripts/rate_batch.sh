@@ -1,8 +1,7 @@
 #!/bin/bash
 #
-# Conducts a series of experiments, stores the
-# output in unique locations, and analyses the
-# reaction rate data
+# Conducts a series of experiments, stores the output in unique locations,
+# and analyses the reaction rate data
 #
 # Usage: ./rate_batch.sh batch experiments iters x y atoms rxnorder prob shuffle
 #   batch        the name for the batch of experiments

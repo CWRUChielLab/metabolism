@@ -15,6 +15,14 @@
 
 # Import command line arguments
 Args = commandArgs()
+if (length(Args) != 12)
+{
+   sink(stderr())
+   print("ANALYSIS FAILED: Incorrect number of parameters!")
+   print("  Usage: ./rate_analysis.R rxnorder prob pathtoconfig pathtodata pathtoplots pathtostats uselatex")
+   sink()
+   q(save="no", status=1, runLast=FALSE)
+}
 rxn_order      = as.character(Args[6])
 prob           = as.numeric(Args[7])
 path_to_config = as.character(Args[8])
@@ -25,10 +33,10 @@ use_latex      = as.character(Args[12])
 
 # Import experimental parameters
 keepers = c("version", "seed", "iters", "x", "y", "atoms", "reactions", "shuffle")
-temp = readLines(path_to_config); f = file(); cat(temp[charmatch(keepers, temp)], sep="\n", file=f); temp = read.table(f, colClasses=c("character", "character"));
+temp = readLines(path_to_config); f = file(); cat(temp[charmatch(keepers, temp)], sep="\n", file=f); temp = read.table(f, colClasses=c("character", "character"))
 write(as.matrix(temp), ncolumns=length(keepers), file=f)
 config = read.table(f, header=TRUE)
-close(f);
+close(f)
 
 seed = as.integer(config["seed"])
 iters = as.integer(config["iters"])
@@ -343,12 +351,12 @@ if (use_latex == "true")
 }
 
 # Export statistical test results
-f = file(path_to_stats, "w");
+f = file(path_to_stats, "w")
 for( i in 1:length(stats_data) )
 {
-   cat(names(stats_data)[i], as.numeric(stats_data[i]), "\n", file=f);
+   cat(names(stats_data)[i], as.numeric(stats_data[i]), "\n", file=f)
 }
-close(f);
+close(f)
 
 # End
 

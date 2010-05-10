@@ -12,11 +12,18 @@
 
 # Import command line arguments
 Args = commandArgs()
+if (length(Args) != 9)
+{
+   sink(stderr())
+   print("ANALYSIS FAILED: Incorrect number of parameters!")
+   print("  Usage: ./rate_batch_analysis_mm.R pathtobatch nexperiments pathtoplots uselatex")
+   sink()
+   q(save="no", status=1, runLast=FALSE)
+}
 path_to_batch  = as.character(Args[6])
 n_experiments  = as.integer(Args[7])
 path_to_plots  = as.character(Args[8])
-shuffling_used = as.character(Args[9])
-use_latex      = as.character(Args[10])
+use_latex      = as.character(Args[9])
 
 # Import experimental parameters and statistics
 config = list()
@@ -28,15 +35,15 @@ for (i in 1:n_experiments)
    this_stats  = paste(path_to_batch, "/", this_experiment, "/stats.",  this_experiment, ".out", sep="")
 
    keepers = c("version", "seed", "iters", "x", "y", "atoms", "reactions", "shuffle")
-   f = file(); temp = readLines(this_config); cat(temp[charmatch(keepers, temp)], sep="\n", file=f); temp = read.table(f, colClasses=c("character", "character"));
+   f = file(); temp = readLines(this_config); cat(temp[charmatch(keepers, temp)], sep="\n", file=f); temp = read.table(f, colClasses=c("character", "character"))
    write(as.matrix(temp), ncolumns=length(keepers), file=f)
    config = rbind(config, read.table(f, header=TRUE))
-   close(f);
+   close(f)
 
-   f = file(); temp = read.table(this_stats, colClasses=c("character", "character"));
+   f = file(); temp = read.table(this_stats, colClasses=c("character", "character"))
    write(as.matrix(temp), ncolumns=length(temp[,1]), file=f)
    stats  = rbind(stats,  read.table(f, header=TRUE))
-   close(f);
+   close(f)
 }
 
 # Calculate densities and extract batch parameters
