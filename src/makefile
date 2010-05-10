@@ -31,14 +31,14 @@ metabolism metabolism-no-ncurses: atom.o element.o main.o options.o reaction.o s
 	g++ $(LFLAGS) -o $@ atom.o element.o main.o options.o reaction.o safecalls.o sim.o SFMT.o $(LIBS)
 
 bless: clean metabolism
-	./metabolism --no-gui --load check/mm.load --iters 100 -x 128 -y 128 --atoms 500 --seed 42 --shuffle \
-		--files check/config.check.out check/census.check.out check/diffusion.check.out check/rand.check.out
+	./metabolism --no-gui --load ../load/mm.load --iters 100 -x 128 -y 128 --atoms 500 --seed 42 --shuffle \
+		--files ../check/config.check.out ../check/census.check.out ../check/diffusion.check.out ../check/rand.check.out
 
 check: clean metabolism-no-ncurses
-	./metabolism-no-ncurses --load check/config.check.out
-	diff census.out check/census.check.out | wc -l
-	diff diffusion.out check/diffusion.check.out | wc -l
-	diff rand.out check/rand.check.out | wc -l
+	./metabolism-no-ncurses --load ../check/config.check.out
+	diff census.out ../check/census.check.out | wc -l
+	diff diffusion.out ../check/diffusion.check.out | wc -l
+	diff rand.out ../check/rand.check.out | wc -l
 
 clean:
 	rm -f metabolism metabolism-no-ncurses *.o *.out *~
