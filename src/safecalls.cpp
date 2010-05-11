@@ -2,7 +2,7 @@
  */
 
 #include <cerrno>
-#include <stdio.h>
+#include <stdio.h> // fprintf, etc.
 #include "safecalls.h"
 
 

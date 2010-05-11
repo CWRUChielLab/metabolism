@@ -22,16 +22,17 @@ class Sim
       // Constructor
       Sim( Options* newOptions );
 
-      // Methods
+      // Public engine methods
       int iterate();
       int getCurrentIter();
+
+      // Public I/O methods
       void writeConfig();
+      void takeCensus();
+      void dumpAtoms();
       void printWorld();
       void printElements();
       void printReactions();
-
-      void takeCensus();
-      void dumpAtoms();
 
    private:
       // Sim attributes
@@ -41,6 +42,7 @@ class Sim
       ElementMap periodicTable;
       ReactionMap rxnTable;
       ElementVector initialTypes;
+
       Atom** world;
       uint8_t* claimed;
       unsigned int* positions;
@@ -49,7 +51,7 @@ class Sim
       int randNums_length_in_64_bit_ints;
       uint64_t* randNums;
 
-      // Private methods
+      // Private engine methods
       void initRNG( int initSeed );
       void generateRandNums();
       void shufflePositions();

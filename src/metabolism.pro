@@ -74,5 +74,5 @@ win32 {
 
 # Input
 HEADERS += atom.h element.h options.h reaction.h safecalls.h sim.h
-SOURCES += atom.cpp element.cpp main.cpp options.cpp reaction.cpp safecalls.cpp sim.cpp ../SFMT/SFMT.c
+SOURCES += atom.cpp element.cpp main.cpp options.cpp reaction.cpp safecalls.cpp sim-engine.cpp sim-io.cpp ../SFMT/SFMT.c
 

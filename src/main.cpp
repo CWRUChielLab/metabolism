@@ -2,12 +2,9 @@
  */
 
 #include <csignal>
-#include <ctime>
-#include <iostream>
 #ifndef _NO_NCURSES
 #include <ncurses.h>
 #endif
-#include <unistd.h>   // Might not be compatible with Windows
 #include "options.h"
 #include "safecalls.h"
 #include "sim.h"

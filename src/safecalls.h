@@ -4,8 +4,8 @@
 #ifndef SAFECALLS_H
 #define SAFECALLS_H
 
-#include <cstdlib>
-#include <iostream>
+#include <cstdlib>  // exit, EXIT_FAILURE
+#include <iostream> // cerr
 
 namespace SafeCalls
 {

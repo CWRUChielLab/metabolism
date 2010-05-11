@@ -27,8 +27,8 @@ metabolism: LIBS+=-lncurses
 
 metabolism-no-ncurses: DEFINES+=-D_NO_NCURSES
 
-metabolism metabolism-no-ncurses: atom.o element.o main.o options.o reaction.o safecalls.o sim.o SFMT.o
-	g++ $(LFLAGS) -o $@ atom.o element.o main.o options.o reaction.o safecalls.o sim.o SFMT.o $(LIBS)
+metabolism metabolism-no-ncurses: atom.o element.o main.o options.o reaction.o safecalls.o sim-engine.o sim-io.o SFMT.o
+	g++ $(LFLAGS) $(LIBS) -o $@ atom.o element.o main.o options.o reaction.o safecalls.o sim-engine.o sim-io.o SFMT.o
 
 bless: clean metabolism
 	./metabolism --no-gui --load ../load/mm.load --iters 100 -x 128 -y 128 --atoms 500 --seed 42 --shuffle \
@@ -70,13 +70,20 @@ reaction.o: reaction.cpp reaction.h \
 safecalls.o: safecalls.cpp safecalls.h
 	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o safecalls.o safecalls.cpp
 
-sim.o: sim.cpp sim.h \
+sim-engine.o: sim-engine.cpp sim.h \
 		safecalls.h \
 		atom.h \
 		element.h \
 		options.h \
 		reaction.h
-	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o sim.o sim.cpp
+	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o sim-engine.o sim-engine.cpp
+
+sim-io.o: sim-io.cpp sim.h \
+		atom.h \
+		element.h \
+		options.h \
+		reaction.h
+	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o sim-io.o sim-io.cpp
 
 SFMT.o: ../SFMT/SFMT.c ../SFMT/SFMT.h \
 		../SFMT/SFMT-params.h \

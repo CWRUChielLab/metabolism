@@ -2,7 +2,6 @@
  */
 
 #include <cassert>
-#include <vector>
 #include "reaction.h"
 
 

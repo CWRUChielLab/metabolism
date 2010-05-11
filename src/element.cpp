@@ -1,7 +1,7 @@
 /* element.cpp
  */
 
-#include <cmath>
+#include <cmath> // sqrt
 #include <string>
 #include "element.h"
 
