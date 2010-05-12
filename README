@@ -1,5 +1,6 @@
-Chemical Metabolism Simulator
-=============================
+============================================================
+             - CHEMICAL METABOLISM SIMULATOR -
+============================================================
 
 An open-source chemical reaction modeling platform.
 
@@ -8,7 +9,7 @@ http://github.com/jpg18/metabolism/
 
 
 Dependencies
-============
+============================================================
 
 This project uses the following:
 
@@ -33,13 +34,13 @@ This project uses the following:
 
    tikzDevice
       LaTeX graphics for R. Optional parameter 'uselatex'
-      for each R script allows LaTeX documents to be build
+      for each R script allows LaTeX documents to be built
       instead of PDFs. Available at
       http://r-forge.r-project.org/projects/tikzdevice/.
 
 
 Compilation Instructions
-========================
+============================================================
 
 Compiles with g++ (Ubuntu 4.4.1-4ubuntu9) 4.4.1.
 
@@ -54,46 +55,46 @@ are not available, the program can be compiled without
 ncurses using the following:
 
    cd metabolism/src
-   make no-ncurses
+   make metabolism-no-ncurses
 
 The program created will then be called
 "metabolism-no-ncurses".
 
 
 An Example Simulation and Analysis
-==================================
+============================================================
 
 Once compiled, try running:
 
    ./metabolism --no-gui -x 512 -y 512 --iters 200 --atoms 39322
 
-This will run a very quick simulation with the default
-reaction enabled.  Data is output to the files diffusion.out
+This will run a quick simulation with the default reaction
+system enabled. Data is output to the files diffusion.out
 and census.out, and the simulation parameters are recorded
-in config.out.  To conduct a reaction rate analysis, run:
+in config.out. To conduct a reaction rate analysis, run:
 
    ../scripts/rate_analysis.R second 0.5 config.out census.out plots stats.out false
 
 (The parameters here are explained at the beginning of the
 script's comments.) A PDF file is generated and some
-statistics are stored in the file stats.out.  View the PDF:
+statistics are stored in the file stats.out. View the PDF:
 
    evince plots.pdf
 
-Notice that the red expectation line does not match the data
-too well.  Now try:
+Notice that the data deviates from the expected trajectory
+(the red line). Now try:
 
    ./metabolism --no-gui -x 512 -y 512 --iters 200 --atoms 39322 --shuffle
    ../scripts/rate_analysis.R second 0.5 config.out census.out plots stats.out false
    evince plots.pdf
 
 This will run the same simulation with shuffling of particle
-positions each iteration.  Shuffline simulates mixing.  Now
-the red line fits much better.
+positions each iteration. Shuffling simulates mixing. Now
+the data fits the expected trajectory much better.
 
 
 Using the Simulation Platform
-=============================
+============================================================
 
 All command line options are available via --help and can be
 used to specify simulation parameters such as the size of
@@ -107,8 +108,8 @@ To change the types of particles in the lattice or the
 reactions that are defined in the reaction table, you will
 need to create a custom config file or use one of the
 provided files in metabolism/load. Create a new file and
-fill it with any parameters you would like to specify in the
-format:
+fill it with any parameters you would like to specify using
+the format:
 
    keyword value
 
@@ -132,57 +133,50 @@ using the following format:
    ele name symbol color charge
 
 "name" is a string, "symbol" is a single character that is
-used to represent particles of that type in the GUI, and
-"color" and "charge" are integers (currently not used).
+used to represent particles of that type in the ncurses text
+interface, and "color" and "charge" are integers (currently
+not used).
 
 An example will help clarify how to build a config file. The
 Michaelis-Menten enzyme kinetics system consists of three
 reactions: E + S -> ES, ES -> E + S, and ES -> E + P. The
-particle types for this system could be listed using:
+particle types for this system could be defined using:
 
    ele Enzyme E 0 0
    ele Substrate S 0 0
    ele ES F 0 0
    ele Product P 0 0
 
-When specifying reactions, each unique set of reactants
-should receive its own line beginning with "rxn". Up to
-two reactants can be specified (reaction orders higher than
-2 are not supported). One set of products must be specified,
-and an optional second set can be specified as well. Using
-both sets allows you to design a reaction system such as the
-Michaelis-Menten enzyme kinetics system, which uses the
-reactions ES -> E + S and ES -> E + P. Because the enzyme-
-substrate complex can decompose into two different sets of
-reaction products, both would be specified on the same line
-in a config file. The reaction format is:
+When specifying reactions, each unique reaction should
+receive its own line beginning with "rxn". Up to two
+reactants can be specified (reaction orders higher than
+2 are not supported), and up to two products can be
+specified. Use the format:
 
-   rxn prob1 n1 reactant [reactant] n2 product [product] [prob2] [n3] [product] [product]
+   rxn prob [n] reactant [+] [n] [reactant] -> [n] product [+] [n] [product]
 
-"prob1" and "prob2" are the probabilities between 0 and 1 of
-the reaction occurring when reactants "collide" and the
-first or second set of products, respectively, are selected
-to result from the process. Which set of products is chosen
-at any given point in the simulation is independent of these
-probabilities, and so they do not need to add to 1.
-"reactant" and "product" are the names of particle types.
-Reactions must be balanced, and so if two reactants are
-specified, two products must be specified. To specify a
-reaction such as A -> B + C, use the placeholder particle
-type "Solvent" as the second reactant. This particle type is
-always predefined in the simulation. "n1" is the number (1
-or 2) of reactants (including any "Solvent"), "n2" is the
-number (1 or 2) of products in the first set, and "n3" is
-the number (1 or 2) of products in the second set. These
-three numbers must be the same to balance the reaction. All
-particle types must be listed in a config file before any
-reactions that use them.
+"prob" is the probability between 0 and 1 of the reaction
+occurring when the reactants "collide". "reactant" and
+"product" are the names of particle types. If you would like
+to define a zeroth-order reaction, or if you would like your
+reactants to annihilate one another, use the placeholder
+symbol "*" for the reactants or products, respectively
+(e.g., * -> A, or A -> *). "n" is a stoichiometric
+coefficient. Since at most two reactants and two products
+can be specified, this number must be either "1" (in which
+case it is not necessary) or "2" (in which case there can be
+no other reaction participants listed on that side of the
+reaction arrow). Additionally, at most two separate
+reactions can be specified with the same set of reactants.
+All particle types must be listed in a config file before
+any reactions that use them.
 
 For our example, the Michaelis-Menten reactions could be
 listed using:
 
-   rxn 0.5 2 Enzyme Substrate 2 ES Solvent
-   rxn 0.01 2 ES Solvent 2 Enzyme Substrate 0.01 2 Enzyme Product
+   rxn 0.50 Enzyme + Substrate -> ES
+   rxn 0.01 ES -> Enzyme + Substrate
+   rxn 0.01 ES -> Enzyme + Product
 
 with "prob"'s = 0.5, 0.01, and 0.01.
 
@@ -192,14 +186,14 @@ for each particle must be specified in the config file. Use
 the keyword "init" to start a list of initial particle
 types:
 
-   init n name [name] [name] [name]
+   init n name [...]
 
-"n" is the number of types in the list (up to a maximum of
-4), and "name"'s are the names of the particle types.
-The type for each particle when it is created at the start
-of the simulation will be chosen at random from this list.
-Types included in this list must be defined earlier in the
-config file.
+"n" is the number of types in the list, and "name"'s are the
+names of the particle types. The type for each particle when
+it is created at the start of the simulation will be chosen
+at random from this list. If "n" is "0", then no particles
+will be placed in the lattice. Types included in this list
+must be defined earlier in the config file.
 
 For the Michaelis-Menten example, we could use:
 
@@ -208,11 +202,13 @@ For the Michaelis-Menten example, we could use:
 to create a 3:1 ratio of Substrate to Enzyme for the
 particles initially placed in the lattice.
 
-If a config file is used and lacks any lines that begin with
-"ele" then the types "A", "B", "C", and "D" are defined by
-default. If the config file lacks any "rxn" lines, the
-reaction A + B -> C + D (prob = 0.5) is defined. If the
-config file had no line beginning with "init", then the
-particles will start with types A and B in roughly a 1:1
-ratio.
+If a config file is not used, or if a config file is used
+that lacks any lines that begin with "ele", then the types
+"A", "B", "C", and "D" are defined by default. If the config
+file lacks any "rxn" lines, the reaction A + B -> C + D
+(prob = 0.5) is defined. If the config file has no line
+beginning with "init", then the particles will start with
+types A and B in roughly a 1:1 ratio.
+
+============================================================
 
