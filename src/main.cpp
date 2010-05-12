@@ -55,7 +55,7 @@ main ( int argc, char* argv[] )
       printw( "------\n" );
       mySim->printElements();
       printw( "------\n" );
-      mySim->printReactions();
+      mySim->printReactions( (std::ostream*)(NULL) );
       printw( "------\n" );
 #endif
    }
@@ -66,7 +66,7 @@ main ( int argc, char* argv[] )
       std::cout << "------" << std::endl;
       mySim->printElements();
       std::cout << "------" << std::endl;
-      mySim->printReactions();
+      mySim->printReactions( &std::cout );
       std::cout << "------" << std::endl;
    }
 

@@ -5,6 +5,7 @@
 #define SIM_H 
 
 #include <map>
+#include <ostream>
 #include <stdint.h>
 #include <vector>
 #include "atom.h"
@@ -14,6 +15,7 @@
 
 typedef std::map<std::string,Element*> ElementMap;
 typedef std::map<int,Reaction*> ReactionMap;
+typedef std::map<std::string,int> StringCounter;
 typedef std::vector<Element*> ElementVector;
 
 class Sim
@@ -32,7 +34,7 @@ class Sim
       void dumpAtoms();
       void printWorld();
       void printElements();
-      void printReactions();
+      void printReactions( std::ostream* out );
 
    private:
       // Sim attributes

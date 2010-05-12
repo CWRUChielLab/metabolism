@@ -389,32 +389,34 @@ Sim::printElements()
 
 
 void
-Sim::printReactions()
+Sim::printReactions( std::ostream* out )
 {
    // Loop through the rxnTable, printing each Reaction
    for( ReactionMap::iterator i = rxnTable.begin(); i != rxnTable.end(); i++ )
    {
-      std::map<char,int> reactantCount;
-      std::map<char,int> firstProductCount;
-      std::map<char,int> secondProductCount;
-      Reaction* rxn = i->second;
+      StringCounter reactantCount;
+      StringCounter firstProductCount;
+      StringCounter secondProductCount;
+      int coefficient;
+      std::string name;
 
+      Reaction* rxn = i->second;
       if( rxn != NULL )
       {
          // Count up the number of each type of reactant and product
          for( unsigned int j = 0; j < rxn->getReactants().size(); j++ )
          {
-            reactantCount[ rxn->getReactants()[j]->getSymbol() ]++;
+            reactantCount[ rxn->getReactants()[j]->getName() ]++;
          }
          for( unsigned int j = 0; j < rxn->getFirstProducts().size(); j++ )
          {
-            firstProductCount[ rxn->getFirstProducts()[j]->getSymbol() ]++;
+            firstProductCount[ rxn->getFirstProducts()[j]->getName() ]++;
          }
          if( !rxn->getSecondProducts().empty() )
          {
             for( unsigned int j = 0; j < rxn->getSecondProducts().size(); j++ )
             {
-               secondProductCount[ rxn->getSecondProducts()[j]->getSymbol() ]++;
+               secondProductCount[ rxn->getSecondProducts()[j]->getName() ]++;
             }
          }
 
@@ -428,22 +430,23 @@ Sim::printReactions()
 
             // Print the reactants, grouping copies of one type together
             // with stoichiometric coefficients
-            for( std::map<char,int>::iterator j = reactantCount.begin(); j != reactantCount.end(); j++ )
+            for( StringCounter::iterator j = reactantCount.begin(); j != reactantCount.end(); j++ )
             {
-               int coefficient = j->second;
+               coefficient = j->second;
+               name = j->first;
                if( coefficient == 1 )
                {
                   if( j == reactantCount.begin() )
-                     printw( "%c", j->first );
+                     printw( "%s", name.c_str() );
                   else
-                     printw( " + %c", j->first );
+                     printw( " + %s", name.c_str() );
                }
                else
                {
                   if( j == reactantCount.begin() )
-                     printw( "%d%c", j->second, j->first );
+                     printw( "%d %s", coefficient, name.c_str() );
                   else
-                     printw( " + %d%c", j->second, j->first );
+                     printw( " + %d %s", coefficient, name.c_str() );
                }
             }
 
@@ -451,22 +454,23 @@ Sim::printReactions()
 
             // Print the first products, grouping copies of one type together
             // with stoichiometric coefficients
-            for( std::map<char,int>::iterator j = firstProductCount.begin(); j != firstProductCount.end(); j++ )
+            for( StringCounter::iterator j = firstProductCount.begin(); j != firstProductCount.end(); j++ )
             {
-               int coefficient = j->second;
+               coefficient = j->second;
+               name = j->first;
                if( coefficient == 1 )
                {
                   if( j == firstProductCount.begin() )
-                     printw( "%c", j->first );
+                     printw( "%s", name.c_str() );
                   else
-                     printw( " + %c", j->first );
+                     printw( " + %s", name.c_str() );
                }
                else
                {
                   if( j == firstProductCount.begin() )
-                     printw( "%d%c", j->second, j->first );
+                     printw( "%d %s", coefficient, name.c_str() );
                   else
-                     printw( " + %d%c", j->second, j->first );
+                     printw( " + %d %s", coefficient, name.c_str() );
                }
             }
 
@@ -482,22 +486,23 @@ Sim::printReactions()
 
                // Print the reactants, grouping copies of one type together
                // with stoichiometric coefficients
-               for( std::map<char,int>::iterator j = reactantCount.begin(); j != reactantCount.end(); j++ )
+               for( StringCounter::iterator j = reactantCount.begin(); j != reactantCount.end(); j++ )
                {
-                  int coefficient = j->second;
+                  coefficient = j->second;
+                  name = j->first;
                   if( coefficient == 1 )
                   {
                      if( j == reactantCount.begin() )
-                        printw( "%c", j->first );
+                        printw( "%s", name.c_str() );
                      else
-                        printw( " + %c", j->first );
+                        printw( " + %s", name.c_str() );
                   }
                   else
                   {
                      if( j == reactantCount.begin() )
-                        printw( "%d%c", j->second, j->first );
+                        printw( "%d %s", coefficient, name.c_str() );
                      else
-                        printw( " + %d%c", j->second, j->first );
+                        printw( " + %d %s", coefficient, name.c_str() );
                   }
                }
 
@@ -505,22 +510,23 @@ Sim::printReactions()
 
                // Print the second products, grouping copies of one type together
                // with stoichiometric coefficients
-               for( std::map<char,int>::iterator j = secondProductCount.begin(); j != secondProductCount.end(); j++ )
+               for( StringCounter::iterator j = secondProductCount.begin(); j != secondProductCount.end(); j++ )
                {
-                  int coefficient = j->second;
+                  coefficient = j->second;
+                  name = j->first;
                   if( coefficient == 1 )
                   {
                      if( j == secondProductCount.begin() )
-                        printw( "%c", j->first );
+                        printw( "%s", name.c_str() );
                      else
-                        printw( " + %c", j->first );
+                        printw( " + %s", name.c_str() );
                   }
                   else
                   {
                      if( j == secondProductCount.begin() )
-                        printw( "%d%c", j->second, j->first );
+                        printw( "%d %s", coefficient, name.c_str() );
                      else
-                        printw( " + %d%c", j->second, j->first );
+                        printw( " + %d %s", coefficient, name.c_str() );
                   }
                }
 
@@ -537,22 +543,23 @@ Sim::printReactions()
 
             // Print the reactants, grouping copies of one type together
             // with stoichiometric coefficients
-            for( std::map<char,int>::iterator j = reactantCount.begin(); j != reactantCount.end(); j++ )
+            for( StringCounter::iterator j = reactantCount.begin(); j != reactantCount.end(); j++ )
             {
-               int coefficient = j->second;
+               coefficient = j->second;
+               name = j->first;
                if( coefficient == 1 )
                {
                   if( j == reactantCount.begin() )
-                     std::cout << j->first;
+                     std::cout << name;
                   else
-                     std::cout << " + " << j->first;
+                     std::cout << " + " << name;
                }
                else
                {
                   if( j == reactantCount.begin() )
-                     std::cout << j->second << j->first;
+                     std::cout << coefficient << " " << name;
                   else
-                     std::cout << " + " << j->second << j->first;
+                     std::cout << " + " << coefficient << " " << name;
                }
             }
 
@@ -560,22 +567,23 @@ Sim::printReactions()
 
             // Print the first products, grouping copies of one type together
             // with stoichiometric coefficients
-            for( std::map<char,int>::iterator j = firstProductCount.begin(); j != firstProductCount.end(); j++ )
+            for( StringCounter::iterator j = firstProductCount.begin(); j != firstProductCount.end(); j++ )
             {
-               int coefficient = j->second;
+               coefficient = j->second;
+               name = j->first;
                if( coefficient == 1 )
                {
                   if( j == firstProductCount.begin() )
-                     std::cout << j->first;
+                     std::cout << name;
                   else
-                     std::cout << " + " << j->first;
+                     std::cout << " + " << name;
                }
                else
                {
                   if( j == firstProductCount.begin() )
-                     std::cout << j->second << j->first;
+                     std::cout << coefficient << " " << name;
                   else
-                     std::cout << " + " << j->second << j->first;
+                     std::cout << " + " << coefficient << " " << name;
                }
             }
 
@@ -591,22 +599,23 @@ Sim::printReactions()
 
                // Print the reactants, grouping copies of one type together
                // with stoichiometric coefficients
-               for( std::map<char,int>::iterator j = reactantCount.begin(); j != reactantCount.end(); j++ )
+               for( StringCounter::iterator j = reactantCount.begin(); j != reactantCount.end(); j++ )
                {
-                  int coefficient = j->second;
+                  coefficient = j->second;
+                  name = j->first;
                   if( coefficient == 1 )
                   {
                      if( j == reactantCount.begin() )
-                        std::cout << j->first;
+                        std::cout << name;
                      else
-                        std::cout << " + " << j->first;
+                        std::cout << " + " << name;
                   }
                   else
                   {
                      if( j == reactantCount.begin() )
-                        std::cout << j->second << j->first;
+                        std::cout << coefficient << " " << name;
                      else
-                        std::cout << " + " << j->second << j->first;
+                        std::cout << " + " << coefficient << " " << name;
                   }
                }
 
@@ -614,22 +623,23 @@ Sim::printReactions()
 
                // Print the second products, grouping copies of one type together
                // with stoichiometric coefficients
-               for( std::map<char,int>::iterator j = secondProductCount.begin(); j != secondProductCount.end(); j++ )
+               for( StringCounter::iterator j = secondProductCount.begin(); j != secondProductCount.end(); j++ )
                {
-                  int coefficient = j->second;
+                  coefficient = j->second;
+                  name = j->first;
                   if( coefficient == 1 )
                   {
                      if( j == secondProductCount.begin() )
-                        std::cout << j->first;
+                        std::cout << name;
                      else
-                        std::cout << " + " << j->first;
+                        std::cout << " + " << name;
                   }
                   else
                   {
                      if( j == secondProductCount.begin() )
-                        std::cout << j->second << j->first;
+                        std::cout << coefficient << " " << name;
                      else
-                        std::cout << " + " << j->second << j->first;
+                        std::cout << " + " << coefficient << " " << name;
                   }
                }
 
