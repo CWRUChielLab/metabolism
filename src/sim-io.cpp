@@ -47,11 +47,15 @@ Sim::loadChemistry()
                std::string word;
                int n;
                double prob;
+               StringCounter reactantCount;
+               StringCounter productCount;
                ElementVector reactants, products;
 
                load.exceptions( std::ifstream::failbit );
                load >> prob;
 
+               // Read in the names of reactants, adding
+               // them up along the way
                word = "+";
                while( word == "+" )
                {
@@ -67,9 +71,9 @@ Sim::loadChemistry()
                   load >> word;
                   for( int i = 0; i < n; i++ )
                   {
-                     if( periodicTable[ word ] != NULL )
+                     if( periodicTable[ word ] != NULL && word != "Solvent" )
                      {
-                        reactants.push_back( periodicTable[ word ] );
+                        reactantCount[ word ]++;
                      }
                      else
                      {
@@ -84,12 +88,16 @@ Sim::loadChemistry()
                   load >> word;
                }
 
+               // Ensure that the reactants and products
+               // are divided by a reaction arrow
                if( word != "->" )
                {
                   std::cout << "Loading rxn: confused by \"" << word << "\", was expecting \"->\"!" << std::endl;
                   assert(0);
                }
 
+               // Read in the names of products, adding
+               // them up along the way
                word = "+";
                while( word == "+" )
                {
@@ -105,9 +113,9 @@ Sim::loadChemistry()
                   load >> word;
                   for( int i = 0; i < n; i++ )
                   {
-                     if( periodicTable[ word ] != NULL )
+                     if( periodicTable[ word ] != NULL && word != "Solvent" )
                      {
-                        products.push_back( periodicTable[ word ] );
+                        productCount[ word ]++;
                      }
                      else
                      {
@@ -128,6 +136,23 @@ Sim::loadChemistry()
 
                load.exceptions( std::ifstream::goodbit );
 
+               // Store the reactants and products in the ElementVectors,
+               // adding Solvent as placeholders to balance the reaction
+               // if necessary
+               for( StringCounter::iterator i = reactantCount.begin(); i != reactantCount.end(); i++ )
+               {
+                  word = i->first;
+                  n = i->second;
+                  for( int j = 0; j < n; j++ )
+                     reactants.push_back( periodicTable[ word ] );
+               }
+               for( StringCounter::iterator i = productCount.begin(); i != productCount.end(); i++ )
+               {
+                  word = i->first;
+                  n = i->second;
+                  for( int j = 0; j < n; j++ )
+                     products.push_back( periodicTable[ word ] );
+               }
                while( products.size() > reactants.size() )
                {
                   reactants.push_back( periodicTable[ "Solvent" ] );
@@ -137,6 +162,9 @@ Sim::loadChemistry()
                   products.push_back( periodicTable[ "Solvent" ] );
                }
 
+               // Create the reaction and store it in the rxnTable;
+               // if a Reaction with the same reactants already exists,
+               // make this its second set of products
                tempRxn = safeNew( Reaction( reactants, products, prob ) );
                if( rxnTable[ tempRxn->getKey() ] == NULL )
                {
@@ -147,6 +175,7 @@ Sim::loadChemistry()
                   rxnTable[ tempRxn->getKey() ]->setSecondProducts( products );
                   rxnTable[ tempRxn->getKey() ]->setSecondProb( prob );
                }
+
                rxnsLoaded++;
             }
             else
@@ -204,52 +233,16 @@ Sim::writeConfig()
    configFile << std::endl;
 
    // Write Elements to file
-   for( ElementMap::iterator i = periodicTable.begin(); i != periodicTable.end(); i++ )
-   {
-      Element* ele = i->second;
-      if( ele->getName() != "Solvent" )
-      {
-         configFile <<  "ele " << ele->getName() << " " << ele->getSymbol() << " " << ele->getColor() << " " << ele->getCharge() << std::endl;
-      }
-   }
+   printEles( &configFile );
    configFile << std::endl;
 
    // Write Reactions to file
-   for( ReactionMap::iterator i = rxnTable.begin(); i != rxnTable.end(); i++ )
-   {
-      Reaction* rxn = i->second;
-      if( rxn != NULL )
-      {
-         configFile << "rxn " << rxn->getFirstProb() << " " << rxn->getReactants().size() << " ";
-         for( unsigned int j = 0; j < rxn->getReactants().size(); j++ )
-         {
-            configFile << rxn->getReactants()[j]->getName() << " ";
-         }
-         configFile << rxn->getFirstProducts().size() << " ";
-         for( unsigned int j = 0; j < rxn->getFirstProducts().size(); j++ )
-         {
-            configFile << rxn->getFirstProducts()[j]->getName() << " ";
-         }
-         if( !rxn->getSecondProducts().empty() )
-         {
-            configFile << rxn->getSecondProb() << " " << rxn->getSecondProducts().size() << " ";
-            for( unsigned int j = 0; j < rxn->getSecondProducts().size(); j++ )
-            {
-               configFile << rxn->getSecondProducts()[j]->getName() << " ";
-            }
-         }
-         configFile << std::endl;
-      }
-   }
+   printRxns( &configFile );
    configFile << std::endl;
 
    // Write initialTypes to file
-   configFile << "init " << initialTypes.size() << " ";
-   for( unsigned int i = 0; i < initialTypes.size(); i++ )
-   {
-      configFile << initialTypes[i]->getName() << " ";
-   }
-   configFile << std::endl << std::endl;
+   printInits( &configFile );
+   configFile << std::endl;
 
    configFile.close();
 }
@@ -258,7 +251,7 @@ Sim::writeConfig()
 // Records important information about the state
 // of the world and writes it to file.
 void
-Sim::takeCensus()
+Sim::writeCensus()
 {
    int colwidth = 12;
    static int initialized = 0;
@@ -300,7 +293,7 @@ Sim::takeCensus()
 // of the world to file.  To be called when the
 // simulation ends.
 void
-Sim::dumpAtoms()
+Sim::writeDiffusion()
 {
    int colwidth = 12;
    std::ofstream diffusionFile;
@@ -356,297 +349,290 @@ Sim::printWorld()
 
 
 void
-Sim::printElements()
+Sim::printEles( std::ostream* out )
 {
-   if( o->useGUI )
-   // **********************
-   // Print using ncurses
-   // **********************
+   for( ElementMap::iterator i = periodicTable.begin(); i != periodicTable.end(); i++ )
    {
+      Element* ele = i->second;
+      if( ele->getName() != "Solvent" )
+      {
+         if( out == (std::ostream*)(NULL) )
+         {
 #ifndef _NO_NCURSES
-      printw( "There are %d elements.\n", periodicTable.size() );
-      for( ElementMap::iterator i = periodicTable.begin(); i != periodicTable.end(); i++ )
-      {
-         Element* ele = i->second;
-         printw( "periodicTable[\"%s\"] has key:\t%d\n", ele->getName().c_str(), periodicTable[ele->getName()]->getKey() );
-      }
-      refresh();
+            printw( "ele %s %c %d %d\n", ele->getName().c_str(), ele->getSymbol(), ele->getColor(), ele->getCharge() );
 #endif
-   }
-   else
-   // **********************
-   // Print using cout
-   // **********************
-   {
-      std::cout << "There are " << periodicTable.size() << " elements." << std::endl;
-      for( ElementMap::iterator i = periodicTable.begin(); i != periodicTable.end(); i++ )
-      {
-         Element* ele = i->second;
-         std::cout << "periodicTable[\"" << ele->getName() << "\"] has key:\t" << periodicTable[ele->getName()]->getKey() << std::endl;
+         }
+         else
+         {
+            *out <<  "ele " << ele->getName() << " " << ele->getSymbol() << " " << ele->getColor() << " " << ele->getCharge() << std::endl;
+         }
       }
    }
 }
 
 
 void
-Sim::printReactions( std::ostream* out )
+Sim::printRxns( std::ostream* out )
 {
    // Loop through the rxnTable, printing each Reaction
    for( ReactionMap::iterator i = rxnTable.begin(); i != rxnTable.end(); i++ )
    {
-      StringCounter reactantCount;
-      StringCounter firstProductCount;
-      StringCounter secondProductCount;
-      int coefficient;
-      std::string name;
-
       Reaction* rxn = i->second;
       if( rxn != NULL )
       {
-         // Count up the number of each type of reactant and product
-         for( unsigned int j = 0; j < rxn->getReactants().size(); j++ )
-         {
-            reactantCount[ rxn->getReactants()[j]->getName() ]++;
-         }
-         for( unsigned int j = 0; j < rxn->getFirstProducts().size(); j++ )
-         {
-            firstProductCount[ rxn->getFirstProducts()[j]->getName() ]++;
-         }
+         // Determine how many sets of products this reaction has
+         int numProductSets;
          if( !rxn->getSecondProducts().empty() )
-         {
-            for( unsigned int j = 0; j < rxn->getSecondProducts().size(); j++ )
-            {
-               secondProductCount[ rxn->getSecondProducts()[j]->getName() ]++;
-            }
-         }
-
-         if( o->useGUI )
-         // **********************************
-         // Print first reaction using ncurses
-         // **********************************
-         {
-#ifndef _NO_NCURSES
-            printw( "Key: %d  Prob: %f  \t", rxn->getKey(), rxn->getFirstProb() );
-
-            // Print the reactants, grouping copies of one type together
-            // with stoichiometric coefficients
-            for( StringCounter::iterator j = reactantCount.begin(); j != reactantCount.end(); j++ )
-            {
-               coefficient = j->second;
-               name = j->first;
-               if( coefficient == 1 )
-               {
-                  if( j == reactantCount.begin() )
-                     printw( "%s", name.c_str() );
-                  else
-                     printw( " + %s", name.c_str() );
-               }
-               else
-               {
-                  if( j == reactantCount.begin() )
-                     printw( "%d %s", coefficient, name.c_str() );
-                  else
-                     printw( " + %d %s", coefficient, name.c_str() );
-               }
-            }
-
-            printw( " -> " );
-
-            // Print the first products, grouping copies of one type together
-            // with stoichiometric coefficients
-            for( StringCounter::iterator j = firstProductCount.begin(); j != firstProductCount.end(); j++ )
-            {
-               coefficient = j->second;
-               name = j->first;
-               if( coefficient == 1 )
-               {
-                  if( j == firstProductCount.begin() )
-                     printw( "%s", name.c_str() );
-                  else
-                     printw( " + %s", name.c_str() );
-               }
-               else
-               {
-                  if( j == firstProductCount.begin() )
-                     printw( "%d %s", coefficient, name.c_str() );
-                  else
-                     printw( " + %d %s", coefficient, name.c_str() );
-               }
-            }
-
-            printw( "\n" );
-
-
-            if( !rxn->getSecondProducts().empty() )
-            // ***********************************
-            // Print second reaction using ncurses
-            // ***********************************
-            {
-               printw( "Key: %d  Prob: %f  \t", rxn->getKey(), rxn->getSecondProb() );
-
-               // Print the reactants, grouping copies of one type together
-               // with stoichiometric coefficients
-               for( StringCounter::iterator j = reactantCount.begin(); j != reactantCount.end(); j++ )
-               {
-                  coefficient = j->second;
-                  name = j->first;
-                  if( coefficient == 1 )
-                  {
-                     if( j == reactantCount.begin() )
-                        printw( "%s", name.c_str() );
-                     else
-                        printw( " + %s", name.c_str() );
-                  }
-                  else
-                  {
-                     if( j == reactantCount.begin() )
-                        printw( "%d %s", coefficient, name.c_str() );
-                     else
-                        printw( " + %d %s", coefficient, name.c_str() );
-                  }
-               }
-
-               printw( " -> " );
-
-               // Print the second products, grouping copies of one type together
-               // with stoichiometric coefficients
-               for( StringCounter::iterator j = secondProductCount.begin(); j != secondProductCount.end(); j++ )
-               {
-                  coefficient = j->second;
-                  name = j->first;
-                  if( coefficient == 1 )
-                  {
-                     if( j == secondProductCount.begin() )
-                        printw( "%s", name.c_str() );
-                     else
-                        printw( " + %s", name.c_str() );
-                  }
-                  else
-                  {
-                     if( j == secondProductCount.begin() )
-                        printw( "%d %s", coefficient, name.c_str() );
-                     else
-                        printw( " + %d %s", coefficient, name.c_str() );
-                  }
-               }
-
-               printw( "\n" );
-            }
-#endif
-         }
+            numProductSets = 2;
          else
-         // *******************************
-         // Print first reaction using cout
-         // *******************************
+            numProductSets = 1;
+
+         // Loop through each set of products, printing a separate
+         // line for each reactant-product pair
+         for( int j = 0; j < numProductSets; j++ )
          {
-            std::cout << "Key: " << rxn->getKey() << "  Prob: " << rxn->getFirstProb() << "  \t";
+            double currentProb;
+            ElementVector currentProducts;
+            switch( j )
+            {
+               case 0:
+                  currentProb = rxn->getFirstProb();
+                  currentProducts = rxn->getFirstProducts();
+                  break;
+               case 1:
+                  currentProb = rxn->getSecondProb();
+                  currentProducts = rxn->getSecondProducts();
+                  break;
+               default:
+                  assert(0);
+            }
+
+            // Count up the number of each type of reactant and product
+            StringCounter reactantCount;
+            StringCounter currentProductCount;
+            for( unsigned int k = 0; k < rxn->getReactants().size(); k++ )
+            {
+               if( rxn->getReactants()[k]->getName() != "Solvent" )
+                  reactantCount[ rxn->getReactants()[k]->getName() ]++;
+            }
+            for( unsigned int k = 0; k < currentProducts.size(); k++ )
+            {
+               if( currentProducts[k]->getName() != "Solvent" )
+                  currentProductCount[ currentProducts[k]->getName() ]++;
+            }
+
+            // Print the "rxn" keyword and the probability
+            if( out == (std::ostream*)(NULL) )
+            {
+#ifndef _NO_NCURSES
+               printw( "rxn %f ", currentProb );
+#endif
+            }
+            else
+            {
+               *out << "rxn " << currentProb << " ";
+            }
 
             // Print the reactants, grouping copies of one type together
             // with stoichiometric coefficients
-            for( StringCounter::iterator j = reactantCount.begin(); j != reactantCount.end(); j++ )
+            int coefficient;
+            std::string name;
+            for( StringCounter::iterator k = reactantCount.begin(); k != reactantCount.end(); k++ )
             {
-               coefficient = j->second;
-               name = j->first;
+               coefficient = k->second;
+               name = k->first;
                if( coefficient == 1 )
                {
-                  if( j == reactantCount.begin() )
-                     std::cout << name;
+                  if( k == reactantCount.begin() )
+                  {
+                     if( out == (std::ostream*)(NULL) )
+                     {
+#ifndef _NO_NCURSES
+                        printw( "%s", name.c_str() );
+#endif
+                     }
+                     else
+                     {
+                        *out << name;
+                     }
+                  }
                   else
-                     std::cout << " + " << name;
+                  {
+                     if( out == (std::ostream*)(NULL) )
+                     {
+#ifndef _NO_NCURSES
+                        printw( " + %s", name.c_str() );
+#endif
+                     }
+                     else
+                     {
+                        *out << " + " << name;
+                     }
+                  }
                }
                else
                {
-                  if( j == reactantCount.begin() )
-                     std::cout << coefficient << " " << name;
+                  if( k == reactantCount.begin() )
+                  {
+                     if( out == (std::ostream*)(NULL) )
+                     {
+#ifndef _NO_NCURSES
+                        printw( "%d %s", coefficient, name.c_str() );
+#endif
+                     }
+                     else
+                     {
+                        *out << coefficient << " " << name;
+                     }
+                  }
                   else
-                     std::cout << " + " << coefficient << " " << name;
+                  {
+                     if( out == (std::ostream*)(NULL) )
+                     {
+#ifndef _NO_NCURSES
+                        printw( " + %d %s", coefficient, name.c_str() );
+#endif
+                     }
+                     else
+                     {
+                        *out << " + " << coefficient << " " << name;
+                     }
+                  }
                }
             }
 
-            std::cout << " -> ";
+            // Print the reaction arrow, separating reactants from products
+            if( out == (std::ostream*)(NULL) )
+            {
+#ifndef _NO_NCURSES
+               printw( " -> " );
+#endif
+            }
+            else
+            {
+               *out << " -> ";
+            }
 
-            // Print the first products, grouping copies of one type together
+            // Print the products, grouping copies of one type together
             // with stoichiometric coefficients
-            for( StringCounter::iterator j = firstProductCount.begin(); j != firstProductCount.end(); j++ )
+            for( StringCounter::iterator k = currentProductCount.begin(); k != currentProductCount.end(); k++ )
             {
-               coefficient = j->second;
-               name = j->first;
+               coefficient = k->second;
+               name = k->first;
                if( coefficient == 1 )
                {
-                  if( j == firstProductCount.begin() )
-                     std::cout << name;
+                  if( k == currentProductCount.begin() )
+                  {
+                     if( out == (std::ostream*)(NULL) )
+                     {
+#ifndef _NO_NCURSES
+                        printw( "%s", name.c_str() );
+#endif
+                     }
+                     else
+                     {
+                        *out << name;
+                     }
+                  }
                   else
-                     std::cout << " + " << name;
+                  {
+                     if( out == (std::ostream*)(NULL) )
+                     {
+#ifndef _NO_NCURSES
+                        printw(" + %s", name.c_str() );
+#endif
+                     }
+                     else
+                     {
+                        *out << " + " << name;
+                     }
+                  }
                }
                else
                {
-                  if( j == firstProductCount.begin() )
-                     std::cout << coefficient << " " << name;
+                  if( k == currentProductCount.begin() )
+                  {
+                     if( out == (std::ostream*)(NULL) )
+                     {
+#ifndef _NO_NCURSES
+                        printw( "%d %s", coefficient, name.c_str() );
+#endif
+                     }
+                     else
+                     {
+                        *out << coefficient << " " << name;
+                     }
+                  }
                   else
-                     std::cout << " + " << coefficient << " " << name;
+                  {
+                     if( out == (std::ostream*)(NULL) )
+                     {
+#ifndef _NO_NCURSES
+                        printw( " + %d %s", coefficient, name.c_str() );
+#endif
+                     }
+                     else
+                     {
+                        *out << " + " << coefficient << " " << name;
+                     }
+                  }
                }
             }
 
-            std::cout << std::endl;
-
-
-            if( !rxn->getSecondProducts().empty() )
-            // ********************************
-            // Print second reaction using cout
-            // ********************************
+            // End the line
+            if( out == (std::ostream*)(NULL) )
             {
-               std::cout << "Key: " << rxn->getKey() << "  Prob: " << rxn->getSecondProb() << "  \t";
-
-               // Print the reactants, grouping copies of one type together
-               // with stoichiometric coefficients
-               for( StringCounter::iterator j = reactantCount.begin(); j != reactantCount.end(); j++ )
-               {
-                  coefficient = j->second;
-                  name = j->first;
-                  if( coefficient == 1 )
-                  {
-                     if( j == reactantCount.begin() )
-                        std::cout << name;
-                     else
-                        std::cout << " + " << name;
-                  }
-                  else
-                  {
-                     if( j == reactantCount.begin() )
-                        std::cout << coefficient << " " << name;
-                     else
-                        std::cout << " + " << coefficient << " " << name;
-                  }
-               }
-
-               std::cout << " -> ";
-
-               // Print the second products, grouping copies of one type together
-               // with stoichiometric coefficients
-               for( StringCounter::iterator j = secondProductCount.begin(); j != secondProductCount.end(); j++ )
-               {
-                  coefficient = j->second;
-                  name = j->first;
-                  if( coefficient == 1 )
-                  {
-                     if( j == secondProductCount.begin() )
-                        std::cout << name;
-                     else
-                        std::cout << " + " << name;
-                  }
-                  else
-                  {
-                     if( j == secondProductCount.begin() )
-                        std::cout << coefficient << " " << name;
-                     else
-                        std::cout << " + " << coefficient << " " << name;
-                  }
-               }
-
-               std::cout << std::endl;
+#ifndef _NO_NCURSES
+               printw( "\n" );
+#endif
+            }
+            else
+            {
+               *out << std::endl;
             }
          }
       }
+   }
+}
+
+
+void
+Sim::printInits( std::ostream* out )
+{
+   if( out == (std::ostream*)(NULL) )
+   {
+#ifndef _NO_NCURSES
+      printw( "init %d ", initialTypes.size() );
+#endif
+   }
+   else
+   {
+      *out << "init " << initialTypes.size() << " ";
+   }
+
+   for( unsigned int i = 0; i < initialTypes.size(); i++ )
+   {
+      if( out == (std::ostream*)(NULL) )
+      {
+#ifndef _NO_NCURSES
+         printw( "%s ", initialTypes[i]->getName().c_str() );
+#endif
+      }
+      else
+      {
+         *out << initialTypes[i]->getName() << " ";
+      }
+   }
+
+   if( out == (std::ostream*)(NULL) )
+   {
+#ifndef _NO_NCURSES
+      printw( "\n" );
+#endif
+   }
+   else
+   {
+      *out << std::endl;
    }
 }
 

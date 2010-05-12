@@ -32,7 +32,7 @@ main ( int argc, char* argv[] )
    // Import command line options and initialize the simulation
    o = safeNew( Options( argc, argv ) );
    mySim = safeNew( Sim(o) );
-   mySim->takeCensus();
+   mySim->writeCensus();
 
    // Set up handling of Ctrl-c abort
    signal(SIGINT,handleExit);
@@ -53,9 +53,11 @@ main ( int argc, char* argv[] )
 #ifndef _NO_NCURSES
       printw( "Press Ctrl-c to quit.\n" );
       printw( "------\n" );
-      mySim->printElements();
-      printw( "------\n" );
-      mySim->printReactions( (std::ostream*)(NULL) );
+      mySim->printEles( (std::ostream*)(NULL) );
+      printw( "\n" );
+      mySim->printRxns( (std::ostream*)(NULL) );
+      printw( "\n" );
+      mySim->printInits( (std::ostream*)(NULL) );
       printw( "------\n" );
 #endif
    }
@@ -64,9 +66,11 @@ main ( int argc, char* argv[] )
       // Print using cout
       std::cout << "Press Ctrl-c to quit." << std::endl;
       std::cout << "------" << std::endl;
-      mySim->printElements();
-      std::cout << "------" << std::endl;
-      mySim->printReactions( &std::cout );
+      mySim->printEles( &std::cout );
+      std::cout << std::endl;
+      mySim->printRxns( &std::cout );
+      std::cout << std::endl;
+      mySim->printInits( &std::cout );
       std::cout << "------" << std::endl;
    }
 
@@ -136,7 +140,7 @@ main ( int argc, char* argv[] )
       //if( mySim->getCurrentIter() % 32 == 0 )
       if( mySim->getCurrentIter() % 8 == 0 )
       {
-         mySim->takeCensus();
+         mySim->writeCensus();
       }
 
       // Sleep the simulation each iteration
@@ -161,7 +165,7 @@ main ( int argc, char* argv[] )
    // Write the simulation parameters and diffusion data
    // and clean up ncurses
    mySim->writeConfig();
-   mySim->dumpAtoms();
+   mySim->writeDiffusion();
    if( o->useGUI )
    {
 #ifndef _NO_NCURSES

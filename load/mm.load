@@ -3,8 +3,9 @@ ele Substrate S 0 0
 ele ES F 0 0
 ele Product P 0 0
 
-rxn 0.5 2 Enzyme Substrate 2 ES Solvent
-rxn 0.01 2 ES Solvent 2 Enzyme Substrate 0.01 2 Enzyme Product
+rxn 0.50 Enzyme + Substrate -> ES
+rxn 0.01 ES -> Enzyme + Substrate
+rxn 0.01 ES -> Enzyme + Product
 
 init 4 Enzyme Substrate Substrate Substrate
 

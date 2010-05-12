@@ -30,11 +30,12 @@ class Sim
 
       // Public I/O methods
       void writeConfig();
-      void takeCensus();
-      void dumpAtoms();
+      void writeCensus();
+      void writeDiffusion();
       void printWorld();
-      void printElements();
-      void printReactions( std::ostream* out );
+      void printEles( std::ostream* out );
+      void printRxns( std::ostream* out );
+      void printInits( std::ostream* out );
 
    private:
       // Sim attributes
