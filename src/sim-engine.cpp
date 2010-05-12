@@ -104,14 +104,21 @@ Sim::Sim( Options* newOptions )
    Atom* tempAtom;
    int x, y;
    o->atomCount = std::min( o->atomCount, o->worldX * o->worldY );
-   for( int i = 0; i < o->atomCount; i++ )
+   if( initialTypes.size() > 0 )
    {
-      x = positions[i] % o->worldX;
-      y = positions[i] / o->worldX;
-      tempEle = initialTypes[ randNums[i] % initialTypes.size() ];
-      //if( i < 64 ) tempEle = initialTypes[0]; else tempEle = initialTypes[1];
-      tempAtom = safeNew( Atom( tempEle, x, y ) );
-      world[ getWorldIndex(x,y) ] = tempAtom;
+      for( int i = 0; i < o->atomCount; i++ )
+      {
+         x = positions[i] % o->worldX;
+         y = positions[i] / o->worldX;
+         tempEle = initialTypes[ randNums[i] % initialTypes.size() ];
+         //if( i < 64 ) tempEle = initialTypes[0]; else tempEle = initialTypes[1];
+         tempAtom = safeNew( Atom( tempEle, x, y ) );
+         world[ getWorldIndex(x,y) ] = tempAtom;
+      }
+   }
+   else
+   {
+      o->atomCount = 0;
    }
 }
 

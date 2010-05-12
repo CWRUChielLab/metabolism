@@ -71,14 +71,17 @@ Sim::loadChemistry()
                   load >> word;
                   for( int i = 0; i < n; i++ )
                   {
-                     if( periodicTable[ word ] != NULL && word != "Solvent" )
+                     if( word != "*" && word != "Solvent" )
                      {
-                        reactantCount[ word ]++;
-                     }
-                     else
-                     {
-                        std::cout << "Loading rxn: " << word << " is not a defined Element!" << std::endl;
-                        assert(0);
+                        if( periodicTable[ word ] != NULL )
+                        {
+                           reactantCount[ word ]++;
+                        }
+                        else
+                        {
+                           std::cout << "Loading rxn: " << word << " is not a defined Element!" << std::endl;
+                           assert(0);
+                        }
                      }
                   }
                   if( load.peek() == '\n' )
@@ -113,14 +116,17 @@ Sim::loadChemistry()
                   load >> word;
                   for( int i = 0; i < n; i++ )
                   {
-                     if( periodicTable[ word ] != NULL && word != "Solvent" )
+                     if( word != "*" && word != "Solvent" )
                      {
-                        productCount[ word ]++;
-                     }
-                     else
-                     {
-                        std::cout << "Loading rxn: " << word << " is not a defined Element!" << std::endl;
-                        assert(0);
+                        if( periodicTable[ word ] != NULL )
+                        {
+                           productCount[ word ]++;
+                        }
+                        else
+                        {
+                           std::cout << "Loading rxn: " << word << " is not a defined Element!" << std::endl;
+                           assert(0);
+                        }
                      }
                   }
                   while( load.peek() == ' ' )
@@ -437,65 +443,81 @@ Sim::printRxns( std::ostream* out )
             // with stoichiometric coefficients
             int coefficient;
             std::string name;
-            for( StringCounter::iterator k = reactantCount.begin(); k != reactantCount.end(); k++ )
+            if( reactantCount.empty() )
             {
-               coefficient = k->second;
-               name = k->first;
-               if( coefficient == 1 )
+               if( out == (std::ostream*)(NULL) )
                {
-                  if( k == reactantCount.begin() )
-                  {
-                     if( out == (std::ostream*)(NULL) )
-                     {
 #ifndef _NO_NCURSES
-                        printw( "%s", name.c_str() );
+                  printw( "*" );
 #endif
-                     }
-                     else
-                     {
-                        *out << name;
-                     }
-                  }
-                  else
-                  {
-                     if( out == (std::ostream*)(NULL) )
-                     {
-#ifndef _NO_NCURSES
-                        printw( " + %s", name.c_str() );
-#endif
-                     }
-                     else
-                     {
-                        *out << " + " << name;
-                     }
-                  }
                }
                else
                {
-                  if( k == reactantCount.begin() )
+                  *out << "*";
+               }
+            }
+            else
+            {
+               for( StringCounter::iterator k = reactantCount.begin(); k != reactantCount.end(); k++ )
+               {
+                  coefficient = k->second;
+                  name = k->first;
+                  if( coefficient == 1 )
                   {
-                     if( out == (std::ostream*)(NULL) )
+                     if( k == reactantCount.begin() )
                      {
+                        if( out == (std::ostream*)(NULL) )
+                        {
 #ifndef _NO_NCURSES
-                        printw( "%d %s", coefficient, name.c_str() );
+                           printw( "%s", name.c_str() );
 #endif
+                        }
+                        else
+                        {
+                           *out << name;
+                        }
                      }
                      else
                      {
-                        *out << coefficient << " " << name;
+                        if( out == (std::ostream*)(NULL) )
+                        {
+#ifndef _NO_NCURSES
+                           printw( " + %s", name.c_str() );
+#endif
+                        }
+                        else
+                        {
+                           *out << " + " << name;
+                        }
                      }
                   }
                   else
                   {
-                     if( out == (std::ostream*)(NULL) )
+                     if( k == reactantCount.begin() )
                      {
+                        if( out == (std::ostream*)(NULL) )
+                        {
 #ifndef _NO_NCURSES
-                        printw( " + %d %s", coefficient, name.c_str() );
+                           printw( "%d %s", coefficient, name.c_str() );
 #endif
+                        }
+                        else
+                        {
+                           *out << coefficient << " " << name;
+                        }
                      }
                      else
                      {
-                        *out << " + " << coefficient << " " << name;
+                        if( out == (std::ostream*)(NULL) )
+                        {
+#ifndef _NO_NCURSES
+                           printw( " + %d %s", coefficient, name.c_str() );
+#endif
+                        }
+                        else
+                        {
+                           *out << " + " << coefficient << " " << name;
+                        }
                      }
                   }
                }
@@ -515,65 +537,81 @@ Sim::printRxns( std::ostream* out )
 
             // Print the products, grouping copies of one type together
             // with stoichiometric coefficients
-            for( StringCounter::iterator k = currentProductCount.begin(); k != currentProductCount.end(); k++ )
+            if( currentProductCount.empty() )
             {
-               coefficient = k->second;
-               name = k->first;
-               if( coefficient == 1 )
+               if( out == (std::ostream*)(NULL) )
                {
-                  if( k == currentProductCount.begin() )
-                  {
-                     if( out == (std::ostream*)(NULL) )
-                     {
 #ifndef _NO_NCURSES
-                        printw( "%s", name.c_str() );
+                  printw( "*" );
 #endif
-                     }
-                     else
-                     {
-                        *out << name;
-                     }
-                  }
-                  else
-                  {
-                     if( out == (std::ostream*)(NULL) )
-                     {
-#ifndef _NO_NCURSES
-                        printw(" + %s", name.c_str() );
-#endif
-                     }
-                     else
-                     {
-                        *out << " + " << name;
-                     }
-                  }
                }
                else
                {
-                  if( k == currentProductCount.begin() )
+                  *out << "*";
+               }
+            }
+            else
+            {
+               for( StringCounter::iterator k = currentProductCount.begin(); k != currentProductCount.end(); k++ )
+               {
+                  coefficient = k->second;
+                  name = k->first;
+                  if( coefficient == 1 )
                   {
-                     if( out == (std::ostream*)(NULL) )
+                     if( k == currentProductCount.begin() )
                      {
+                        if( out == (std::ostream*)(NULL) )
+                        {
 #ifndef _NO_NCURSES
-                        printw( "%d %s", coefficient, name.c_str() );
+                           printw( "%s", name.c_str() );
 #endif
+                        }
+                        else
+                        {
+                           *out << name;
+                        }
                      }
                      else
                      {
-                        *out << coefficient << " " << name;
+                        if( out == (std::ostream*)(NULL) )
+                        {
+#ifndef _NO_NCURSES
+                           printw(" + %s", name.c_str() );
+#endif
+                        }
+                        else
+                        {
+                           *out << " + " << name;
+                        }
                      }
                   }
                   else
                   {
-                     if( out == (std::ostream*)(NULL) )
+                     if( k == currentProductCount.begin() )
                      {
+                        if( out == (std::ostream*)(NULL) )
+                        {
 #ifndef _NO_NCURSES
-                        printw( " + %d %s", coefficient, name.c_str() );
+                           printw( "%d %s", coefficient, name.c_str() );
 #endif
+                        }
+                        else
+                        {
+                           *out << coefficient << " " << name;
+                        }
                      }
                      else
                      {
-                        *out << " + " << coefficient << " " << name;
+                        if( out == (std::ostream*)(NULL) )
+                        {
+#ifndef _NO_NCURSES
+                           printw( " + %d %s", coefficient, name.c_str() );
+#endif
+                        }
+                        else
+                        {
+                           *out << " + " << coefficient << " " << name;
+                        }
                      }
                   }
                }
