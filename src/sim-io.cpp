@@ -18,10 +18,6 @@ using namespace SafeCalls;
 void
 Sim::loadChemistry()
 {
-   elesLoaded = 0;
-   rxnsLoaded = 0;
-   initsLoaded = 0;
-
    std::ifstream load;
    std::string keyword;
    Element* tempEle;
@@ -48,109 +44,138 @@ Sim::loadChemistry()
          {
             if( keyword == "rxn")
             {
+               std::string word;
                int n;
-               char c;
-               std::string firstEle, secondEle;
-               double firstProb, secondProb;
-               ElementVector reactants, firstProducts, secondProducts;
+               double prob;
+               ElementVector reactants, products;
 
-               load >> firstProb >> n;
-               switch( n )
+               load.exceptions( std::ifstream::failbit );
+               load >> prob;
+
+               word = "+";
+               while( word == "+" )
                {
-                  case 1:
-                     load >> firstEle;
-                     reactants = ev( 1, firstEle.c_str() );
-                     break;
-                  case 2:
-                     load >> firstEle >> secondEle;
-                     reactants = ev( 2, firstEle.c_str(), secondEle.c_str() );
-                     break;
-                  default:
-                     std::cout << "Load settings: " << n << " is not an acceptable number of reactants!" << std::endl;
-                     assert(0);
-                     break;
-               }
-               load >> n;
-               switch( n )
-               {
-                  case 1:
-                     load >> firstEle;
-                     firstProducts = ev( 1, firstEle.c_str() );
-                     break;
-                  case 2:
-                     load >> firstEle >> secondEle;
-                     firstProducts = ev( 2, firstEle.c_str(), secondEle.c_str() );
-                     break;
-                  default:
-                     std::cout << "Load settings: " << n << " is not an acceptable number of products!" << std::endl;
-                     assert(0);
-                     break;
-               }
-               while( load.peek() == ' ' && load.good() )
-               {
-                  c = load.get();
-               }
-               c = load.peek();
-               if( c == '0' || c == '1' )
-               {
-                  load >> secondProb >> n;
-                  switch( n )
+                  n = 1;
+                  try
                   {
-                     case 1:
-                        load >> firstEle;
-                        secondProducts = ev( 1, firstEle.c_str() );
-                        break;
-                     case 2:
-                        load >> firstEle >> secondEle;
-                        secondProducts = ev( 2, firstEle.c_str(), secondEle.c_str() );
-                        break;
-                     default:
-                        std::cout << "Load settings: " << n << " is not an acceptable number of products!" << std::endl;
-                        assert(0);
-                        break;
+                     load >> n;
                   }
-                  tempRxn = safeNew( Reaction( reactants, firstProducts, firstProb, secondProducts, secondProb ) );
+                  catch( std::ifstream::failure e )
+                  {
+                     load.clear();
+                  }
+                  load >> word;
+                  for( int i = 0; i < n; i++ )
+                  {
+                     if( periodicTable[ word ] != NULL )
+                     {
+                        reactants.push_back( periodicTable[ word ] );
+                     }
+                     else
+                     {
+                        std::cout << "Loading rxn: " << word << " is not a defined Element!" << std::endl;
+                        assert(0);
+                     }
+                  }
+                  if( load.peek() == '\n' )
+                  {
+                     break;
+                  }
+                  load >> word;
+               }
+
+               if( word != "->" )
+               {
+                  std::cout << "Loading rxn: confused by \"" << word << "\", was expecting \"->\"!" << std::endl;
+                  assert(0);
+               }
+
+               word = "+";
+               while( word == "+" )
+               {
+                  n = 1;
+                  try
+                  {
+                     load >> n;
+                  }
+                  catch( std::ifstream::failure e )
+                  {
+                     load.clear();
+                  }
+                  load >> word;
+                  for( int i = 0; i < n; i++ )
+                  {
+                     if( periodicTable[ word ] != NULL )
+                     {
+                        products.push_back( periodicTable[ word ] );
+                     }
+                     else
+                     {
+                        std::cout << "Loading rxn: " << word << " is not a defined Element!" << std::endl;
+                        assert(0);
+                     }
+                  }
+                  while( load.peek() == ' ' )
+                  {
+                     word = load.get();
+                  }
+                  if( load.peek() == '\n' )
+                  {
+                     break;
+                  }
+                  load >> word;
+               }
+
+               load.exceptions( std::ifstream::goodbit );
+
+               while( products.size() > reactants.size() )
+               {
+                  reactants.push_back( periodicTable[ "Solvent" ] );
+               }
+               while( reactants.size() > products.size() )
+               {
+                  products.push_back( periodicTable[ "Solvent" ] );
+               }
+
+               tempRxn = safeNew( Reaction( reactants, products, prob ) );
+               if( rxnTable[ tempRxn->getKey() ] == NULL )
+               {
+                  rxnTable[ tempRxn->getKey() ] = tempRxn;
                }
                else
                {
-                  tempRxn = safeNew( Reaction( reactants, firstProducts, firstProb ) );
+                  rxnTable[ tempRxn->getKey() ]->setSecondProducts( products );
+                  rxnTable[ tempRxn->getKey() ]->setSecondProb( prob );
                }
-               rxnTable[ tempRxn->getKey() ] = tempRxn;
                rxnsLoaded++;
             }
             else
             {
                if( keyword == "init" )
                {
+                  std::string word;
                   int n;
-                  std::string firstEle, secondEle, thirdEle, fourthEle;
 
                   load >> n;
-                  switch( n )
+                  for( int i = 0; i < n; i++ )
                   {
-                     case 1:
-                        load >> firstEle;
-                        initialTypes = ev( 1, firstEle.c_str() );
-                        break;
-                     case 2:
-                        load >> firstEle >> secondEle;
-                        initialTypes = ev( 2, firstEle.c_str(), secondEle.c_str() );
-                        break;
-                     case 3:
-                        load >> firstEle >> secondEle >> thirdEle;
-                        initialTypes = ev( 3, firstEle.c_str(), secondEle.c_str(), thirdEle.c_str() );
-                        break;
-                     case 4:
-                        load >> firstEle >> secondEle >> thirdEle >> fourthEle;
-                        initialTypes = ev( 4, firstEle.c_str(), secondEle.c_str(), thirdEle.c_str(), fourthEle.c_str() );
-                        break;
-                     default:
-                        std::cout << "Load settings: only allowed between 1 and 4 initial types!" << std::endl;
+                     load >> word;
+                     if( periodicTable[ word ] != NULL )
+                     {
+                        initialTypes.push_back( periodicTable[ word ] );
+                     }
+                     else
+                     {
+                        std::cout << "Loading init: " << word << " is not a defined Element!" << std::endl;
                         assert(0);
-                        break;
+                     }
                   }
                   initsLoaded++;
-                  assert( initsLoaded < 2 );
+                  if( initsLoaded > 1 )
+                  {
+                     std::cout << "Loading init: only one init keyword is permitted!" << std::endl;
+                     assert(0);
+                  }
                }
             }
          }

@@ -2,6 +2,7 @@
  */
 
 #include <cassert>
+#include <iostream>
 #include "reaction.h"
 
 
@@ -9,10 +10,25 @@
 Reaction::Reaction( std::vector<Element*> initReactants, std::vector<Element*> initFirstProducts, double initFirstProb )
 {
    // Ensure that products and reactants are balanced
-   assert( initReactants.size() == initFirstProducts.size() );
+   if( initReactants.size() != initFirstProducts.size() )
+   {
+      std::cout << "Loading rxn: reaction is not balanced!" << std::endl;
+      assert(0);
+   }
+
+   // Ensure number of products and reactants are fine
+   if( initReactants.size() < 1 || initReactants.size() > 2 )
+   {
+      std::cout << "Loading rxn: reactions must contain at least one and no more than two reactants and products each!" << std::endl;
+      assert(0);
+   }
 
    // Ensure that probabilities are sane
-   assert( initFirstProb >= 0 && initFirstProb <= 1 );
+   if( initFirstProb < 0 || initFirstProb > 1 )
+   {
+      std::cout << "Loading rxn: probability must fall between 0 and 1!" << std::endl;
+      assert(0);
+   }
 
    // Calculate the product of the reactant keys for the Reaction key
    key = 1;
@@ -28,32 +44,6 @@ Reaction::Reaction( std::vector<Element*> initReactants, std::vector<Element*> i
    secondProducts = temp;
    firstProb = initFirstProb;
    secondProb = 0.0;
-}
-
-
-Reaction::Reaction( std::vector<Element*> initReactants, std::vector<Element*> initFirstProducts, double initFirstProb, std::vector<Element*> initSecondProducts, double initSecondProb )
-{
-   // Ensure that products and reactants are balanced
-   assert( initReactants.size() == initFirstProducts.size() );
-   assert( initReactants.size() == initSecondProducts.size() );
-
-   // Ensure that probabilities are sane
-   assert( initFirstProb >= 0 && initFirstProb <= 1 );
-   assert( initSecondProb >= 0 && initSecondProb <= 1 );
-
-   // Calculate the product of the reactant keys for the Reaction key
-   key = 1;
-   for( unsigned int i = 0; i < initReactants.size(); i++ )
-   {
-      key *= initReactants[i]->getKey();
-   }
-
-   // Copy constructor arguments
-   reactants = initReactants;
-   firstProducts = initFirstProducts;
-   secondProducts = initSecondProducts;
-   firstProb = initFirstProb;
-   secondProb = initSecondProb;
 }
 
 
@@ -89,6 +79,13 @@ void
 Reaction::setFirstProducts( std::vector<Element*> newFirstProducts )
 {
    // Ensure that products and reactants are balanced
+   if( newFirstProducts.size() != reactants.size() )
+   {
+      std::cout << "setFirstProducts: reaction is not balanced!" << std::endl;
+      assert(0);
+   }
+
+   // Ensure that products and reactants are balanced
    assert( newFirstProducts.size() == reactants.size() );
 
    firstProducts = newFirstProducts;
@@ -99,7 +96,11 @@ void
 Reaction::setSecondProducts( std::vector<Element*> newSecondProducts )
 {
    // Ensure that products and reactants are balanced
-   assert( newSecondProducts.size() == reactants.size() );
+   if( newSecondProducts.size() != reactants.size() )
+   {
+      std::cout << "setSecondProducts: reaction is not balanced!" << std::endl;
+      assert(0);
+   }
 
    secondProducts = newSecondProducts;
 }
@@ -123,7 +124,11 @@ void
 Reaction::setFirstProb( double newFirstProb )
 {
    // Ensure that probabilities are sane
-   assert( newFirstProb >= 0 && newFirstProb <= 1 );
+   if( newFirstProb < 0 || newFirstProb > 1 )
+   {
+      std::cout << "setFirstProb: probability must fall between 0 and 1!" << std::endl;
+      assert(0);
+   }
 
    firstProb = newFirstProb;
 }
@@ -133,7 +138,11 @@ void
 Reaction::setSecondProb( double newSecondProb )
 {
    // Ensure that probabilities are sane
-   assert( newSecondProb >= 0 && newSecondProb <= 1 );
+   if( newSecondProb < 0 || newSecondProb > 1 )
+   {
+      std::cout << "setSecondProb: probability must fall between 0 and 1!" << std::endl;
+      assert(0);
+   }
 
    secondProb = newSecondProb;
 }

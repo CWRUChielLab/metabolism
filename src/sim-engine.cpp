@@ -67,6 +67,9 @@ Sim::Sim( Options* newOptions )
    periodicTable[ "Solvent" ] = tempEle;
 
    // Load periodicTable, rxnTable, and initialType if available
+   elesLoaded = 0;
+   rxnsLoaded = 0;
+   initsLoaded = 0;
    loadChemistry();
 
    // Set up default periodicTable if one was not loaded

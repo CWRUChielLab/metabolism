@@ -12,7 +12,6 @@ class Reaction
    public:
       // Constructors
       Reaction( std::vector<Element*> initReactants, std::vector<Element*> initFirstProducts, double initFirstProb );
-      Reaction( std::vector<Element*> initReactants, std::vector<Element*> initFirstProducts, double initFirstProb, std::vector<Element*> initSecondProducts, double initSecondProb );
       
       // Get and set functions
       int getKey();
