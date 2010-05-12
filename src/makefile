@@ -41,7 +41,7 @@ check: clean metabolism-no-ncurses
 	diff rand.out ../check/rand.check.out | wc -l
 
 clean:
-	rm -f metabolism metabolism-no-ncurses *.o *.out *~
+	rm -f metabolism metabolism-no-ncurses *.o *.out *.pdf *~
 
 atom.o: atom.cpp atom.h \
 		element.h
@@ -79,6 +79,7 @@ sim-engine.o: sim-engine.cpp sim.h \
 	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o sim-engine.o sim-engine.cpp
 
 sim-io.o: sim-io.cpp sim.h \
+		safecalls.h \
 		atom.h \
 		element.h \
 		options.h \

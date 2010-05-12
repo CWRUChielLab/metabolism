@@ -1,13 +1,163 @@
 /* sim-io.cpp
  */
 
+#include <cassert>
 #include <fstream>
 #include <iomanip> // setw
 #include <iostream>
 #ifndef _NO_NCURSES
 #include <ncurses.h>
 #endif
+#include "safecalls.h"
 #include "sim.h"
+using namespace SafeCalls;
+
+
+// Load periodicTable, rxnTable, and initialTypes
+// if available from loadFile
+void
+Sim::loadChemistry()
+{
+   elesLoaded = 0;
+   rxnsLoaded = 0;
+   initsLoaded = 0;
+
+   std::ifstream load;
+   std::string keyword;
+   Element* tempEle;
+   Reaction* tempRxn;
+
+   if( o->loadFile != "" )
+   {
+      load.open( o->loadFile.c_str() );
+      while( load.good() )
+      {
+         load >> keyword;
+         if( keyword == "ele")
+         {
+            std::string name;
+            char symbol;
+            int color, charge;
+
+            load >> name >> symbol >> color >> charge;
+            tempEle = safeNew( Element( name, symbol, color, charge ) );
+            periodicTable[ name ] = tempEle;
+            elesLoaded++;
+         }
+         else
+         {
+            if( keyword == "rxn")
+            {
+               int n;
+               char c;
+               std::string firstEle, secondEle;
+               double firstProb, secondProb;
+               ElementVector reactants, firstProducts, secondProducts;
+
+               load >> firstProb >> n;
+               switch( n )
+               {
+                  case 1:
+                     load >> firstEle;
+                     reactants = ev( 1, firstEle.c_str() );
+                     break;
+                  case 2:
+                     load >> firstEle >> secondEle;
+                     reactants = ev( 2, firstEle.c_str(), secondEle.c_str() );
+                     break;
+                  default:
+                     std::cout << "Load settings: " << n << " is not an acceptable number of reactants!" << std::endl;
+                     assert(0);
+                     break;
+               }
+               load >> n;
+               switch( n )
+               {
+                  case 1:
+                     load >> firstEle;
+                     firstProducts = ev( 1, firstEle.c_str() );
+                     break;
+                  case 2:
+                     load >> firstEle >> secondEle;
+                     firstProducts = ev( 2, firstEle.c_str(), secondEle.c_str() );
+                     break;
+                  default:
+                     std::cout << "Load settings: " << n << " is not an acceptable number of products!" << std::endl;
+                     assert(0);
+                     break;
+               }
+               while( load.peek() == ' ' && load.good() )
+               {
+                  c = load.get();
+               }
+               c = load.peek();
+               if( c == '0' || c == '1' )
+               {
+                  load >> secondProb >> n;
+                  switch( n )
+                  {
+                     case 1:
+                        load >> firstEle;
+                        secondProducts = ev( 1, firstEle.c_str() );
+                        break;
+                     case 2:
+                        load >> firstEle >> secondEle;
+                        secondProducts = ev( 2, firstEle.c_str(), secondEle.c_str() );
+                        break;
+                     default:
+                        std::cout << "Load settings: " << n << " is not an acceptable number of products!" << std::endl;
+                        assert(0);
+                        break;
+                  }
+                  tempRxn = safeNew( Reaction( reactants, firstProducts, firstProb, secondProducts, secondProb ) );
+               }
+               else
+               {
+                  tempRxn = safeNew( Reaction( reactants, firstProducts, firstProb ) );
+               }
+               rxnTable[ tempRxn->getKey() ] = tempRxn;
+               rxnsLoaded++;
+            }
+            else
+            {
+               if( keyword == "init" )
+               {
+                  int n;
+                  std::string firstEle, secondEle, thirdEle, fourthEle;
+
+                  load >> n;
+                  switch( n )
+                  {
+                     case 1:
+                        load >> firstEle;
+                        initialTypes = ev( 1, firstEle.c_str() );
+                        break;
+                     case 2:
+                        load >> firstEle >> secondEle;
+                        initialTypes = ev( 2, firstEle.c_str(), secondEle.c_str() );
+                        break;
+                     case 3:
+                        load >> firstEle >> secondEle >> thirdEle;
+                        initialTypes = ev( 3, firstEle.c_str(), secondEle.c_str(), thirdEle.c_str() );
+                        break;
+                     case 4:
+                        load >> firstEle >> secondEle >> thirdEle >> fourthEle;
+                        initialTypes = ev( 4, firstEle.c_str(), secondEle.c_str(), thirdEle.c_str(), fourthEle.c_str() );
+                        break;
+                     default:
+                        std::cout << "Load settings: only allowed between 1 and 4 initial types!" << std::endl;
+                        assert(0);
+                        break;
+                  }
+                  initsLoaded++;
+                  assert( initsLoaded < 2 );
+               }
+            }
+         }
+         keyword = "";
+      }
+   }
+}
 
 
 // Output all important experimental parameters

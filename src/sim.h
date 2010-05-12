@@ -39,6 +39,10 @@ class Sim
       Options* o;
       int currentIter;
 
+      int elesLoaded;
+      int rxnsLoaded;
+      int initsLoaded;
+
       ElementMap periodicTable;
       ReactionMap rxnTable;
       ElementVector initialTypes;
@@ -65,6 +69,9 @@ class Sim
 
       ElementVector ev( int elementCount, ... );
       int getWorldIndex( int x, int y );
+
+      // Private I/O methods
+      void loadChemistry();
 };
 
 #endif /* SIM_H */

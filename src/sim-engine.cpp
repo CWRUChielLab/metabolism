@@ -1,11 +1,11 @@
 /* sim-engine.cpp
  */
 
-#include <cassert>   // assert
-#include <cmath>     // ceil
-#include <cstdarg>   // variable arguments handling
-#include <cstring>   // memset
-#include <fstream>   // ifstream, ofstream
+#include <cassert>
+#include <cmath>   // ceil
+#include <cstdarg> // variable arguments handling
+#include <cstring> // memset
+#include <fstream>
 #include <SFMT.h>
 #ifdef BLR_USEMAC
 #include <sys/malloc.h> // aligned memory retrieval on Mac
@@ -67,143 +67,7 @@ Sim::Sim( Options* newOptions )
    periodicTable[ "Solvent" ] = tempEle;
 
    // Load periodicTable, rxnTable, and initialType if available
-   int elesLoaded = 0;
-   int rxnsLoaded = 0;
-   int initsLoaded = 0;
-   std::ifstream load;
-   std::string keyword;
-   Reaction* tempRxn;
-
-   if( o->loadFile != "" )
-   {
-      load.open( o->loadFile.c_str() );
-      while( load.good() )
-      {
-         load >> keyword;
-         if( keyword == "ele")
-         {
-            std::string name;
-            char symbol;
-            int color, charge;
-
-            load >> name >> symbol >> color >> charge;
-            tempEle = safeNew( Element( name, symbol, color, charge ) );
-            periodicTable[ name ] = tempEle;
-            elesLoaded++;
-         }
-         else
-         {
-            if( keyword == "rxn")
-            {
-               int n;
-               char c;
-               std::string firstEle, secondEle;
-               double firstProb, secondProb;
-               ElementVector reactants, firstProducts, secondProducts;
-
-               load >> firstProb >> n;
-               switch( n )
-               {
-                  case 1:
-                     load >> firstEle;
-                     reactants = ev( 1, firstEle.c_str() );
-                     break;
-                  case 2:
-                     load >> firstEle >> secondEle;
-                     reactants = ev( 2, firstEle.c_str(), secondEle.c_str() );
-                     break;
-                  default:
-                     std::cout << "Load settings: " << n << " is not an acceptable number of reactants!" << std::endl;
-                     assert(0);
-                     break;
-               }
-               load >> n;
-               switch( n )
-               {
-                  case 1:
-                     load >> firstEle;
-                     firstProducts = ev( 1, firstEle.c_str() );
-                     break;
-                  case 2:
-                     load >> firstEle >> secondEle;
-                     firstProducts = ev( 2, firstEle.c_str(), secondEle.c_str() );
-                     break;
-                  default:
-                     std::cout << "Load settings: " << n << " is not an acceptable number of products!" << std::endl;
-                     assert(0);
-                     break;
-               }
-               while( load.peek() == ' ' && load.good() )
-               {
-                  c = load.get();
-               }
-               c = load.peek();
-               if( c == '0' || c == '1' )
-               {
-                  load >> secondProb >> n;
-                  switch( n )
-                  {
-                     case 1:
-                        load >> firstEle;
-                        secondProducts = ev( 1, firstEle.c_str() );
-                        break;
-                     case 2:
-                        load >> firstEle >> secondEle;
-                        secondProducts = ev( 2, firstEle.c_str(), secondEle.c_str() );
-                        break;
-                     default:
-                        std::cout << "Load settings: " << n << " is not an acceptable number of products!" << std::endl;
-                        assert(0);
-                        break;
-                  }
-                  tempRxn = safeNew( Reaction( reactants, firstProducts, firstProb, secondProducts, secondProb ) );
-               }
-               else
-               {
-                  tempRxn = safeNew( Reaction( reactants, firstProducts, firstProb ) );
-               }
-               rxnTable[ tempRxn->getKey() ] = tempRxn;
-               rxnsLoaded++;
-            }
-            else
-            {
-               if( keyword == "init" )
-               {
-                  int n;
-                  std::string firstEle, secondEle, thirdEle, fourthEle;
-
-                  load >> n;
-                  switch( n )
-                  {
-                     case 1:
-                        load >> firstEle;
-                        initialTypes = ev( 1, firstEle.c_str() );
-                        break;
-                     case 2:
-                        load >> firstEle >> secondEle;
-                        initialTypes = ev( 2, firstEle.c_str(), secondEle.c_str() );
-                        break;
-                     case 3:
-                        load >> firstEle >> secondEle >> thirdEle;
-                        initialTypes = ev( 3, firstEle.c_str(), secondEle.c_str(), thirdEle.c_str() );
-                        break;
-                     case 4:
-                        load >> firstEle >> secondEle >> thirdEle >> fourthEle;
-                        initialTypes = ev( 4, firstEle.c_str(), secondEle.c_str(), thirdEle.c_str(), fourthEle.c_str() );
-                        break;
-                     default:
-                        std::cout << "Load settings: only allowed between 1 and 4 initial types!" << std::endl;
-                        assert(0);
-                        break;
-                  }
-                  initsLoaded++;
-                  assert( initsLoaded < 2 );
-               }
-            }
-         }
-         keyword = "";
-      }
-   }
+   loadChemistry();
 
    // Set up default periodicTable if one was not loaded
    if( elesLoaded == 0 )
@@ -219,6 +83,7 @@ Sim::Sim( Options* newOptions )
    // Set up default rxnTable if one was not loaded
    if( rxnsLoaded == 0 )
    {
+      Reaction* tempRxn;
       tempRxn = safeNew( Reaction( ev(2,"A","B"), ev(2,"C","D"), 0.5 ) );
       rxnTable[ tempRxn->getKey() ] = tempRxn;
    }
