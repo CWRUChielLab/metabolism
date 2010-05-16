@@ -2,7 +2,7 @@
  */
 
 #include <csignal>
-#ifndef _NO_NCURSES
+#ifdef HAVE_NCURSES
 #include <ncurses.h>
 #endif
 #include "options.h"
@@ -40,7 +40,7 @@ main ( int argc, char* argv[] )
    if( o->useGUI )
    {
       // Initialize ncurses
-#ifndef _NO_NCURSES
+#ifdef HAVE_NCURSES
       initscr();   // Startup
       timeout(0);  // Makes getch a nonblocking call
 #endif
@@ -50,7 +50,7 @@ main ( int argc, char* argv[] )
    if( o->verbose && o->useGUI )
    {
       // Print using ncurses
-#ifndef _NO_NCURSES
+#ifdef HAVE_NCURSES
       printw( "Press Ctrl-c to quit.\n" );
       printw( "------\n" );
       mySim->printEles( (std::ostream*)(NULL) );
@@ -74,7 +74,7 @@ main ( int argc, char* argv[] )
       std::cout << "------" << std::endl;
    }
 
-#ifndef _NO_NCURSES
+#ifdef HAVE_NCURSES
    int x = 0;
    int y = 0;
 #endif
@@ -82,7 +82,7 @@ main ( int argc, char* argv[] )
 
    if( o->useGUI )
    {
-#ifndef _NO_NCURSES
+#ifdef HAVE_NCURSES
       getyx( stdscr, y, x );
       mySim->printWorld();
 #endif
@@ -96,7 +96,7 @@ main ( int argc, char* argv[] )
       // Print using ncurses
       // **********************
       {
-#ifndef _NO_NCURSES
+#ifdef HAVE_NCURSES
          // Move the cursor to the appropriate location
          // for printing with ncurses and print the
          // world
@@ -168,7 +168,7 @@ main ( int argc, char* argv[] )
    mySim->writeDiffusion();
    if( o->useGUI )
    {
-#ifndef _NO_NCURSES
+#ifdef HAVE_NCURSES
       endwin();
 #endif
    }

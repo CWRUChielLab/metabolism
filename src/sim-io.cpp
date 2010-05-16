@@ -5,7 +5,7 @@
 #include <fstream>
 #include <iomanip> // setw
 #include <iostream>
-#ifndef _NO_NCURSES
+#ifdef HAVE_NCURSES
 #include <ncurses.h>
 #endif
 #include "safecalls.h"
@@ -336,7 +336,7 @@ Sim::writeDiffusion()
 void
 Sim::printWorld()
 {
-#ifndef _NO_NCURSES
+#ifdef HAVE_NCURSES
    for( int y = 0; y < o->worldY; y++ )
    {
       for( int x = 0; x < o->worldX; x++ )
@@ -364,7 +364,7 @@ Sim::printEles( std::ostream* out )
       {
          if( out == (std::ostream*)(NULL) )
          {
-#ifndef _NO_NCURSES
+#ifdef HAVE_NCURSES
             printw( "ele %s %c %d %d\n", ele->getName().c_str(), ele->getSymbol(), ele->getColor(), ele->getCharge() );
 #endif
          }
@@ -430,7 +430,7 @@ Sim::printRxns( std::ostream* out )
             // Print the "rxn" keyword and the probability
             if( out == (std::ostream*)(NULL) )
             {
-#ifndef _NO_NCURSES
+#ifdef HAVE_NCURSES
                printw( "rxn %f ", currentProb );
 #endif
             }
@@ -447,7 +447,7 @@ Sim::printRxns( std::ostream* out )
             {
                if( out == (std::ostream*)(NULL) )
                {
-#ifndef _NO_NCURSES
+#ifdef HAVE_NCURSES
                   printw( "*" );
 #endif
                }
@@ -468,7 +468,7 @@ Sim::printRxns( std::ostream* out )
                      {
                         if( out == (std::ostream*)(NULL) )
                         {
-#ifndef _NO_NCURSES
+#ifdef HAVE_NCURSES
                            printw( "%s", name.c_str() );
 #endif
                         }
@@ -481,7 +481,7 @@ Sim::printRxns( std::ostream* out )
                      {
                         if( out == (std::ostream*)(NULL) )
                         {
-#ifndef _NO_NCURSES
+#ifdef HAVE_NCURSES
                            printw( " + %s", name.c_str() );
 #endif
                         }
@@ -497,7 +497,7 @@ Sim::printRxns( std::ostream* out )
                      {
                         if( out == (std::ostream*)(NULL) )
                         {
-#ifndef _NO_NCURSES
+#ifdef HAVE_NCURSES
                            printw( "%d %s", coefficient, name.c_str() );
 #endif
                         }
@@ -510,7 +510,7 @@ Sim::printRxns( std::ostream* out )
                      {
                         if( out == (std::ostream*)(NULL) )
                         {
-#ifndef _NO_NCURSES
+#ifdef HAVE_NCURSES
                            printw( " + %d %s", coefficient, name.c_str() );
 #endif
                         }
@@ -526,7 +526,7 @@ Sim::printRxns( std::ostream* out )
             // Print the reaction arrow, separating reactants from products
             if( out == (std::ostream*)(NULL) )
             {
-#ifndef _NO_NCURSES
+#ifdef HAVE_NCURSES
                printw( " -> " );
 #endif
             }
@@ -541,7 +541,7 @@ Sim::printRxns( std::ostream* out )
             {
                if( out == (std::ostream*)(NULL) )
                {
-#ifndef _NO_NCURSES
+#ifdef HAVE_NCURSES
                   printw( "*" );
 #endif
                }
@@ -562,7 +562,7 @@ Sim::printRxns( std::ostream* out )
                      {
                         if( out == (std::ostream*)(NULL) )
                         {
-#ifndef _NO_NCURSES
+#ifdef HAVE_NCURSES
                            printw( "%s", name.c_str() );
 #endif
                         }
@@ -575,7 +575,7 @@ Sim::printRxns( std::ostream* out )
                      {
                         if( out == (std::ostream*)(NULL) )
                         {
-#ifndef _NO_NCURSES
+#ifdef HAVE_NCURSES
                            printw(" + %s", name.c_str() );
 #endif
                         }
@@ -591,7 +591,7 @@ Sim::printRxns( std::ostream* out )
                      {
                         if( out == (std::ostream*)(NULL) )
                         {
-#ifndef _NO_NCURSES
+#ifdef HAVE_NCURSES
                            printw( "%d %s", coefficient, name.c_str() );
 #endif
                         }
@@ -604,7 +604,7 @@ Sim::printRxns( std::ostream* out )
                      {
                         if( out == (std::ostream*)(NULL) )
                         {
-#ifndef _NO_NCURSES
+#ifdef HAVE_NCURSES
                            printw( " + %d %s", coefficient, name.c_str() );
 #endif
                         }
@@ -620,7 +620,7 @@ Sim::printRxns( std::ostream* out )
             // End the line
             if( out == (std::ostream*)(NULL) )
             {
-#ifndef _NO_NCURSES
+#ifdef HAVE_NCURSES
                printw( "\n" );
 #endif
             }
@@ -639,7 +639,7 @@ Sim::printInits( std::ostream* out )
 {
    if( out == (std::ostream*)(NULL) )
    {
-#ifndef _NO_NCURSES
+#ifdef HAVE_NCURSES
       printw( "init %d ", initialTypes.size() );
 #endif
    }
@@ -652,7 +652,7 @@ Sim::printInits( std::ostream* out )
    {
       if( out == (std::ostream*)(NULL) )
       {
-#ifndef _NO_NCURSES
+#ifdef HAVE_NCURSES
          printw( "%s ", initialTypes[i]->getName().c_str() );
 #endif
       }
@@ -664,7 +664,7 @@ Sim::printInits( std::ostream* out )
 
    if( out == (std::ostream*)(NULL) )
    {
-#ifndef _NO_NCURSES
+#ifdef HAVE_NCURSES
       printw( "\n" );
 #endif
    }

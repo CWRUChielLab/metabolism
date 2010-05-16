@@ -2,13 +2,14 @@
 # metabolism makefile #
 #######################
 
-OS := $(shell sh -c 'uname -s 2>/dev/null || echo not')
-PROCESSOR := $(shell sh -c 'uname -p 2>/dev/null || echo not')
-DEFINES = -DMEXP=132049 -DGIT_TAG=`git describe --tags | sed "s/\(.*\)/\"\1\"/"` -D_REENTRANT
+DEFINES = -D_REENTRANT -DMEXP=132049 -DGIT_TAG=`git describe --tags | sed "s/\(.*\)/\"\1\"/"`
 FLAGS   = -pipe -O3 -Wall -W
 INCPATH = -I. -I../SFMT
 LIBS    = -L/usr/lib
 
+# OS-specific flags
+OS        := $(shell sh -c 'uname -s 2>/dev/null || echo not')
+PROCESSOR := $(shell sh -c 'uname -p 2>/dev/null || echo not')
 ifeq ($(OS),Linux) # Linux
   DEFINES += -DBLR_USELINUX -DHAVE_SSE2
   LFLAGS = -Wl,-O1
@@ -20,35 +21,43 @@ ifeq ($(OS),Darwin) # Mac
   endif
 endif
 
+# File locations used for make bless and make check
+CHECK_LOAD      = ../load/mm.load
+CHECK_CONFIG    = ../check/config.check.out
+CHECK_CENSUS    = ../check/census.check.out
+CHECK_DIFFUSION = ../check/diffusion.check.out
+CHECK_RAND      = ../check/rand.check.out
+
+
 
 default: metabolism
 
+metabolism: DEFINES+=-DHAVE_NCURSES
 metabolism: LIBS+=-lncurses
-
-metabolism-no-ncurses: DEFINES+=-D_NO_NCURSES
+metabolism-no-ncurses:
 
 metabolism metabolism-no-ncurses: atom.o element.o main.o options.o reaction.o safecalls.o sim-engine.o sim-io.o SFMT.o
-	g++ $(LFLAGS) $(LIBS) -o $@ atom.o element.o main.o options.o reaction.o safecalls.o sim-engine.o sim-io.o SFMT.o
+	g++ $(LFLAGS) $(LIBS) -o $@ $^
 
 bless: clean metabolism
-	./metabolism --no-gui --load ../load/mm.load --iters 100 -x 128 -y 128 --atoms 500 --seed 42 --shuffle \
-		--files ../check/config.check.out ../check/census.check.out ../check/diffusion.check.out ../check/rand.check.out
+	./metabolism --no-gui --load $(CHECK_LOAD) --iters 100 -x 128 -y 128 --atoms 500 --seed 42 --shuffle \
+		--files $(CHECK_CONFIG) $(CHECK_CENSUS) $(CHECK_DIFFUSION) $(CHECK_RAND)
 
 check: clean metabolism-no-ncurses
-	./metabolism-no-ncurses --load ../check/config.check.out
-	diff census.out ../check/census.check.out | wc -l
-	diff diffusion.out ../check/diffusion.check.out | wc -l
-	diff rand.out ../check/rand.check.out | wc -l
+	./metabolism-no-ncurses --load $(CHECK_CONFIG)
+	diff census.out $(CHECK_CENSUS) | wc -l
+	diff diffusion.out $(CHECK_DIFFUSION) | wc -l
+	diff rand.out $(CHECK_RAND) | wc -l
 
 clean:
 	rm -f metabolism metabolism-no-ncurses *.o *.out *.pdf *~
 
 atom.o: atom.cpp atom.h \
 		element.h
-	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o atom.o atom.cpp
+	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o $@ $<
 
 element.o: element.cpp element.h
-	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o element.o element.cpp
+	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o $@ $<
 
 main.o: main.cpp \
 		options.h \
@@ -57,18 +66,18 @@ main.o: main.cpp \
 		atom.h \
 		element.h \
 		reaction.h
-	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o main.o main.cpp
+	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o $@ $<
 
 options.o: options.cpp options.h \
 		safecalls.h
-	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o options.o options.cpp
+	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o $@ $<
 
 reaction.o: reaction.cpp reaction.h \
 		element.h
-	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o reaction.o reaction.cpp
+	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o $@ $<
 
 safecalls.o: safecalls.cpp safecalls.h
-	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o safecalls.o safecalls.cpp
+	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o $@ $<
 
 sim-engine.o: sim-engine.cpp sim.h \
 		safecalls.h \
@@ -76,7 +85,7 @@ sim-engine.o: sim-engine.cpp sim.h \
 		element.h \
 		options.h \
 		reaction.h
-	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o sim-engine.o sim-engine.cpp
+	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o $@ $<
 
 sim-io.o: sim-io.cpp sim.h \
 		safecalls.h \
@@ -84,7 +93,7 @@ sim-io.o: sim-io.cpp sim.h \
 		element.h \
 		options.h \
 		reaction.h
-	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o sim-io.o sim-io.cpp
+	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o $@ $<
 
 SFMT.o: ../SFMT/SFMT.c ../SFMT/SFMT.h \
 		../SFMT/SFMT-params.h \
@@ -100,7 +109,7 @@ SFMT.o: ../SFMT/SFMT.c ../SFMT/SFMT.h \
 		../SFMT/SFMT-params216091.h \
 		../SFMT/SFMT-alti.h \
 		../SFMT/SFMT-sse2.h
-	gcc -c -msse2 $(FLAGS) $(DEFINES) $(INCPATH) -o SFMT.o ../SFMT/SFMT.c
+	gcc -c -msse2 $(FLAGS) $(DEFINES) $(INCPATH) -o $@ $<
 
 # End
 
