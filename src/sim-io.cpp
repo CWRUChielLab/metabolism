@@ -344,18 +344,35 @@ void
 Sim::printWorld()
 {
 #ifdef HAVE_NCURSES
+   // Print top border
+   for( int x = -1; x < o->worldX + 1; x++ )
+      printw( ". " );
+   printw( "\n" );
+
    for( int y = 0; y < o->worldY; y++ )
    {
+      // Print left border
+      printw( ". " );
+
+      // Print contents of world
       for( int x = 0; x < o->worldX; x++ )
       {
          if( world[ getWorldIndex(x,y) ] != NULL )
             printw( "%c ", world[ getWorldIndex(x,y) ]->getType()->getSymbol() );
          else
-            printw( ". " );
+            printw( "  " );
       }
+      
+      // Print right border
+      printw( ". " );
       printw( "\n" );
    }
-   printw( "\n" );
+
+   // Print bottom border
+   for( int x = -1; x < o->worldX + 1; x++ )
+      printw( ". " );
+   printw( "\n\n" );
+
    refresh();
 #endif
 }
