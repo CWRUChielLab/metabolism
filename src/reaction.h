@@ -10,7 +10,7 @@
 class Reaction
 {
    public:
-      // Constructors
+      // Constructor
       Reaction( std::vector<Element*> initReactants, std::vector<Element*> initFirstProducts, double initFirstProb );
       
       // Get and set functions

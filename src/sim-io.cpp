@@ -2,6 +2,7 @@
  */
 
 #include <cassert>
+#include <cstdlib> // exit
 #include <fstream>
 #include <iomanip> // setw
 #include <iostream>
@@ -80,12 +81,18 @@ Sim::loadChemistry()
                         else
                         {
                            std::cout << "Loading rxn: " << word << " is not a defined Element!" << std::endl;
-                           assert(0);
+                           exit( EXIT_FAILURE );
                         }
                      }
                   }
+                  while( load.peek() == ' ' )
+                  {
+                     word = load.get();
+                  }
                   if( load.peek() == '\n' )
                   {
+                     std::cout << "Loading rxn: premature line-break, was expecting \"->\"!" << std::endl;
+                     exit( EXIT_FAILURE );
                      break;
                   }
                   load >> word;
@@ -96,7 +103,7 @@ Sim::loadChemistry()
                if( word != "->" )
                {
                   std::cout << "Loading rxn: confused by \"" << word << "\", was expecting \"->\"!" << std::endl;
-                  assert(0);
+                  exit( EXIT_FAILURE );
                }
 
                // Read in the names of products, adding
@@ -125,7 +132,7 @@ Sim::loadChemistry()
                         else
                         {
                            std::cout << "Loading rxn: " << word << " is not a defined Element!" << std::endl;
-                           assert(0);
+                           exit( EXIT_FAILURE );
                         }
                      }
                   }
@@ -202,14 +209,14 @@ Sim::loadChemistry()
                      else
                      {
                         std::cout << "Loading init: " << word << " is not a defined Element!" << std::endl;
-                        assert(0);
+                        exit( EXIT_FAILURE );
                      }
                   }
                   initsLoaded++;
                   if( initsLoaded > 1 )
                   {
                      std::cout << "Loading init: only one init keyword is permitted!" << std::endl;
-                     assert(0);
+                     exit( EXIT_FAILURE );
                   }
                }
             }
@@ -410,7 +417,8 @@ Sim::printRxns( std::ostream* out )
                   currentProducts = rxn->getSecondProducts();
                   break;
                default:
-                  assert(0);
+                  assert( numProductSets >= 1 && numProductSets <= 2 );
+                  break;
             }
 
             // Count up the number of each type of reactant and product

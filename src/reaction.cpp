@@ -1,33 +1,33 @@
 /* reaction.cpp
  */
 
-#include <cassert>
+#include <cstdlib> // exit
 #include <iostream>
 #include "reaction.h"
 
 
-// Constructors
+// Constructor
 Reaction::Reaction( std::vector<Element*> initReactants, std::vector<Element*> initFirstProducts, double initFirstProb )
 {
    // Ensure that products and reactants are balanced
    if( initReactants.size() != initFirstProducts.size() )
    {
       std::cout << "Loading rxn: reaction is not balanced!" << std::endl;
-      assert(0);
+      exit( EXIT_FAILURE );
    }
 
    // Ensure number of products and reactants are fine
    if( initReactants.size() < 1 || initReactants.size() > 2 )
    {
       std::cout << "Loading rxn: reactions must contain at least one and no more than two reactants and products each!" << std::endl;
-      assert(0);
+      exit( EXIT_FAILURE );
    }
 
    // Ensure that probabilities are sane
    if( initFirstProb < 0 || initFirstProb > 1 )
    {
       std::cout << "Loading rxn: probability must fall between 0 and 1!" << std::endl;
-      assert(0);
+      exit( EXIT_FAILURE );
    }
 
    // Calculate the product of the reactant keys for the Reaction key
@@ -82,11 +82,8 @@ Reaction::setFirstProducts( std::vector<Element*> newFirstProducts )
    if( newFirstProducts.size() != reactants.size() )
    {
       std::cout << "setFirstProducts: reaction is not balanced!" << std::endl;
-      assert(0);
+      exit( EXIT_FAILURE );
    }
-
-   // Ensure that products and reactants are balanced
-   assert( newFirstProducts.size() == reactants.size() );
 
    firstProducts = newFirstProducts;
 }
@@ -99,7 +96,7 @@ Reaction::setSecondProducts( std::vector<Element*> newSecondProducts )
    if( newSecondProducts.size() != reactants.size() )
    {
       std::cout << "setSecondProducts: reaction is not balanced!" << std::endl;
-      assert(0);
+      exit( EXIT_FAILURE );
    }
 
    secondProducts = newSecondProducts;
@@ -127,7 +124,7 @@ Reaction::setFirstProb( double newFirstProb )
    if( newFirstProb < 0 || newFirstProb > 1 )
    {
       std::cout << "setFirstProb: probability must fall between 0 and 1!" << std::endl;
-      assert(0);
+      exit( EXIT_FAILURE );
    }
 
    firstProb = newFirstProb;
@@ -141,7 +138,7 @@ Reaction::setSecondProb( double newSecondProb )
    if( newSecondProb < 0 || newSecondProb > 1 )
    {
       std::cout << "setSecondProb: probability must fall between 0 and 1!" << std::endl;
-      assert(0);
+      exit( EXIT_FAILURE );
    }
 
    secondProb = newSecondProb;

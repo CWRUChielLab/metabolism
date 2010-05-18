@@ -4,7 +4,7 @@
 #ifndef SAFECALLS_H
 #define SAFECALLS_H
 
-#include <cstdlib>  // exit, EXIT_FAILURE
+#include <cstdlib>  // exit
 #include <iostream> // cerr
 
 namespace SafeCalls
@@ -43,7 +43,7 @@ namespace SafeCalls
       {
          std::cerr << "Call to new resulted in null ptr.  Failed at " << file
             << "::" << line << std::endl;
-         exit(EXIT_FAILURE);
+         exit( EXIT_FAILURE );
       }
       else
       {

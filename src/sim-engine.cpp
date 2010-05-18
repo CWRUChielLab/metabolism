@@ -239,7 +239,7 @@ Sim::initRNG( int initSeed )
       randNums = (uint64_t*)malloc( bytes_to_be_allocated );
 #else
 #ifdef BLR_USEWIN
-      randNums = (unsigned char*)malloc( bytes_to_be_allocated + 16 );
+      randNums = (uint64_t*)malloc( bytes_to_be_allocated + 16 );
       randNums += 16 - (long int)randNums % 16;
 #endif
 #endif
@@ -481,6 +481,7 @@ Sim::executeRxns()
                break;
             default:
                assert( 0 );
+               break;
          }
          if( neighborX == x && neighborY == y )
          {
@@ -526,6 +527,7 @@ Sim::executeRxns()
                   break;
                default:
                   assert( 0 );
+                  break;
             }
          }
          else
@@ -562,6 +564,7 @@ Sim::executeRxns()
                   break;
                default:
                   assert( 0 );
+                  break;
             }
          }
 
@@ -656,6 +659,7 @@ Sim::executeRxns()
                   break;
                default:
                   assert( 0 );
+                  break;
             }
             if( neighborX == x && neighborY == y )
             {
@@ -701,6 +705,7 @@ Sim::executeRxns()
                      break;
                   default:
                      assert( 0 );
+                     break;
                }
             }
             else
@@ -741,6 +746,7 @@ Sim::executeRxns()
                         break;
                      default:
                         assert( 0 );
+                        break;
                   }
                }
             }

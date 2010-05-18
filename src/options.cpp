@@ -2,6 +2,7 @@
  */
 
 #include <cassert>
+#include <cstdlib> // exit
 #include <fstream>
 #include "options.h"
 #include "safecalls.h"
@@ -101,7 +102,7 @@ Options::Options( int argc, char* argv[] )
                   files_read_in_so_far++;
                   break;
                default:
-                  assert( files_read_in_so_far != 0 && files_read_in_so_far < 4 );
+                  assert( files_read_in_so_far >= 1 && files_read_in_so_far <= 3 );
                   break;
             }
             break;
@@ -120,7 +121,7 @@ Options::Options( int argc, char* argv[] )
             break;
          case 'h':
             printHelp();
-            exit( 0 );
+            exit( EXIT_SUCCESS );
             break;
          case 'i':
             maxIters = safeStrtol( optarg );
@@ -166,7 +167,7 @@ Options::Options( int argc, char* argv[] )
                               else
                               {
                                  std::cout << "Load settings: \"reactions\" must have value \"on\" or \"off\"!" << std::endl;
-                                 assert(0);
+                                 exit( EXIT_FAILURE );
                               }
                            }
                         }
@@ -195,8 +196,7 @@ Options::Options( int argc, char* argv[] )
                                     else
                                     {
                                        std::cout << "Load settings: \"shuffle\" must have value \"on\" or \"off\"!" << std::endl;
-                                       std::cout << onOrOff << std::endl;
-                                       assert(0);
+                                       exit( EXIT_FAILURE );
                                     }
                                  }
                               }
@@ -221,7 +221,7 @@ Options::Options( int argc, char* argv[] )
                                        else
                                        {
                                           std::cout << "Load settings: Unrecognized keyword \"" << keyword << "\"!" << std::endl;
-                                          assert(0);
+                                          exit( EXIT_FAILURE );
                                        }
                                     }
                                  }
@@ -248,7 +248,7 @@ Options::Options( int argc, char* argv[] )
             break;
          case 'v':
             printVersion();
-            exit( 0 );
+            exit( EXIT_SUCCESS );
             break;
          case 'V':
             verbose = 1;
@@ -264,7 +264,7 @@ Options::Options( int argc, char* argv[] )
             break;
          default:
             std::cout << "Unknown option.  Try --help for a full list." << std::endl;
-            exit(-1);
+            exit( EXIT_FAILURE );
             break;
       }
    }
