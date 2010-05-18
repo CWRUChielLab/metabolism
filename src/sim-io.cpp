@@ -404,7 +404,7 @@ Sim::printRxns( std::ostream* out )
          // line for each reactant-product pair
          for( int j = 0; j < numProductSets; j++ )
          {
-            double currentProb;
+            double currentProb = 0;
             ElementVector currentProducts;
             switch( j )
             {
