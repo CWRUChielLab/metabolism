@@ -40,7 +40,7 @@ metabolism metabolism-no-ncurses: atom.o element.o main.o options.o reaction.o s
 	g++ $(LFLAGS) $(LIBS) -o $@ $^
 
 bless: clean metabolism
-	./metabolism --no-gui --load $(CHECK_LOAD) --iters 100 -x 128 -y 128 --atoms 500 --seed 42 --shuffle \
+	./metabolism --gui-off --load $(CHECK_LOAD) --iters 100 -x 128 -y 128 --atoms 500 --seed 42 --shuffle \
 		--files $(CHECK_CONFIG) $(CHECK_CENSUS) $(CHECK_DIFFUSION) $(CHECK_RAND)
 
 check: clean metabolism-no-ncurses
