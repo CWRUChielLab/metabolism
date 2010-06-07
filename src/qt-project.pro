@@ -1,14 +1,11 @@
-######################################################################
-# Chemical Metabolism Simulator
-######################################################################
+##############################
+# metabolism Qt Project File #
+##############################
 
 TEMPLATE = app
-# TARGET = "Chemical Metabolism Simulator"
-TARGET = "metabolism"
 # RESOURCES = resources.qrc
-DEPENDPATH += .
 INCLUDEPATH += ../SFMT
-DEFINES += MEXP=132049 GIT_TAG="`git describe --tags | sed \"s/\\(.*\\)/\\\"\\1\\\"/\"`"
+DEFINES += MEXP=132049 GIT_TAG="`git describe --tags | sed \"s/\\(.*\\)/\\\"\\1\\\"/\"`" HAVE_QT
 
 QMAKE_CFLAGS_RELEASE -= -O2
 QMAKE_CFLAGS_RELEASE += -O3
@@ -17,21 +14,31 @@ QMAKE_CXXFLAGS_RELEASE += -O3
 CONFIG += warn_on 
 QT += opengl
 
+message( "Building with Qt." )
+
+no-ncurses {
+   message( "Building without ncurses." )
+   TARGET = metabolism-no-ncurses
+} else {
+   message( "Building with ncurses." )
+   TARGET = metabolism
+   DEFINES += HAVE_NCURSES
+   LIBS += -lncurses
+}
+
 isEmpty( MACTARGET ) {
    MACTARGET = intel
 }
 
 !contains( CONFIG, static ) {
-   !contains( CONFIG, shared ) {
-      CONFIG += shared
-   }
+   CONFIG *= shared
 }
 
 unix:!macx {
    message( "Generating makefile for Linux systems." )
    INCLUDEPATH += /usr/include/qwt-qt4
    DEFINES += BLR_USELINUX HAVE_SSE2
-   LIBS += -lqwt-qt4 -lncurses
+   LIBS += -lqwt-qt4
    QMAKE_CFLAGS += -msse2
 }
 

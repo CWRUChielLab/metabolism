@@ -5,6 +5,9 @@
 #ifdef HAVE_NCURSES
 #include <ncurses.h>
 #endif
+#ifdef HAVE_QT
+#include <QApplication>
+#endif
 #include "options.h"
 #include "safecalls.h"
 #include "sim.h"
@@ -29,6 +32,11 @@ handleExit( int sig )
 int
 main ( int argc, char* argv[] )
 {
+#ifdef HAVE_QT
+   std::cout << "*** Qt detected! ***" << std::endl;
+   QCoreApplication *app;
+#endif
+
    // Import command line options and initialize the simulation
    o = safeNew( Options( argc, argv ) );
    mySim = safeNew( Sim(o) );
@@ -37,7 +45,7 @@ main ( int argc, char* argv[] )
    // Set up handling of Ctrl-c abort
    signal(SIGINT,handleExit);
 
-   if( o->useGUI )
+   if( o->gui == Options::GUI_NCURSES )
    {
       // Initialize ncurses
 #ifdef HAVE_NCURSES
@@ -47,7 +55,7 @@ main ( int argc, char* argv[] )
    }
 
    // Print extra information about the simulation
-   if( o->verbose && o->useGUI )
+   if( o->verbose && o->gui == Options::GUI_NCURSES )
    {
       // Print using ncurses
 #ifdef HAVE_NCURSES
@@ -61,7 +69,7 @@ main ( int argc, char* argv[] )
       printw( "------\n" );
 #endif
    }
-   else if( o->verbose && !o->useGUI )
+   else if( o->verbose && o->gui == Options::GUI_OFF )
    {
       // Print using cout
       std::cout << "Press Ctrl-c to quit." << std::endl;
@@ -80,7 +88,7 @@ main ( int argc, char* argv[] )
 #endif
    int lastProgressUpdate = 0;
 
-   if( o->useGUI )
+   if( o->gui == Options::GUI_NCURSES )
    {
 #ifdef HAVE_NCURSES
       getyx( stdscr, y, x );
@@ -91,7 +99,7 @@ main ( int argc, char* argv[] )
    // Execute the simulation
    while( !interrupted && mySim->iterate() )
    {
-      if( o->useGUI )
+      if( o->gui == Options::GUI_NCURSES )
       // **********************
       // Print using ncurses
       // **********************
@@ -154,7 +162,7 @@ main ( int argc, char* argv[] )
    // Finalize the progress indicator to accurately
    // display how far the simulation got before ending
    // when running batches
-   if( o->progress && !o->useGUI )
+   if( o->progress && o->gui == Options::GUI_OFF )
    {
       std::cout << "                                                                                   \r" << std::flush;
       std::cout << "Iteration: " << mySim->getCurrentIter() << " of " << o->maxIters << " | ";
@@ -166,7 +174,7 @@ main ( int argc, char* argv[] )
    // and clean up ncurses
    mySim->writeConfig();
    mySim->writeDiffusion();
-   if( o->useGUI )
+   if( o->gui == Options::GUI_NCURSES )
    {
 #ifdef HAVE_NCURSES
       endwin();

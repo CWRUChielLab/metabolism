@@ -2,6 +2,31 @@
 # metabolism makefile #
 #######################
 
+HEADERS = atom.h \
+			 element.h \
+			 options.h \
+			 reaction.h \
+			 safecalls.h \
+			 sim.h
+SOURCES = atom.cpp \
+			 element.cpp \
+			 main.cpp \
+			 options.cpp \
+			 reaction.cpp \
+			 safecalls.cpp \
+			 sim-engine.cpp \
+			 sim-io.cpp \
+			 ../SFMT/SFMT.c
+OBJECTS = atom.o \
+			 element.o \
+			 main.o \
+			 options.o \
+			 reaction.o \
+			 safecalls.o \
+			 sim-engine.o \
+			 sim-io.o \
+			 SFMT.o
+
 DEFINES = -D_REENTRANT -DMEXP=132049 -DGIT_TAG=`git describe --tags | sed "s/\(.*\)/\"\1\"/"`
 FLAGS   = -pipe -O3 -Wall -W
 INCPATH = -I. -I../SFMT
@@ -32,25 +57,35 @@ CHECK_RAND      = ../check/rand.check.out
 
 default: metabolism
 
-metabolism: DEFINES+=-DHAVE_NCURSES
-metabolism: LIBS+=-lncurses
-metabolism-no-ncurses:
+metabolism: qt-makefile $(SOURCES) $(HEADERS)
+	make -f $<
+metabolism-no-ncurses: qt-makefile-no-ncurses $(SOURCES) $(HEADERS)
+	make -f $<
+metabolism-no-qt: DEFINES+=-DHAVE_NCURSES
+metabolism-no-qt: LIBS+=-lncurses
+metabolism-no-qt metabolism-no-qt-ncurses: $(OBJECTS) 
+	g++ $(LFLAGS) $(LIBS) -o $@ $(OBJECTS)
 
-metabolism metabolism-no-ncurses: atom.o element.o main.o options.o reaction.o safecalls.o sim-engine.o sim-io.o SFMT.o
-	g++ $(LFLAGS) $(LIBS) -o $@ $^
 
 bless: clean metabolism
 	./metabolism --gui-off --load $(CHECK_LOAD) --iters 100 -x 128 -y 128 --atoms 500 --seed 42 --shuffle \
 		--files $(CHECK_CONFIG) $(CHECK_CENSUS) $(CHECK_DIFFUSION) $(CHECK_RAND)
 
-check: clean metabolism-no-ncurses
-	./metabolism-no-ncurses --load $(CHECK_CONFIG)
+check: clean metabolism-no-qt-ncurses
+	./metabolism-no-qt-ncurses --load $(CHECK_CONFIG)
 	diff census.out $(CHECK_CENSUS) | wc -l
 	diff diffusion.out $(CHECK_DIFFUSION) | wc -l
 	diff rand.out $(CHECK_RAND) | wc -l
 
 clean:
-	rm -f metabolism metabolism-no-ncurses *.o *.out *.pdf *~
+	rm -f metabolism metabolism-no-* qt-makefile* *.o *.out *.pdf *~
+
+
+qt-makefile: qt-project.pro $(SOURCES) $(HEADERS)
+	qmake -o $@
+qt-makefile-no-ncurses: qt-project.pro $(SOURCES) $(HEADERS)
+	qmake -o $@ "CONFIG += no-ncurses"
+
 
 atom.o: atom.cpp atom.h \
 		element.h

@@ -19,9 +19,9 @@ Options::Options( int argc, char* argv[] )
    worldY = 16;
    atomCount = 64;
 #ifdef HAVE_NCURSES
-   useGUI = 1;
+   gui = GUI_NCURSES;
 #else
-   useGUI = 0;
+   gui = GUI_OFF;
 #endif
    doRxns = 1;
    doShuffle = 0;
@@ -256,7 +256,7 @@ Options::Options( int argc, char* argv[] )
             files_read_in_so_far++;
             break;
          case 'g':
-            useGUI = 0;
+            gui = GUI_OFF;
             break;
          case 'h':
             printHelp();

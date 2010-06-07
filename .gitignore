@@ -3,13 +3,14 @@
 *.o
 *.swp
 Makefile*
+qt-makefile*
 moc_*
 qrc_resources.cpp
 debug
 release
 object_script*
 metabolism
-metabolism-no-ncurses
+metabolism-no-*
 metabolism.app
 Chemical Metabolism Simulator
 Chemical Metabolism Simulator.app

@@ -23,7 +23,7 @@ class Options
       int worldX;
       int worldY;
       int atomCount;
-      int useGUI;
+      int gui;
       int doRxns;
       int doShuffle;
       int sleep;
@@ -34,6 +34,14 @@ class Options
       std::string censusFile;
       std::string diffusionFile;
       std::string randFile;
+
+      // Options attribute values
+      enum
+      {
+         GUI_OFF,
+         GUI_QT,
+         GUI_NCURSES
+      };
 };
 
 #endif /* OPTIONS_H */
