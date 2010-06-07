@@ -33,7 +33,6 @@ int
 main ( int argc, char* argv[] )
 {
 #ifdef HAVE_QT
-   std::cout << "*** Qt detected! ***" << std::endl;
    QCoreApplication *app;
 #endif
 
@@ -41,6 +40,11 @@ main ( int argc, char* argv[] )
    o = safeNew( Options( argc, argv ) );
    mySim = safeNew( Sim(o) );
    mySim->writeCensus();
+
+   if( o->gui == Options::GUI_QT )
+   {
+      std::cout << "*** Using Qt GUI! ***" << std::endl;
+   }
 
    // Set up handling of Ctrl-c abort
    signal(SIGINT,handleExit);

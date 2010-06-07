@@ -14,13 +14,11 @@ QMAKE_CXXFLAGS_RELEASE += -O3
 CONFIG += warn_on 
 QT += opengl
 
-message( "Building with Qt." )
-
 no-ncurses {
-   message( "Building without ncurses." )
+   message( "Building with Qt and without ncurses." )
    TARGET = metabolism-no-ncurses
 } else {
-   message( "Building with ncurses." )
+   message( "Building with Qt and ncurses." )
    TARGET = metabolism
    DEFINES += HAVE_NCURSES
    LIBS += -lncurses

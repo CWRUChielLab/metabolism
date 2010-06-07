@@ -18,10 +18,14 @@ Options::Options( int argc, char* argv[] )
    worldX = 16;
    worldY = 16;
    atomCount = 64;
+#ifdef HAVE_QT
+   gui = GUI_QT;
+#else
 #ifdef HAVE_NCURSES
    gui = GUI_NCURSES;
 #else
    gui = GUI_OFF;
+#endif
 #endif
    doRxns = 1;
    doShuffle = 0;
@@ -34,39 +38,60 @@ Options::Options( int argc, char* argv[] )
    diffusionFile = "diffusion.out";
    randFile = "rand.out";
 
-   // Store command line names for options.
+   // Options that take only long-opt form should be indexed here.
+   // In order to not clash with single-letter options, start from
+   // 'z'+1 (recall that 'z' > 'Z').
+   enum
+   {
+      OPT_GUI_NCURSES = 'z' + 1,
+      OPT_RXNS_ON,
+      OPT_SHUFFLE_OFF
+   };
+
+   // Any options that take long-opt form should be stored here.
    // Order by short name.
    struct option long_options[] =
    {
-   // { "long_option_name", "noarg(0), requiredarg(1), optarg(2)", NULL, retval }
-      { "atoms",             1, 0, 'a' },
-      { "files",             1, 0, 'f' },
-      { "gui-off",           0, 0, 'g' },
-      { "help",              0, 0, 'h' },
-      { "iters",             1, 0, 'i' },
-      { "load",              1, 0, 'l' },
-      { "progress-off",      0, 0, 'p' },
-      { "rxns-off",          0, 0, 'r' },
-      { "rxns-on",           0, 0, 'R' },
-      { "seed",              1, 0, 's' },
-      { "shuffle",           0, 0, 'S' },
-      { "shuffle-off",       0, 0, 't' },
-      { "version",           0, 0, 'v' },
-      { "verbose",           0, 0, 'V' },
-      { "x",                 1, 0, 'x' },
-      { "y",                 1, 0, 'y' },
-      { "sleep",             1, 0, 'z' }
+   // { "long_option_name", "no_argument(0), required_argument(1), optional_argument(2)", NULL, retval }
+      { "atoms",        required_argument, 0, 'a' },
+      { "files",        required_argument, 0, 'f' },
+#if defined(HAVE_QT) | defined(HAVE_NCURSES)
+      { "gui-off",      no_argument,       0, 'g' },
+#endif
+      { "help",         no_argument,       0, 'h' },
+      { "iters",        required_argument, 0, 'i' },
+      { "load",         required_argument, 0, 'l' },
+      { "progress-off", no_argument,       0, 'p' },
+      { "rxns-off",     no_argument,       0, 'r' },
+      { "seed",         required_argument, 0, 's' },
+      { "shuffle",      no_argument,       0, 'S' },
+      { "version",      no_argument,       0, 'v' },
+      { "verbose",      no_argument,       0, 'V' },
+      { "width",        required_argument, 0, 'x' },
+      { "height",       required_argument, 0, 'y' },
+      { "sleep",        required_argument, 0, 'z' },
+#if defined(HAVE_QT) & defined(HAVE_NCURSES)
+      { "gui-ncurses",  no_argument,       0, OPT_GUI_NCURSES },
+#endif
+      { "rxns-on",      no_argument,       0, OPT_RXNS_ON },
+      { "shuffle-off",  no_argument,       0, OPT_SHUFFLE_OFF }
    };
 
+   // Any options that take short-opt form should be listed here.
    // The options_string passed to getopt_long lists each valid
    // short option name followed by a colon if an argument
    // is required, followed by two colons if an argument is
-   // optional, or not followed by a colon if the option
-   // cannot take arguments.  The leading hyphen allows
-   // getopt_long to properly handle the multiple parameters
-   // that can be passed to --files by assigning the second
-   // and third parameters passed to --files with c=1.
-   const char* options_string = "-a:f:ghi:l:priRs:StvVx:y:z:";
+   // optional, or nothing if the option cannot take arguments.
+   // The leading hyphen allows getopt_long to properly handle
+   // the multiple parameters that can be passed to --files by
+   // assigning the second and third parameters passed to
+   // --files with c=1.
+#if defined(HAVE_QT) | defined(HAVE_NCURSES)
+   const char* options_string = "-a:f:ghi:l:prs:SvVx:y:z:";
+#else
+   // -g option is not available when no gui is compiled
+   const char* options_string = "-a:f:hi:l:prs:SvVx:y:z:";
+#endif
 
    int option_index = 0, c;
    int files_read_in_so_far = 0;
@@ -255,9 +280,11 @@ Options::Options( int argc, char* argv[] )
             configFile = optarg;
             files_read_in_so_far++;
             break;
+#if defined(HAVE_QT) | defined(HAVE_NCURSES)
          case 'g':
             gui = GUI_OFF;
             break;
+#endif
          case 'h':
             printHelp();
             exit( EXIT_SUCCESS );
@@ -273,17 +300,11 @@ Options::Options( int argc, char* argv[] )
          case 'r':
             doRxns = 0;
             break;
-         case 'R':
-            doRxns = 1;
-            break;
          case 's':
             seed = safeStrtol( optarg );
             break;
          case 'S':
             doShuffle = 1;
-            break;
-         case 't':
-            doShuffle = 0;
             break;
          case 'v':
             printVersion();
@@ -301,6 +322,17 @@ Options::Options( int argc, char* argv[] )
          case 'z':
             sleep = safeStrtol( optarg );
             break;
+#if defined(HAVE_QT) & defined(HAVE_NCURSES)
+         case OPT_GUI_NCURSES:
+            gui = GUI_NCURSES;
+            break;
+#endif
+         case OPT_RXNS_ON:
+            doRxns = 1;
+            break;
+         case OPT_SHUFFLE_OFF:
+            doShuffle = 0;
+            break;
          default:
             std::cout << "Unknown option.  Try --help for a full list." << std::endl;
             exit( EXIT_FAILURE );
@@ -317,7 +349,19 @@ Options::printVersion()
    std::cout << "---------------------------------------------------------------------------" << std::endl;
    std::cout << "Chemical Metabolism Simulator"                                               << std::endl;
    std::cout << GIT_TAG                                                                       << std::endl;
+#if defined(HAVE_QT) & defined(HAVE_NCURSES)
+   std::cout << "Compiled at " << __TIME__ << " on " << __DATE__ << " with Qt and ncurses."   << std::endl;
+#else
+#ifdef HAVE_QT
+   std::cout << "Compiled at " << __TIME__ << " on " << __DATE__ << " with Qt."               << std::endl;
+#else
+#ifdef HAVE_NCURSES
+   std::cout << "Compiled at " << __TIME__ << " on " << __DATE__ << " with ncurses."          << std::endl;
+#else
    std::cout << "Compiled at " << __TIME__ << " on " << __DATE__ << "."                       << std::endl;
+#endif
+#endif
+#endif
    std::cout << "---------------------------------------------------------------------------" << std::endl;
 }
 
@@ -335,8 +379,19 @@ Options::printHelp()
    std::cout << "-a, --atoms         Number of atoms in the world. Default: 64"               << std::endl;
    std::cout << "-f, --files         Specify the names of the four output files."             << std::endl;
    std::cout << "                      Default: config.out census.out diffusion.out rand.out" << std::endl;
+#if defined(HAVE_QT) & defined(HAVE_NCURSES)
+   std::cout << "-g, --gui-off       Disable the Qt GUI or use the ncurses text-based GUI"    << std::endl;
+   std::cout << "    --gui-ncurses     instead."                                              << std::endl;
+#else
+#ifdef HAVE_QT
+   std::cout << "-g, --gui-off       Disable the Qt GUI."                                     << std::endl;
+#else
 #ifdef HAVE_NCURSES
-   std::cout << "-g, --gui-off       Disable the GUI. The GUI is enabled by default."         << std::endl;
+   std::cout << "-g, --gui-off       Disable the text-based ncurses GUI."                     << std::endl;
+#else
+   // -g option is not available when no gui is compiled
+#endif
+#endif
 #endif
    std::cout << "-h, --help          Display this information."                               << std::endl;
    std::cout << "-i, --iters         Number of iterations. Default: 100000"                   << std::endl;
@@ -345,18 +400,17 @@ Options::printHelp()
    std::cout << "                      loaded options."                                       << std::endl;
    std::cout << "-p, --progress-off  Disable simulation progress reporting (percent"          << std::endl;
    std::cout << "                      complete)."                                            << std::endl;
-   std::cout << "-r, --rxns-off      Disable the execution of chemical reactions. Reactions"  << std::endl;
-   std::cout << "                      are enabled by default."                               << std::endl;
-   std::cout << "-R, --rxns-on       Enable reactions."                                       << std::endl;
+   std::cout << "-r, --rxns-off      Disable or enable the execution of chemical reactions."  << std::endl;
+   std::cout << "    --rxns-on         Reactions are enabled by default."                     << std::endl;
    std::cout << "-s, --seed          Seed for the random number generator. Initialized using" << std::endl;
    std::cout << "                      the system time by default."                           << std::endl;
-   std::cout << "-S, --shuffle       Shuffle the positions of the atoms in the world each"    << std::endl;
-   std::cout << "                      iteration. Shuffling disabled by default."             << std::endl;
-   std::cout << "-t, --shuffle-off   Disable shuffling."                                      << std::endl;
+   std::cout << "-S, --shuffle       Enable or disable shuffling of the positions of atoms"   << std::endl;
+   std::cout << "    --shuffle-off     in the world each iteration. Shuffling is disabled by" << std::endl;
+   std::cout << "                      default."                                              << std::endl;
    std::cout << "-v, --version       Display version information."                            << std::endl;
    std::cout << "-V, --verbose       Write to screen detailed information for debugging."     << std::endl;
-   std::cout << "-x, --x             Width of the world. Default: 16"                         << std::endl;
-   std::cout << "-y, --y             Height of the world. Default: 16"                        << std::endl;
+   std::cout << "-x, --width         Width of the world. Default: 16"                         << std::endl;
+   std::cout << "-y, --height        Height of the world. Default: 16"                        << std::endl;
    std::cout << "-z, --sleep         Number of milliseconds to sleep between iterations."     << std::endl;
    std::cout << "                      Default: 0"                                            << std::endl;
    std::cout << "---------------------------------------------------------------------------" << std::endl;
