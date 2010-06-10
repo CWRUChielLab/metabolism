@@ -23,7 +23,6 @@ void
 handleExit( int sig )
 {
    sig = 0;  // silence the compiler
-   o->maxIters = mySim->getCurrentIter();
    interrupted = 1;
    std::cout << std::endl;
 }
@@ -32,6 +31,9 @@ handleExit( int sig )
 int
 main ( int argc, char* argv[] )
 {
+   // Set up handling of Ctrl-c abort
+   signal( SIGINT, handleExit );
+
 #ifdef HAVE_QT
    QCoreApplication *app;
 #endif
@@ -39,117 +41,31 @@ main ( int argc, char* argv[] )
    // Import command line options and initialize the simulation
    o = safeNew( Options( argc, argv ) );
    mySim = safeNew( Sim(o) );
-   mySim->writeCensus();
 
    if( o->gui == Options::GUI_QT )
    {
       std::cout << "*** Using Qt GUI! ***" << std::endl;
    }
 
-   // Set up handling of Ctrl-c abort
-   signal(SIGINT,handleExit);
-
-   if( o->gui == Options::GUI_NCURSES )
-   {
-      // Initialize ncurses
-#ifdef HAVE_NCURSES
-      initscr();   // Startup
-      timeout(0);  // Makes getch a nonblocking call
-#endif
-   }
-
-   // Print extra information about the simulation
-   if( o->verbose && o->gui == Options::GUI_NCURSES )
-   {
-      // Print using ncurses
-#ifdef HAVE_NCURSES
-      printw( "Press Ctrl-c to quit.\n" );
-      printw( "------\n" );
-      mySim->printEles( (std::ostream*)(NULL) );
-      printw( "\n" );
-      mySim->printRxns( (std::ostream*)(NULL) );
-      printw( "\n" );
-      mySim->printInits( (std::ostream*)(NULL) );
-      printw( "------\n" );
-#endif
-   }
-   else if( o->verbose && o->gui == Options::GUI_OFF )
-   {
-      // Print using cout
-      std::cout << "Press Ctrl-c to quit." << std::endl;
-      std::cout << "------" << std::endl;
-      mySim->printEles( &std::cout );
-      std::cout << std::endl;
-      mySim->printRxns( &std::cout );
-      std::cout << std::endl;
-      mySim->printInits( &std::cout );
-      std::cout << "------" << std::endl;
-   }
-
-#ifdef HAVE_NCURSES
-   int x = 0;
-   int y = 0;
-#endif
-   int lastProgressUpdate = 0;
-
-   if( o->gui == Options::GUI_NCURSES )
-   {
-#ifdef HAVE_NCURSES
-      getyx( stdscr, y, x );
-      mySim->printWorld();
-#endif
-   }
-
    // Execute the simulation
    while( !interrupted && mySim->iterate() )
    {
       if( o->gui == Options::GUI_NCURSES )
-      // **********************
-      // Print using ncurses
-      // **********************
       {
 #ifdef HAVE_NCURSES
-         // Move the cursor to the appropriate location
-         // for printing with ncurses and print the
-         // world
-         move( y, x );
          mySim->printWorld();
-         
-         if( o->progress )
-         {
-            // Print out the progress of the simulation
-            // once each second
-            if( time(NULL) - lastProgressUpdate > 0 )
-            {
-               lastProgressUpdate = time(NULL);
-               printw( "Iteration: %d of %d | %d%% complete\n",
-                  mySim->getCurrentIter(),
-                  o->maxIters,
-                  (int)( 100 * (double)mySim->getCurrentIter() / (double)o->maxIters ) );
-               refresh();
-            }
-         }
 #endif
       }
-      else if( o->progress )
-      // **********************
-      // Print using cout
-      // **********************
+
+      // Print out the progress of the simulation
+      // once each second
+      if( o->progress )
       {
-         // Print out the progress of the simulation
-         // once each second
-         if( time(NULL) - lastProgressUpdate > 0 )
-         {
-            lastProgressUpdate = time(NULL);
-            std::cout << "                                                                                   \r" << std::flush;
-            std::cout << "Iteration: " << mySim->getCurrentIter() << " of " << o->maxIters << " | ";
-            std::cout << (int)( 100 * (double)mySim->getCurrentIter() / (double)o->maxIters ) << "\% complete\r" << std::flush;
-         }
+         mySim->reportProgress();
       }
 
       // Take a census of the atoms in the world
       // occasionally
-      //if( mySim->getCurrentIter() % 32 == 0 )
       if( mySim->getCurrentIter() % 8 == 0 )
       {
          mySim->writeCensus();
@@ -162,28 +78,8 @@ main ( int argc, char* argv[] )
       }
    }
 
-
-   // Finalize the progress indicator to accurately
-   // display how far the simulation got before ending
-   // when running batches
-   if( o->progress && o->gui == Options::GUI_OFF )
-   {
-      std::cout << "                                                                                   \r" << std::flush;
-      std::cout << "Iteration: " << mySim->getCurrentIter() << " of " << o->maxIters << " | ";
-      std::cout << (int)( 100 * (double)mySim->getCurrentIter() / (double)o->maxIters ) << "\% complete\r" << std::flush;
-   }
-
-
-   // Write the simulation parameters and diffusion data
-   // and clean up ncurses
-   mySim->writeConfig();
-   mySim->writeDiffusion();
-   if( o->gui == Options::GUI_NCURSES )
-   {
-#ifdef HAVE_NCURSES
-      endwin();
-#endif
-   }
+   // Write final data to file
+   mySim->finalizeIO();
 
    return 0;
 }

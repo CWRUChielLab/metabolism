@@ -29,13 +29,10 @@ class Sim
       int getCurrentIter();
 
       // Public I/O methods
-      void writeConfig();
+      void finalizeIO();
+      void reportProgress();
       void writeCensus();
-      void writeDiffusion();
       void printWorld();
-      void printEles( std::ostream* out );
-      void printRxns( std::ostream* out );
-      void printInits( std::ostream* out );
 
    private:
       // Sim attributes
@@ -53,12 +50,17 @@ class Sim
       Atom** world;
       uint8_t* claimed;
       unsigned int* positions;
+
+      // I/O attributes
+      int scrX;
+      int scrY;
       
       // RNG parameters
       int randNums_length_in_64_bit_ints;
       uint64_t* randNums;
 
       // Private engine methods
+      void initializeEngine();
       void initRNG( int initSeed );
       void generateRandNums();
       void shufflePositions();
@@ -74,7 +76,13 @@ class Sim
       int getWorldIndex( int x, int y );
 
       // Private I/O methods
+      void initializeIO();
       void loadChemistry();
+      void writeConfig();
+      void writeDiffusion();
+      void printEles( std::ostream* out );
+      void printRxns( std::ostream* out );
+      void printInits( std::ostream* out );
 };
 
 #endif /* SIM_H */

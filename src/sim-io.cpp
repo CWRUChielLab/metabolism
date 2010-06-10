@@ -14,6 +14,100 @@
 using namespace SafeCalls;
 
 
+// Start writing data to files, setup ncurses
+// if necessary, and print simulation details
+// if verbose is enabled
+void
+Sim::initializeIO()
+{
+   static int initialized = 0;
+   if( !initialized )
+   {
+      initialized = 1;
+
+      // Open the census file and take an initial survey
+      writeCensus();
+
+      if( o->gui == Options::GUI_NCURSES )
+      {
+#ifdef HAVE_NCURSES
+         // Initialize ncurses
+         initscr();
+
+         // Print extra information about the simulation
+         if( o->verbose )
+         {
+            printw( "Press Ctrl-c to quit.\n" );
+            printw( "------\n" );
+            printEles( (std::ostream*)(NULL) );
+            printw( "\n" );
+            printRxns( (std::ostream*)(NULL) );
+            printw( "\n" );
+            printInits( (std::ostream*)(NULL) );
+            printw( "------\n" );
+         }
+
+         scrX = 0;
+         scrY = 0;
+         getyx( stdscr, scrY, scrX );
+         printWorld();
+#endif
+      } else {
+         // Print extra information about the simulation
+         if( o->verbose )
+         {
+            std::cout << "Press Ctrl-c to quit." << std::endl;
+            std::cout << "------" << std::endl;
+            printEles( &std::cout );
+            std::cout << std::endl;
+            printRxns( &std::cout );
+            std::cout << std::endl;
+            printInits( &std::cout );
+            std::cout << "------" << std::endl;
+         }
+      }
+   }
+}
+
+
+// Write final data to file
+void
+Sim::finalizeIO()
+{
+   static int finalized = 0;
+   if( !finalized )
+   {
+      finalized = 1;
+
+      // Guard against any more iterations
+      o->maxIters = currentIter;
+
+      // Finalize the progress indicator to accurately
+      // display how many iterations were completed
+      // when the simulation ended (noticable only when
+      // running batches)
+      if( o->progress && o->gui != Options::GUI_NCURSES )
+      {
+         std::cout << "                                                                       \r" << std::flush;
+         std::cout << "Iteration: " << currentIter << " of " << o->maxIters << " | ";
+         std::cout << (int)( 100 * (double)currentIter / (double)o->maxIters ) << "\% complete\r" << std::flush;
+      }
+
+      // Write the simulation parameters and diffusion data
+      // to file and clean up ncurses
+      writeConfig();
+      writeDiffusion();
+      if( o->gui == Options::GUI_NCURSES )
+      {
+#ifdef HAVE_NCURSES
+         endwin();
+#endif
+      }
+   }
+
+}
+
+
 // Load periodicTable, rxnTable, and initialTypes
 // if available from loadFile
 void
@@ -227,40 +321,6 @@ Sim::loadChemistry()
 }
 
 
-// Output all important experimental parameters
-void
-Sim::writeConfig()
-{
-   static std::ofstream configFile;
-   configFile.open( o->configFile.c_str() );
-
-   // Write parameters to file
-   configFile << "version "   << GIT_TAG << std::endl;
-   configFile << "seed "      << o->seed << std::endl;
-   configFile << "iters "     << o->maxIters << std::endl;
-   configFile << "x "         << o->worldX << std::endl;
-   configFile << "y "         << o->worldY << std::endl;
-   configFile << "atoms "     << o->atomCount << std::endl;
-   configFile << "reactions " << (o->doRxns ? "on" : "off") << std::endl;
-   configFile << "shuffle "   << (o->doShuffle ? "on" : "off") << std::endl;
-   configFile << std::endl;
-
-   // Write Elements to file
-   printEles( &configFile );
-   configFile << std::endl;
-
-   // Write Reactions to file
-   printRxns( &configFile );
-   configFile << std::endl;
-
-   // Write initialTypes to file
-   printInits( &configFile );
-   configFile << std::endl;
-
-   configFile.close();
-}
-
-
 // Records important information about the state
 // of the world and writes it to file.
 void
@@ -302,6 +362,40 @@ Sim::writeCensus()
 }
 
 
+// Output all important experimental parameters
+void
+Sim::writeConfig()
+{
+   static std::ofstream configFile;
+   configFile.open( o->configFile.c_str() );
+
+   // Write parameters to file
+   configFile << "version "   << GIT_TAG << std::endl;
+   configFile << "seed "      << o->seed << std::endl;
+   configFile << "iters "     << currentIter << std::endl;
+   configFile << "x "         << o->worldX << std::endl;
+   configFile << "y "         << o->worldY << std::endl;
+   configFile << "atoms "     << o->atomCount << std::endl;
+   configFile << "reactions " << (o->doRxns ? "on" : "off") << std::endl;
+   configFile << "shuffle "   << (o->doShuffle ? "on" : "off") << std::endl;
+   configFile << std::endl;
+
+   // Write Elements to file
+   printEles( &configFile );
+   configFile << std::endl;
+
+   // Write Reactions to file
+   printRxns( &configFile );
+   configFile << std::endl;
+
+   // Write initialTypes to file
+   printInits( &configFile );
+   configFile << std::endl;
+
+   configFile.close();
+}
+
+
 // Writes important information about the state
 // of the world to file.  To be called when the
 // simulation ends.
@@ -340,10 +434,42 @@ Sim::writeDiffusion()
 }
 
 
+// Print out the progress of the simulation
+// once each second
+void
+Sim::reportProgress()
+{
+   static int lastProgressUpdate = 0;
+
+   if( time(NULL) - lastProgressUpdate > 0 )
+   {
+      lastProgressUpdate = time(NULL);
+      if( o->gui == Options::GUI_NCURSES )
+      {
+#ifdef HAVE_NCURSES
+         printw( "Iteration: %d of %d | %d%% complete\n",
+            currentIter,
+            o->maxIters,
+            (int)( 100 * (double)currentIter / (double)o->maxIters ) );
+         refresh();
+#endif
+      } else {
+         std::cout << "                                                                       \r" << std::flush;
+         std::cout << "Iteration: " << currentIter << " of " << o->maxIters << " | ";
+         std::cout << (int)( 100 * (double)currentIter / (double)o->maxIters ) << "\% complete\r" << std::flush;
+      }
+   }
+}
+
+
 void
 Sim::printWorld()
 {
 #ifdef HAVE_NCURSES
+   // Move the cursor to the appropriate position
+   // for printing with ncurses
+   move( scrY, scrX );
+
    // Print top border
    for( int x = -1; x < o->worldX + 1; x++ )
       printw( ". " );

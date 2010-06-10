@@ -21,104 +21,122 @@ Sim::Sim( Options* newOptions )
    // Copy constructor arguments
    o = newOptions;
 
-   // Setup the world
-   currentIter = 0;
-   world = safeNew( Atom*[ o->worldX * o->worldY ] );
-   claimed = safeNew( uint8_t[ o->worldX * o->worldY ] );
-   positions = safeNew( unsigned int[ o->worldX * o->worldY ] );
+   // Initialize the Sim
+   initializeEngine();
+   initializeIO();
+}
 
-   dirdx = new int[8];
-   dirdx[0] = 0;  // N
-   dirdx[1] = 1;  // NE
-   dirdx[2] = 1;  // E
-   dirdx[3] = 1;  // SE
-   dirdx[4] = 0;  // S
-   dirdx[5] = -1; // SW
-   dirdx[6] = -1; // W
-   dirdx[7] = -1; // NW
 
-   dirdy = new int[8];
-   dirdy[0] = -1; // N
-   dirdy[1] = -1; // NE
-   dirdy[2] = 0;  // E
-   dirdy[3] = 1;  // SE
-   dirdy[4] = 1;  // S
-   dirdy[5] = 1;  // SW
-   dirdy[6] = 0;  // W
-   dirdy[7] = -1; // NW
-
-   // Initialize the world array to NULL
-   for( int i = 0; i < o->worldX * o->worldY; i++ )
+// Setup the random number generator, the world
+// data structure, the periodicTable, the rxnTable,
+// and initizalize the Atoms
+void
+Sim::initializeEngine()
+{
+   static int initialized = 0;
+   if( !initialized )
    {
-      world[i] = NULL;
-   }
+      initialized = 1;
 
-   // Initialize the random number generator
-   initRNG( o->seed );
+      // Setup the world
+      currentIter = 0;
+      world = safeNew( Atom*[ o->worldX * o->worldY ] );
+      claimed = safeNew( uint8_t[ o->worldX * o->worldY ] );
+      positions = safeNew( unsigned int[ o->worldX * o->worldY ] );
 
-   // Initialize the positions array with a random
-   // ordering of integers ranging from 0 to
-   // worldX*worldY-1
-   shufflePositions();
+      dirdx = new int[8];
+      dirdx[0] = 0;  // N
+      dirdx[1] = 1;  // NE
+      dirdx[2] = 1;  // E
+      dirdx[3] = 1;  // SE
+      dirdx[4] = 0;  // S
+      dirdx[5] = -1; // SW
+      dirdx[6] = -1; // W
+      dirdx[7] = -1; // NW
 
-   // Create Solvent Element
-   Element* tempEle;
-   tempEle = safeNew( Element( "Solvent", '*', 0, 0 ) );
-   periodicTable[ "Solvent" ] = tempEle;
+      dirdy = new int[8];
+      dirdy[0] = -1; // N
+      dirdy[1] = -1; // NE
+      dirdy[2] = 0;  // E
+      dirdy[3] = 1;  // SE
+      dirdy[4] = 1;  // S
+      dirdy[5] = 1;  // SW
+      dirdy[6] = 0;  // W
+      dirdy[7] = -1; // NW
 
-   // Load periodicTable, rxnTable, and initialType if available
-   elesLoaded = 0;
-   rxnsLoaded = 0;
-   initsLoaded = 0;
-   loadChemistry();
-
-   // Set up default periodicTable if one was not loaded
-   if( elesLoaded == 0 )
-   {
-      for( char symbol = 'A'; symbol <= 'D'; symbol++ )
+      // Initialize the world array to NULL
+      for( int i = 0; i < o->worldX * o->worldY; i++ )
       {
-         std::string name(1,symbol);
-         tempEle = safeNew( Element( name, symbol, 0, 0 ) );
-         periodicTable[ name ] = tempEle;
+         world[i] = NULL;
       }
-   }
 
-   // Set up default rxnTable if one was not loaded
-   if( rxnsLoaded == 0 )
-   {
-      Reaction* tempRxn;
-      tempRxn = safeNew( Reaction( ev(2,"A","B"), ev(2,"C","D"), 0.5 ) );
-      rxnTable[ tempRxn->getKey() ] = tempRxn;
-   }
+      // Create Solvent Element
+      Element* tempEle;
+      tempEle = safeNew( Element( "Solvent", '*', 0, 0 ) );
+      periodicTable[ "Solvent" ] = tempEle;
 
-   // Set up default initialTypes if one was not loaded
-   if( initsLoaded == 0 )
-   {
-      initialTypes = ev(2,"A","B");
-   }
+      // Load periodicTable, rxnTable, and initialType if available
+      elesLoaded = 0;
+      rxnsLoaded = 0;
+      initsLoaded = 0;
+      loadChemistry();
 
-   // Fill the array of random numbers
-   generateRandNums();
-
-   // Initialize the world with random atoms
-   Atom* tempAtom;
-   int x, y;
-   o->atomCount = std::min( o->atomCount, o->worldX * o->worldY );
-   if( initialTypes.size() > 0 )
-   {
-      for( int i = 0; i < o->atomCount; i++ )
+      // Set up default periodicTable if one was not loaded
+      if( elesLoaded == 0 )
       {
-         x = positions[i] % o->worldX;
-         y = positions[i] / o->worldX;
-         tempEle = initialTypes[ randNums[i] % initialTypes.size() ];
-         //if( i < 64 ) tempEle = initialTypes[0]; else tempEle = initialTypes[1];
-         tempAtom = safeNew( Atom( tempEle, x, y ) );
-         world[ getWorldIndex(x,y) ] = tempAtom;
+         for( char symbol = 'A'; symbol <= 'D'; symbol++ )
+         {
+            std::string name(1,symbol);
+            tempEle = safeNew( Element( name, symbol, 0, 0 ) );
+            periodicTable[ name ] = tempEle;
+         }
       }
-   }
-   else
-   {
-      o->atomCount = 0;
+
+      // Set up default rxnTable if one was not loaded
+      if( rxnsLoaded == 0 )
+      {
+         Reaction* tempRxn;
+         tempRxn = safeNew( Reaction( ev(2,"A","B"), ev(2,"C","D"), 0.5 ) );
+         rxnTable[ tempRxn->getKey() ] = tempRxn;
+      }
+
+      // Set up default initialTypes if one was not loaded
+      if( initsLoaded == 0 )
+      {
+         initialTypes = ev(2,"A","B");
+      }
+
+      // Initialize the random number generator
+      initRNG( o->seed );
+
+      // Initialize the positions array with a random
+      // ordering of integers ranging from 0 to
+      // worldX*worldY-1
+      shufflePositions();
+
+      // Fill the array of random numbers
+      generateRandNums();
+
+      // Initialize the world with random atoms
+      Atom* tempAtom;
+      int x, y;
+      o->atomCount = std::min( o->atomCount, o->worldX * o->worldY );
+      if( initialTypes.size() > 0 )
+      {
+         for( int i = 0; i < o->atomCount; i++ )
+         {
+            x = positions[i] % o->worldX;
+            y = positions[i] / o->worldX;
+            tempEle = initialTypes[ randNums[i] % initialTypes.size() ];
+            //if( i < 64 ) tempEle = initialTypes[0]; else tempEle = initialTypes[1];
+            tempAtom = safeNew( Atom( tempEle, x, y ) );
+            world[ getWorldIndex(x,y) ] = tempAtom;
+         }
+      }
+      else
+      {
+         o->atomCount = 0;
+      }
    }
 }
 
