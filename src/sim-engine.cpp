@@ -27,7 +27,7 @@ Sim::Sim( Options* newOptions )
 }
 
 
-// Setup the random number generator, the world
+// Set up the random number generator, the world
 // data structure, the periodicTable, the rxnTable,
 // and initizalize the Atoms
 void
@@ -38,7 +38,7 @@ Sim::initializeEngine()
    {
       initialized = 1;
 
-      // Setup the world
+      // Set up the world
       currentIter = 0;
       world = safeNew( Atom*[ o->worldX * o->worldY ] );
       claimed = safeNew( uint8_t[ o->worldX * o->worldY ] );

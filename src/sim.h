@@ -31,6 +31,7 @@ class Sim
       // Public I/O methods
       void finalizeIO();
       void reportProgress();
+      void forceReportProgress();
       void writeCensus();
       void printWorld();
 
@@ -54,6 +55,7 @@ class Sim
       // I/O attributes
       int scrX;
       int scrY;
+      int lastProgressUpdate;
       
       // RNG parameters
       int randNums_length_in_64_bit_ints;

@@ -58,7 +58,7 @@ main ( int argc, char* argv[] )
       }
 
       // Print out the progress of the simulation
-      // once each second
+      // at most once each second
       if( o->progress )
       {
          mySim->reportProgress();

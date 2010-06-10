@@ -14,7 +14,7 @@
 using namespace SafeCalls;
 
 
-// Start writing data to files, setup ncurses
+// Start writing data to files, set up ncurses
 // if necessary, and print simulation details
 // if verbose is enabled
 void
@@ -27,6 +27,11 @@ Sim::initializeIO()
 
       // Open the census file and take an initial survey
       writeCensus();
+
+      // Set the time for the most recent progress report
+      // printout to "a long time ago and well overdue"
+      // (i.e., never).
+      lastProgressUpdate = 0;
 
       if( o->gui == Options::GUI_NCURSES )
       {
@@ -84,13 +89,11 @@ Sim::finalizeIO()
 
       // Finalize the progress indicator to accurately
       // display how many iterations were completed
-      // when the simulation ended (noticable only when
-      // running batches)
-      if( o->progress && o->gui != Options::GUI_NCURSES )
+      // when the simulation ended (noticeable primarily
+      // when running batches)
+      if( o->progress )
       {
-         std::cout << "                                                                       \r" << std::flush;
-         std::cout << "Iteration: " << currentIter << " of " << o->maxIters << " | ";
-         std::cout << (int)( 100 * (double)currentIter / (double)o->maxIters ) << "\% complete\r" << std::flush;
+         forceReportProgress();
       }
 
       // Write the simulation parameters and diffusion data
@@ -435,12 +438,10 @@ Sim::writeDiffusion()
 
 
 // Print out the progress of the simulation
-// once each second
+// at most once each second
 void
 Sim::reportProgress()
 {
-   static int lastProgressUpdate = 0;
-
    if( time(NULL) - lastProgressUpdate > 0 )
    {
       lastProgressUpdate = time(NULL);
@@ -459,6 +460,15 @@ Sim::reportProgress()
          std::cout << (int)( 100 * (double)currentIter / (double)o->maxIters ) << "\% complete\r" << std::flush;
       }
    }
+}
+
+
+// Force a progress report
+void
+Sim::forceReportProgress()
+{
+   lastProgressUpdate = 0;
+   reportProgress();
 }
 
 
