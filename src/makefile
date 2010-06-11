@@ -26,6 +26,9 @@ OBJECTS = atom.o \
 			 sim-engine.o \
 			 sim-io.o \
 			 SFMT.o
+QT_HEADERS = gui.h
+QT_SOURCES = gui.cpp
+QT_OBJECTS = gui.o moc_gui.o
 
 DEFINES = -D_REENTRANT -DMEXP=132049 -DGIT_TAG=`git describe --tags | sed "s/\(.*\)/\"\1\"/"`
 FLAGS   = -pipe -O3 -Wall -W
@@ -57,9 +60,9 @@ CHECK_RAND      = ../check/rand.check.out
 
 default: metabolism
 
-metabolism: qt-makefile $(SOURCES) $(HEADERS)
+metabolism: qt-makefile $(SOURCES) $(QT_SOURCES) $(HEADERS) $(QT_HEADERS)
 	make -f $<
-metabolism-no-ncurses: qt-makefile-no-ncurses $(SOURCES) $(HEADERS)
+metabolism-no-ncurses: qt-makefile-no-ncurses $(SOURCES) $(QT_SOURCES) $(HEADERS) $(QT_HEADERS)
 	make -f $<
 metabolism-no-qt: DEFINES+=-DHAVE_NCURSES
 metabolism-no-qt: LIBS+=-lncurses
@@ -81,9 +84,9 @@ clean:
 	rm -f metabolism metabolism-no-* qt-makefile* *.o *.out *.pdf *~
 
 
-qt-makefile: qt-project.pro $(SOURCES) $(HEADERS)
+qt-makefile: qt-project.pro $(SOURCES) $(QT_SOURCES) $(HEADERS) $(QT_HEADERS)
 	qmake -o $@
-qt-makefile-no-ncurses: qt-project.pro $(SOURCES) $(HEADERS)
+qt-makefile-no-ncurses: qt-project.pro $(SOURCES) $(QT_SOURCES) $(HEADERS) $(QT_HEADERS)
 	qmake -o $@ "CONFIG += no-ncurses"
 
 

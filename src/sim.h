@@ -35,6 +35,9 @@ class Sim
       void writeCensus();
       void printWorld();
 
+      Atom** world;
+      ElementMap periodicTable;
+
    private:
       // Sim attributes
       Options* o;
@@ -44,11 +47,9 @@ class Sim
       int rxnsLoaded;
       int initsLoaded;
 
-      ElementMap periodicTable;
       ReactionMap rxnTable;
       ElementVector initialTypes;
 
-      Atom** world;
       uint8_t* claimed;
       unsigned int* positions;
 
