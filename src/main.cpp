@@ -4,7 +4,7 @@
 #include <csignal>
 #ifdef HAVE_QT
 #include <QApplication>
-#include "gui.h" // gui.h must be included before ncurses.h
+#include "gui-mainwindow.h" // gui-mainwindow.h must be included before ncurses.h
 #endif
 #ifdef HAVE_NCURSES
 #include <ncurses.h>
@@ -47,7 +47,7 @@ main ( int argc, char* argv[] )
 #ifdef HAVE_QT
       std::cout << "*** Using Qt GUI! ***" << std::endl;
       app = new QApplication( argc, argv );
-      GUI* myGUI = safeNew( GUI( o, mySim ) );
+      GuiMainWindow* myGUI = safeNew( GuiMainWindow( o, mySim ) );
       myGUI->show();
       return app->exec();
 #endif

@@ -78,6 +78,6 @@ win32 {
 }
 
 # Input
-HEADERS += atom.h element.h gui.h options.h reaction.h safecalls.h sim.h
-SOURCES += atom.cpp element.cpp gui.cpp main.cpp options.cpp reaction.cpp safecalls.cpp sim-engine.cpp sim-io.cpp ../SFMT/SFMT.c
+HEADERS += atom.h element.h gui-mainwindow.h gui-view.h options.h reaction.h safecalls.h sim.h
+SOURCES += atom.cpp element.cpp gui-mainwindow.cpp gui-view.cpp main.cpp options.cpp reaction.cpp safecalls.cpp sim-engine.cpp sim-io.cpp ../SFMT/SFMT.c
 

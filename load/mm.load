@@ -1,7 +1,7 @@
-ele Enzyme E 0 0
-ele Substrate S 0 0
-ele ES F 0 0
-ele Product P 0 0
+ele Enzyme E red 0
+ele Substrate S blue 0
+ele ES C darkorange 0
+ele Product P green 0
 
 rxn 0.50 Enzyme + Substrate -> ES
 rxn 0.01 ES -> Enzyme + Substrate

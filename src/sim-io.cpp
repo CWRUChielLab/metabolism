@@ -131,7 +131,8 @@ Sim::loadChemistry()
          {
             std::string name;
             char symbol;
-            int color, charge;
+            std::string color;
+            int charge;
 
             load >> name >> symbol >> color >> charge;
             tempEle = safeNew( Element( name, symbol, color, charge ) );
@@ -525,7 +526,7 @@ Sim::printEles( std::ostream* out )
          if( out == (std::ostream*)(NULL) )
          {
 #ifdef HAVE_NCURSES
-            printw( "ele %s %c %d %d\n", ele->getName().c_str(), ele->getSymbol(), ele->getColor(), ele->getCharge() );
+            printw( "ele %s %c %s %d\n", ele->getName().c_str(), ele->getSymbol(), ele->getColor().c_str(), ele->getCharge() );
 #endif
          }
          else

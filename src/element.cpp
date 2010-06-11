@@ -7,7 +7,7 @@
 
 
 // Constructor
-Element::Element( std::string initName, char initSymbol, int initColor, int initCharge )
+Element::Element( std::string initName, char initSymbol, std::string initColor, int initCharge )
 {
    static int lastPrime = 1;
    
@@ -60,7 +60,7 @@ Element::getSymbol()
 }
 
 
-int
+std::string
 Element::getColor()
 {
    return color;
@@ -68,7 +68,7 @@ Element::getColor()
 
 
 void
-Element::setColor( int newColor )
+Element::setColor( std::string newColor )
 {
    color = newColor;
 }

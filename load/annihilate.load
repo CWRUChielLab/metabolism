@@ -1,0 +1,7 @@
+ele A A red 0
+ele B B blue 0
+
+rxn 0.5 A + B -> *
+
+init 2 A B 
+

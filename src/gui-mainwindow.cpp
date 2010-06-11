@@ -1,15 +1,15 @@
-/* gui.cpp
+/* gui-mainwindow.cpp
  */
 
 #ifdef HAVE_QT
 
-#include "gui.h"
+#include "gui-mainwindow.h"
 #include "safecalls.h"
 using namespace SafeCalls;
 
 
 // Constructor
-GUI::GUI( Options* newOptions, Sim* newSim, QWidget* parent, Qt::WindowFlags flags )
+GuiMainWindow::GuiMainWindow( Options* newOptions, Sim* newSim, QWidget* parent, Qt::WindowFlags flags )
    : QMainWindow( parent, flags )
 {
    // Copy constructor arguments
@@ -17,10 +17,12 @@ GUI::GUI( Options* newOptions, Sim* newSim, QWidget* parent, Qt::WindowFlags fla
    sim = newSim;
 
    // Set up GUI components
+   view = safeNew( GuiView( o, sim, this ) );
    button = safeNew( QPushButton( "Click to start" ) );
 
    // Set up GUI layout
    mainLayout = safeNew( QVBoxLayout() );
+   mainLayout->addWidget( view );
    mainLayout->addWidget( button );
    mainWidget = safeNew( QWidget() );
    mainWidget->setLayout( mainLayout );
@@ -30,13 +32,15 @@ GUI::GUI( Options* newOptions, Sim* newSim, QWidget* parent, Qt::WindowFlags fla
 
    // Signals
    connect( button, SIGNAL( clicked() ), this, SLOT( runSim() ) );
+   connect( button, SIGNAL( clicked() ), view, SLOT( startPaint() ) );
    connect( this, SIGNAL( iterDone() ), this, SLOT( updateButton() ) );
+   connect( this, SIGNAL( iterDone() ), view, SLOT( update() ) );
 }
 
 
 // ...
 void
-GUI::closeEvent( QCloseEvent* event )
+GuiMainWindow::closeEvent( QCloseEvent* event )
 {
    sim->finalizeIO();
    QWidget::closeEvent( event );
@@ -45,14 +49,14 @@ GUI::closeEvent( QCloseEvent* event )
 
 // ...
 void
-GUI::updateButton()
+GuiMainWindow::updateButton()
 {
    button->setText( QString::number( sim->getCurrentIter() ) );
 }
 
 
 void
-GUI::runSim()
+GuiMainWindow::runSim()
 {
    while( sim->iterate() )
    {

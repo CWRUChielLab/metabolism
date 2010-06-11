@@ -10,14 +10,14 @@ class Element
 {
    public:
       // Constructor
-      Element( std::string initName, char initSymbol, int initColor, int initCharge = 0 );
+      Element( std::string initName, char initSymbol, std::string initColor, int initCharge = 0 );
 
       // Get and set functions
       int getKey();
       std::string getName();
       char getSymbol();
-      int getColor();
-      void setColor( int newColor );
+      std::string getColor();
+      void setColor( std::string newColor );
       int getCharge();
       void setCharge( int newCharge );
       int getCount();
@@ -28,7 +28,7 @@ class Element
       int key;
       std::string name;
       char symbol;
-      int color;
+      std::string color;
       int charge;
       int count;
 };

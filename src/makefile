@@ -26,9 +26,9 @@ OBJECTS = atom.o \
 			 sim-engine.o \
 			 sim-io.o \
 			 SFMT.o
-QT_HEADERS = gui.h
-QT_SOURCES = gui.cpp
-QT_OBJECTS = gui.o moc_gui.o
+QT_HEADERS = gui-mainwindow.h gui-view.h
+QT_SOURCES = gui-mainwindow.cpp gui-view.cpp
+QT_OBJECTS = gui-mainwindow.o gui-view.o moc_gui-mainwindow.o moc_gui-view.o
 
 DEFINES = -D_REENTRANT -DMEXP=132049 -DGIT_TAG=`git describe --tags | sed "s/\(.*\)/\"\1\"/"`
 FLAGS   = -pipe -O3 -Wall -W
@@ -81,7 +81,7 @@ check: clean metabolism-no-qt-ncurses
 	diff rand.out $(CHECK_RAND) | wc -l
 
 clean:
-	rm -f metabolism metabolism-no-* qt-makefile* *.o *.out *.pdf *~
+	rm -f metabolism metabolism-no-* qt-makefile* moc_* *.o *.out *.pdf *~
 
 
 qt-makefile: qt-project.pro $(SOURCES) $(QT_SOURCES) $(HEADERS) $(QT_HEADERS)

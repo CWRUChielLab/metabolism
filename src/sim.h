@@ -37,6 +37,7 @@ class Sim
 
       Atom** world;
       ElementMap periodicTable;
+      int getWorldIndex( int x, int y );
 
    private:
       // Sim attributes
@@ -76,7 +77,6 @@ class Sim
       void executeRxns();
 
       ElementVector ev( int elementCount, ... );
-      int getWorldIndex( int x, int y );
 
       // Private I/O methods
       void initializeIO();

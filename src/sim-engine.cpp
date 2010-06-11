@@ -72,7 +72,7 @@ Sim::initializeEngine()
 
       // Create Solvent Element
       Element* tempEle;
-      tempEle = safeNew( Element( "Solvent", '*', 0, 0 ) );
+      tempEle = safeNew( Element( "Solvent", '*', "black", 0 ) );
       periodicTable[ "Solvent" ] = tempEle;
 
       // Load periodicTable, rxnTable, and initialType if available
@@ -84,12 +84,14 @@ Sim::initializeEngine()
       // Set up default periodicTable if one was not loaded
       if( elesLoaded == 0 )
       {
-         for( char symbol = 'A'; symbol <= 'D'; symbol++ )
-         {
-            std::string name(1,symbol);
-            tempEle = safeNew( Element( name, symbol, 0, 0 ) );
-            periodicTable[ name ] = tempEle;
-         }
+         tempEle = safeNew( Element( "A", 'A', "red", 0 ) );
+         periodicTable[ "A" ] = tempEle;
+         tempEle = safeNew( Element( "B", 'B', "blue", 0 ) );
+         periodicTable[ "B" ] = tempEle;
+         tempEle = safeNew( Element( "C", 'C', "darkorange", 0 ) );
+         periodicTable[ "C" ] = tempEle;
+         tempEle = safeNew( Element( "D", 'D', "green", 0 ) );
+         periodicTable[ "D" ] = tempEle;
       }
 
       // Set up default rxnTable if one was not loaded
@@ -129,8 +131,10 @@ Sim::initializeEngine()
             y = positions[i] / o->worldX;
             tempEle = initialTypes[ randNums[i] % initialTypes.size() ];
             //if( i < 64 ) tempEle = initialTypes[0]; else tempEle = initialTypes[1];
+            //if( i % 2 == 0 ) tempEle = initialTypes[0]; else tempEle = initialTypes[1];
             tempAtom = safeNew( Atom( tempEle, x, y ) );
             world[ getWorldIndex(x,y) ] = tempAtom;
+            //world[ i ] = tempAtom;
          }
       }
       else
