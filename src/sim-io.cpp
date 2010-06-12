@@ -132,10 +132,9 @@ Sim::loadChemistry()
             std::string name;
             char symbol;
             std::string color;
-            int charge;
 
-            load >> name >> symbol >> color >> charge;
-            tempEle = safeNew( Element( name, symbol, color, charge ) );
+            load >> name >> symbol >> color;
+            tempEle = safeNew( Element( name, symbol, color ) );
             periodicTable[ name ] = tempEle;
             elesLoaded++;
          }
@@ -526,12 +525,12 @@ Sim::printEles( std::ostream* out )
          if( out == (std::ostream*)(NULL) )
          {
 #ifdef HAVE_NCURSES
-            printw( "ele %s %c %s %d\n", ele->getName().c_str(), ele->getSymbol(), ele->getColor().c_str(), ele->getCharge() );
+            printw( "ele %s %c %s\n", ele->getName().c_str(), ele->getSymbol(), ele->getColor().c_str() );
 #endif
          }
          else
          {
-            *out <<  "ele " << ele->getName() << " " << ele->getSymbol() << " " << ele->getColor() << " " << ele->getCharge() << std::endl;
+            *out <<  "ele " << ele->getName() << " " << ele->getSymbol() << " " << ele->getColor() << std::endl;
          }
       }
    }

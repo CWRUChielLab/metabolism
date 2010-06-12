@@ -72,7 +72,7 @@ Sim::initializeEngine()
 
       // Create Solvent Element
       Element* tempEle;
-      tempEle = safeNew( Element( "Solvent", '*', "black", 0 ) );
+      tempEle = safeNew( Element( "Solvent", '*', "white" ) );
       periodicTable[ "Solvent" ] = tempEle;
 
       // Load periodicTable, rxnTable, and initialType if available
@@ -84,13 +84,13 @@ Sim::initializeEngine()
       // Set up default periodicTable if one was not loaded
       if( elesLoaded == 0 )
       {
-         tempEle = safeNew( Element( "A", 'A', "red", 0 ) );
+         tempEle = safeNew( Element( "A", 'A', "teal" ) );
          periodicTable[ "A" ] = tempEle;
-         tempEle = safeNew( Element( "B", 'B', "blue", 0 ) );
+         tempEle = safeNew( Element( "B", 'B', "hotpink" ) );
          periodicTable[ "B" ] = tempEle;
-         tempEle = safeNew( Element( "C", 'C', "darkorange", 0 ) );
+         tempEle = safeNew( Element( "C", 'C', "darkorange" ) );
          periodicTable[ "C" ] = tempEle;
-         tempEle = safeNew( Element( "D", 'D', "green", 0 ) );
+         tempEle = safeNew( Element( "D", 'D', "yellow" ) );
          periodicTable[ "D" ] = tempEle;
       }
 

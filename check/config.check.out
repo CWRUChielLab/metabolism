@@ -1,4 +1,4 @@
-version v0.2.2-11-ga6bce63
+version v0.2.2-12-gd08c9fe
 seed 42
 iters 100
 x 128
@@ -7,10 +7,10 @@ atoms 500
 reactions on
 shuffle on
 
-ele ES C darkorange 0
-ele Enzyme E red 0
-ele Product P green 0
-ele Substrate S blue 0
+ele ES C darkorange
+ele Enzyme E yellow
+ele Product P hotpink
+ele Substrate S teal
 
 rxn 0.01 ES -> Enzyme + Substrate
 rxn 0.01 ES -> Enzyme + Product

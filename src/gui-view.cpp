@@ -72,7 +72,7 @@ GuiView::resetPaint()
 void
 GuiView::initializeGL()
 {
-   qglClearColor( Qt::white );
+   qglClearColor( Qt::black );
    glShadeModel( GL_FLAT );
    glEnable( GL_DEPTH_TEST );
    glEnable( GL_CULL_FACE );
