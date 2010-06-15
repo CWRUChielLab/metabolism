@@ -28,11 +28,12 @@ GuiMainWindow::GuiMainWindow( Options* newOptions, Sim* newSim, QWidget* parent,
    mainWidget->setLayout( mainLayout );
 
    setCentralWidget( mainWidget );
-   setWindowTitle( "testing 1 2 3" );
+   setWindowTitle( "Chemical Metabolism Simulator" );
 
-   // Signals
-   connect( button, SIGNAL( clicked() ), this, SLOT( runSim() ) );
+   // Connections with the same signal should be declared
+   // in order of descending slot computational complexity
    connect( button, SIGNAL( clicked() ), view, SLOT( startPaint() ) );
+   connect( button, SIGNAL( clicked() ), this, SLOT( runSim() ) );
    connect( this, SIGNAL( iterDone() ), this, SLOT( updateButton() ) );
    connect( this, SIGNAL( iterDone() ), view, SLOT( update() ) );
 }
@@ -55,6 +56,7 @@ GuiMainWindow::updateButton()
 }
 
 
+// ...
 void
 GuiMainWindow::runSim()
 {

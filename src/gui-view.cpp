@@ -13,8 +13,7 @@ GuiView::GuiView( Options* newOptions, Sim* newSim, QWidget *parent )
 {
    o = newOptions;
    sim = newSim;
-   //running = 0;
-   running = 1;
+   running = 0;
 
    setFormat( QGLFormat( QGL::DoubleBuffer | QGL::DepthBuffer ) );
    rotationX = 0.0;
@@ -55,7 +54,6 @@ GuiView::adjustPaintRegion()
 void
 GuiView::startPaint()
 {
-   std::cout << "startPaint()" << std::endl;
    running = 1;
    update();
 }
@@ -130,7 +128,8 @@ GuiView::draw()
    double trackedAtomRadiusY   = trackedAtomDiameterY / 2.0;         // in percentage of the window
 
    // Realtime world visualization
-   if( running )
+   //if( running )
+   if( 1 )
    {
       glBegin( GL_POINTS );
 

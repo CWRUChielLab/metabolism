@@ -45,7 +45,6 @@ main ( int argc, char* argv[] )
    if( o->gui == Options::GUI_QT )
    {
 #ifdef HAVE_QT
-      std::cout << "*** Using Qt GUI! ***" << std::endl;
       app = new QApplication( argc, argv );
       GuiMainWindow* myGUI = safeNew( GuiMainWindow( o, mySim ) );
       myGUI->show();
