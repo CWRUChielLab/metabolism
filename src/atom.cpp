@@ -5,7 +5,7 @@
 
 
 // Constructor
-Atom::Atom( Element* initType, int initX, int initY, int initDxActual, int initDyActual, int initDxIdeal, int initDyIdeal, int initCollisions )
+Atom::Atom( Element* initType, int initX, int initY, int initDxActual, int initDyActual, int initDxIdeal, int initDyIdeal, int initCollisions, int initTracked )
 {
    // Copy constructor arguments
    type = initType;
@@ -16,6 +16,7 @@ Atom::Atom( Element* initType, int initX, int initY, int initDxActual, int initD
    dx_ideal = initDxIdeal;
    dy_ideal = initDyIdeal;
    collisions = initCollisions;
+   tracked = initTracked;
 
    // Increment Element type counter
    type->setCount( type->getCount() + 1 );
@@ -145,5 +146,26 @@ void
 Atom::setCollisions( int newCollisions )
 {
    collisions = newCollisions;
+}
+
+
+int
+Atom::isTracked()
+{
+   return tracked;
+}
+
+
+void
+Atom::setTracked( int newTracked )
+{
+   tracked = newTracked;
+}
+
+
+void
+Atom::toggleTracked()
+{
+   tracked = !tracked;
 }
 

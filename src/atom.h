@@ -10,7 +10,7 @@ class Atom
 {
    public:
       // Constructor
-      Atom( Element* initType, int initX, int initY, int initDxActual = 0, int initDyActual = 0, int initDxIdeal = 0, int initDyIdeal = 0, int initCollisions = 0 );
+      Atom( Element* initType, int initX, int initY, int initDxActual = 0, int initDyActual = 0, int initDxIdeal = 0, int initDyIdeal = 0, int initCollisions = 0, int initTracked = 0 );
 
       // Deconstructor
       ~Atom();
@@ -32,6 +32,9 @@ class Atom
       void setDyIdeal( int newDyIdeal );
       int getCollisions();
       void setCollisions( int newCollisions );
+      int isTracked();
+      void setTracked( int newTracked );
+      void toggleTracked();
 
    private:
       // Atom attributes
@@ -43,6 +46,7 @@ class Atom
       int dx_ideal;
       int dy_ideal;
       int collisions;
+      int tracked;
 };
 
 #endif /* ATOM_H */

@@ -485,7 +485,8 @@ Sim::printWorld()
       printw( ". " );
    printw( "\n" );
 
-   for( int y = 0; y < o->worldY; y++ )
+   // Print with origin at bottom left
+   for( int y = o->worldY - 1; y >= 0; y-- )
    {
       // Print left border
       printw( ". " );

@@ -6,6 +6,7 @@
 #ifdef HAVE_QT
 
 #include <QGLWidget>
+#include <QMouseEvent>
 #include "options.h"
 #include "sim.h"
 
@@ -23,6 +24,7 @@ class GuiView : public QGLWidget
       void resetPaint();
 
    protected:
+      void mousePressEvent( QMouseEvent *event );
       void initializeGL();
       void resizeGL( int width, int height );
       void paintGL();
@@ -43,7 +45,6 @@ class GuiView : public QGLWidget
       GLfloat rotationX;
       GLfloat rotationY;
       GLfloat rotationZ;
-      void draw();
 };
 
 #endif /* HAVE_QT */

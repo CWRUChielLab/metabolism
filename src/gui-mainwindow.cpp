@@ -35,7 +35,7 @@ GuiMainWindow::GuiMainWindow( Options* newOptions, Sim* newSim, QWidget* parent,
    connect( button, SIGNAL( clicked() ), view, SLOT( startPaint() ) );
    connect( button, SIGNAL( clicked() ), this, SLOT( runSim() ) );
    connect( this, SIGNAL( iterDone() ), this, SLOT( updateButton() ) );
-   connect( this, SIGNAL( iterDone() ), view, SLOT( update() ) );
+   connect( this, SIGNAL( iterDone() ), view, SLOT( updateGL() ) );
 }
 
 

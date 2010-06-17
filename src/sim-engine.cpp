@@ -131,10 +131,8 @@ Sim::initializeEngine()
             y = positions[i] / o->worldX;
             tempEle = initialTypes[ randNums[i] % initialTypes.size() ];
             //if( i < 64 ) tempEle = initialTypes[0]; else tempEle = initialTypes[1];
-            //if( i % 2 == 0 ) tempEle = initialTypes[0]; else tempEle = initialTypes[1];
             tempAtom = safeNew( Atom( tempEle, x, y ) );
             world[ getWorldIndex(x,y) ] = tempAtom;
-            //world[ i ] = tempAtom;
          }
       }
       else
@@ -517,7 +515,7 @@ Sim::executeRxns()
             }
             else
             {
-               neighborAtom = safeNew( Atom( periodicTable[ "Solvent" ], x, y ) );
+               neighborAtom = safeNew( Atom( periodicTable[ "Solvent" ], neighborX, neighborY ) );
             }
          }
 
@@ -695,9 +693,17 @@ Sim::executeRxns()
                }
                else
                {
-                  neighborAtom = safeNew( Atom( periodicTable[ "Solvent" ], x, y ) );
+                  neighborAtom = safeNew( Atom( periodicTable[ "Solvent" ], neighborX, neighborY ) );
                }
             }
+
+            // Propagate tracking for decomposition reactions
+            if( thisAtom->getType() == periodicTable[ "Solvent" ] )
+               if( neighborAtom != NULL && neighborAtom->isTracked() )
+                  thisAtom->toggleTracked();
+            if( neighborAtom != NULL && neighborAtom->getType() == periodicTable[ "Solvent" ] )
+               if( thisAtom->isTracked() )
+                  neighborAtom->toggleTracked();
 
             thisRxnProb = 0;
 
