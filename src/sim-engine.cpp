@@ -39,7 +39,7 @@ Sim::initializeEngine()
       initialized = 1;
 
       // Set up the world
-      currentIter = 0;
+      itersCompleted = 0;
       world = safeNew( Atom*[ o->worldX * o->worldY ] );
       claimed = safeNew( uint8_t[ o->worldX * o->worldY ] );
       positions = safeNew( unsigned int[ o->worldX * o->worldY ] );
@@ -143,40 +143,108 @@ Sim::initializeEngine()
 }
 
 
-// Execute one step of the simulation
-// Returns 1 if the simulation succeeded in
+// Execute one step of the simulation;
+// returns 1 if the simulation succeeded in
 // executing one step, and 0 if the
 // simulation had already reached its
 // maxIters
 int
 Sim::iterate()
 {
-   if( currentIter < o->maxIters )
+   if( itersCompleted < o->maxIters )
    {
+      // Assign atoms new positions in the world
+      // randomly to simulate mixing
       if( o->doShuffle )
-      {
          shuffleWorld();
-      }
+
+      // Fill the array of random numbers with
+      // new values
       generateRandNums();
+
+      // Move atoms and handle collisions
       moveAtoms();
+
+      // Scan the world, check for potential
+      // reactions, and execute some of them
       if( o->doRxns )
-      {
          executeRxns();
-      }
-      currentIter++;
+
+      // Print out the progress of the simulation
+      // at most once each second
+      if( o->progress )
+         reportProgress();
+
+      // Take a census of the atoms in the world
+      // occasionally
+      if( itersCompleted % 8 == 0 )
+         writeCensus();
+
+      // Sleep the simulation
+      if( o->sleep != 0 )
+         usleep( o->sleep * 1000 );
+
+      // Increment the iteration counter
+      itersCompleted++;
+
       return 1;
    }
    else
    {
+      // Finish collecting data and clean up
+      cleanup();
+
       return 0;
    }
 }
 
 
-int
-Sim::getCurrentIter()
+// Tell the simulation it is time to end
+// prematurely
+void
+Sim::end()
 {
-   return currentIter;
+   o->maxIters = itersCompleted;
+}
+
+
+// Finish collecting data and clean up
+void
+Sim::cleanup()
+{
+   static int finalized = 0;
+   if( !finalized )
+   {
+      finalized = 1;
+
+      // Guard against any more iterations
+      o->maxIters = itersCompleted;
+
+      // Finalize the progress indicator to accurately
+      // display how many iterations were completed
+      // when the simulation ended (noticeable primarily
+      // when running batches)
+      if( o->progress )
+      {
+         forceReportProgress();
+      }
+
+      // Write the simulation parameters and diffusion data
+      // to file and clean up ncurses
+      writeConfig();
+      writeDiffusion();
+      if( o->gui == Options::GUI_NCURSES )
+      {
+         killncurses();
+      }
+   }
+}
+
+
+int
+Sim::getItersCompleted()
+{
+   return itersCompleted;
 }
 
 
@@ -272,7 +340,8 @@ Sim::initRNG( int initSeed )
 }
 
 
-// Get a new set of randNums.
+// Fill the array of random numbers with
+// new values
 void
 Sim::generateRandNums()
 {
@@ -300,7 +369,7 @@ Sim::generateRandNums()
 
 // Fill the positions array with successive
 // integers ranging from 0 to worldX*worldY-1
-// and then shuffle these integers.
+// and then shuffle these integers
 void
 Sim::shufflePositions()
 {
@@ -329,9 +398,8 @@ Sim::shufflePositions()
 }
 
 
-// Shuffle the atoms in the world to
-// random positions.  Add to iterate
-// in for the well-mixed case
+// Assign atoms new positions in the world
+// randomly to simulate mixing
 void
 Sim::shuffleWorld()
 {
@@ -363,6 +431,8 @@ Sim::shuffleWorld()
 }
 
 
+// Move Atoms in the lattice and handle
+// collisions
 void
 Sim::moveAtoms()
 {
@@ -445,8 +515,8 @@ Sim::moveAtoms()
 }
 
 
-// Scan the world, checking for potential
-// reactions and executing some of them
+// Scan the world, check for potential
+// reactions, and execute some of them
 void
 Sim::executeRxns()
 {

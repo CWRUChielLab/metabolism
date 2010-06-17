@@ -43,7 +43,7 @@ GuiMainWindow::GuiMainWindow( Options* newOptions, Sim* newSim, QWidget* parent,
 void
 GuiMainWindow::closeEvent( QCloseEvent* event )
 {
-   sim->finalizeIO();
+   sim->end();
    QWidget::closeEvent( event );
 }
 
@@ -52,7 +52,7 @@ GuiMainWindow::closeEvent( QCloseEvent* event )
 void
 GuiMainWindow::updateButton()
 {
-   button->setText( QString::number( sim->getCurrentIter() ) );
+   button->setText( QString::number( sim->getItersCompleted() ) );
 }
 
 
@@ -62,28 +62,10 @@ GuiMainWindow::runSim()
 {
    while( sim->iterate() )
    {
+      // Check for Qt signals and events
       QCoreApplication::processEvents();
 
-      // Print out the progress of the simulation
-      // at most once each second
-      if( o->progress )
-      {
-         sim->reportProgress();
-      }
-
-      // Take a census of the atoms in the world
-      // occasionally
-      if( sim->getCurrentIter() % 8 == 0 )
-      {
-         sim->writeCensus();
-      }
-
-      // Sleep the simulation each iteration
-      if( o->sleep != 0 )
-      {
-         usleep(o->sleep * 1000);
-      }
-      
+      // Signal that an iteration has completed
       emit iterDone();
    }
 }

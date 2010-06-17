@@ -26,10 +26,10 @@ class Sim
 
       // Public engine methods
       int iterate();
-      int getCurrentIter();
+      void end();
+      int getItersCompleted();
 
       // Public I/O methods
-      void finalizeIO();
       void reportProgress();
       void forceReportProgress();
       void writeCensus();
@@ -42,7 +42,7 @@ class Sim
    private:
       // Sim attributes
       Options* o;
-      int currentIter;
+      int itersCompleted;
 
       int elesLoaded;
       int rxnsLoaded;
@@ -65,6 +65,7 @@ class Sim
 
       // Private engine methods
       void initializeEngine();
+      void cleanup();
       void initRNG( int initSeed );
       void generateRandNums();
       void shufflePositions();
@@ -80,6 +81,7 @@ class Sim
 
       // Private I/O methods
       void initializeIO();
+      void killncurses();
       void loadChemistry();
       void writeConfig();
       void writeDiffusion();

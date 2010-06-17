@@ -75,39 +75,16 @@ Sim::initializeIO()
 }
 
 
-// Write final data to file
+// Clean up ncurses
 void
-Sim::finalizeIO()
+Sim::killncurses()
 {
-   static int finalized = 0;
-   if( !finalized )
+   if( o->gui == Options::GUI_NCURSES )
    {
-      finalized = 1;
-
-      // Guard against any more iterations
-      o->maxIters = currentIter;
-
-      // Finalize the progress indicator to accurately
-      // display how many iterations were completed
-      // when the simulation ended (noticeable primarily
-      // when running batches)
-      if( o->progress )
-      {
-         forceReportProgress();
-      }
-
-      // Write the simulation parameters and diffusion data
-      // to file and clean up ncurses
-      writeConfig();
-      writeDiffusion();
-      if( o->gui == Options::GUI_NCURSES )
-      {
 #ifdef HAVE_NCURSES
-         endwin();
+      endwin();
 #endif
-      }
    }
-
 }
 
 
@@ -325,7 +302,7 @@ Sim::loadChemistry()
 
 
 // Records important information about the state
-// of the world and writes it to file.
+// of the world and writes it to file
 void
 Sim::writeCensus()
 {
@@ -351,7 +328,7 @@ Sim::writeCensus()
       censusFile << std::setw(colwidth) << "total" << std::endl;
    }
 
-   censusFile << std::setw(colwidth) << currentIter;
+   censusFile << std::setw(colwidth) << itersCompleted;
    for( ElementMap::iterator i = periodicTable.begin(); i != periodicTable.end(); i++ )
    {
       Element* ele = i->second;
@@ -365,7 +342,7 @@ Sim::writeCensus()
 }
 
 
-// Output all important experimental parameters
+// Write to file all experimental parameters
 void
 Sim::writeConfig()
 {
@@ -375,7 +352,7 @@ Sim::writeConfig()
    // Write parameters to file
    configFile << "version "   << GIT_TAG << std::endl;
    configFile << "seed "      << o->seed << std::endl;
-   configFile << "iters "     << currentIter << std::endl;
+   configFile << "iters "     << itersCompleted << std::endl;
    configFile << "x "         << o->worldX << std::endl;
    configFile << "y "         << o->worldY << std::endl;
    configFile << "atoms "     << o->atomCount << std::endl;
@@ -400,8 +377,8 @@ Sim::writeConfig()
 
 
 // Writes important information about the state
-// of the world to file.  To be called when the
-// simulation ends.
+// of the world to file; to be called when the
+// simulation ends
 void
 Sim::writeDiffusion()
 {
@@ -449,15 +426,15 @@ Sim::reportProgress()
       {
 #ifdef HAVE_NCURSES
          printw( "Iteration: %d of %d | %d%% complete\n",
-            currentIter,
+            itersCompleted,
             o->maxIters,
-            (int)( 100 * (double)currentIter / (double)o->maxIters ) );
+            (int)( 100 * (double)itersCompleted / (double)o->maxIters ) );
          refresh();
 #endif
       } else {
          std::cout << "                                                                       \r" << std::flush;
-         std::cout << "Iteration: " << currentIter << " of " << o->maxIters << " | ";
-         std::cout << (int)( 100 * (double)currentIter / (double)o->maxIters ) << "\% complete\r" << std::flush;
+         std::cout << "Iteration: " << itersCompleted << " of " << o->maxIters << " | ";
+         std::cout << (int)( 100 * (double)itersCompleted / (double)o->maxIters ) << "\% complete\r" << std::flush;
       }
    }
 }
@@ -472,6 +449,7 @@ Sim::forceReportProgress()
 }
 
 
+// Print the world using ncurses
 void
 Sim::printWorld()
 {
@@ -515,6 +493,9 @@ Sim::printWorld()
 }
 
 
+// Print the list of Elements to an output
+// steam, or print using ncurses if the stream
+// is NULL
 void
 Sim::printEles( std::ostream* out )
 {
@@ -538,6 +519,9 @@ Sim::printEles( std::ostream* out )
 }
 
 
+// Print the list of Reactions to an output
+// steam, or print using ncurses if the stream
+// is NULL
 void
 Sim::printRxns( std::ostream* out )
 {
@@ -796,6 +780,9 @@ Sim::printRxns( std::ostream* out )
 }
 
 
+// Print the list of inits to an output
+// steam, or print using ncurses if the stream
+// is NULL
 void
 Sim::printInits( std::ostream* out )
 {

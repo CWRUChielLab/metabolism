@@ -15,14 +15,15 @@
 using namespace SafeCalls;
 
 
-int interrupted = 0;
+Options* o;
+Sim* sim;
 
 
 void
 handleExit( int sig )
 {
    sig = 0;  // silence the compiler
-   interrupted = 1;
+   sim->end();
    std::cout << std::endl;
 }
 
@@ -30,59 +31,38 @@ handleExit( int sig )
 int
 main ( int argc, char* argv[] )
 {
-   // Set up handling of Ctrl-c abort
-   signal( SIGINT, handleExit );
-
 #ifdef HAVE_QT
+   // Create the core Qt controller application
    QCoreApplication *app;
 #endif
 
    // Import command line options and initialize the simulation
-   Options* o = safeNew( Options( argc, argv ) );
-   Sim* mySim = safeNew( Sim(o) );
+   o = safeNew( Options( argc, argv ) );
+   sim = safeNew( Sim(o) );
+
+   // Set up handling of Ctrl-c abort
+   signal( SIGINT, handleExit );
 
    // Execute the simulation
    if( o->gui == Options::GUI_QT )
    {
 #ifdef HAVE_QT
       app = new QApplication( argc, argv );
-      GuiMainWindow* myGUI = safeNew( GuiMainWindow( o, mySim ) );
-      myGUI->show();
+      GuiMainWindow* gui = safeNew( GuiMainWindow( o, sim ) );
+      gui->show();
       return app->exec();
 #endif
    } else {
-      while( !interrupted && mySim->iterate() )
+      while( sim->iterate() )
       {
          if( o->gui == Options::GUI_NCURSES )
          {
 #ifdef HAVE_NCURSES
-            mySim->printWorld();
+            // Print the world using ncurses
+            sim->printWorld();
 #endif
          }
-
-         // Print out the progress of the simulation
-         // at most once each second
-         if( o->progress )
-         {
-            mySim->reportProgress();
-         }
-
-         // Take a census of the atoms in the world
-         // occasionally
-         if( mySim->getCurrentIter() % 8 == 0 )
-         {
-            mySim->writeCensus();
-         }
-
-         // Sleep the simulation each iteration
-         if( o->sleep != 0 )
-         {
-            usleep(o->sleep * 1000);
-         }
       }
-
-      // Write final data to file
-      mySim->finalizeIO();
 
       return 0;
    }
