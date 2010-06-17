@@ -4,7 +4,7 @@
 #include <csignal>
 #ifdef HAVE_QT
 #include <QApplication>
-#include "gui-mainwindow.h" // gui-mainwindow.h must be included before ncurses.h
+#include "window.h"     // window.h must be included before ncurses.h
 #endif
 #ifdef HAVE_NCURSES
 #include <ncurses.h>
@@ -48,7 +48,7 @@ main ( int argc, char* argv[] )
    {
 #ifdef HAVE_QT
       app = new QApplication( argc, argv );
-      GuiMainWindow* gui = safeNew( GuiMainWindow( o, sim ) );
+      Window* gui = safeNew( Window( o, sim ) );
       gui->show();
       return app->exec();
 #endif

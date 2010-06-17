@@ -1,15 +1,15 @@
-/* gui-mainwindow.cpp
+/* window.cpp
  */
 
 #ifdef HAVE_QT
 
-#include "gui-mainwindow.h"
+#include "window.h"
 #include "safecalls.h"
 using namespace SafeCalls;
 
 
 // Constructor
-GuiMainWindow::GuiMainWindow( Options* newOptions, Sim* newSim, QWidget* parent, Qt::WindowFlags flags )
+Window::Window( Options* newOptions, Sim* newSim, QWidget* parent, Qt::WindowFlags flags )
    : QMainWindow( parent, flags )
 {
    // Copy constructor arguments
@@ -17,12 +17,12 @@ GuiMainWindow::GuiMainWindow( Options* newOptions, Sim* newSim, QWidget* parent,
    sim = newSim;
 
    // Set up GUI components
-   view = safeNew( GuiView( o, sim, this ) );
+   viewer = safeNew( Viewer( o, sim, this ) );
    button = safeNew( QPushButton( "Click to start" ) );
 
    // Set up GUI layout
    mainLayout = safeNew( QVBoxLayout() );
-   mainLayout->addWidget( view );
+   mainLayout->addWidget( viewer );
    mainLayout->addWidget( button );
    mainWidget = safeNew( QWidget() );
    mainWidget->setLayout( mainLayout );
@@ -32,33 +32,34 @@ GuiMainWindow::GuiMainWindow( Options* newOptions, Sim* newSim, QWidget* parent,
 
    // Connections with the same signal should be declared
    // in order of descending slot computational complexity
-   connect( button, SIGNAL( clicked() ), view, SLOT( startPaint() ) );
+   connect( button, SIGNAL( clicked() ), viewer, SLOT( startPaint() ) );
    connect( button, SIGNAL( clicked() ), this, SLOT( runSim() ) );
    connect( this, SIGNAL( iterDone() ), this, SLOT( updateButton() ) );
-   connect( this, SIGNAL( iterDone() ), view, SLOT( updateGL() ) );
+   connect( this, SIGNAL( iterDone() ), viewer, SLOT( updateGL() ) );
 }
 
 
-// ...
+// Called when the gui window is closed;
+// ensures a clean exit
 void
-GuiMainWindow::closeEvent( QCloseEvent* event )
+Window::closeEvent( QCloseEvent* event )
 {
    sim->end();
    QWidget::closeEvent( event );
 }
 
 
-// ...
+// Update the pushbutton to display the progress
 void
-GuiMainWindow::updateButton()
+Window::updateButton()
 {
    button->setText( QString::number( sim->getItersCompleted() ) );
 }
 
 
-// ...
+// The primary loop for running the simulation
 void
-GuiMainWindow::runSim()
+Window::runSim()
 {
    while( sim->iterate() )
    {

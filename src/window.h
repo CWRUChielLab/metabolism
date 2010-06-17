@@ -1,22 +1,22 @@
-/* gui-mainwindow.h
+/* window.h
  */
 
-#ifndef GUI_MAINWINDOW_H
-#define GUI_MAINWINDOW_H 
+#ifndef WINDOW_H
+#define WINDOW_H 
 #ifdef HAVE_QT
 
 #include <QtGui>
-#include "gui-view.h"
+#include "viewer.h"
 #include "options.h"
 #include "sim.h"
 
-class GuiMainWindow : public QMainWindow
+class Window : public QMainWindow
 {
    Q_OBJECT
 
    public:
       // Constructor
-      GuiMainWindow( Options* newOptions, Sim* newSim, QWidget* parent = 0, Qt::WindowFlags flags = 0 );
+      Window( Options* newOptions, Sim* newSim, QWidget* parent = 0, Qt::WindowFlags flags = 0 );
 
    protected:
       void closeEvent( QCloseEvent* event );
@@ -34,11 +34,11 @@ class GuiMainWindow : public QMainWindow
       Sim* sim;
 
       // GUI components
-      GuiView* view;
+      Viewer* viewer;
       QPushButton* button;
       QVBoxLayout* mainLayout;
       QWidget* mainWidget;
 };
 
 #endif /* HAVE_QT */
-#endif /* GUI_MAINWINDOW_H */
+#endif /* WINDOW_H */

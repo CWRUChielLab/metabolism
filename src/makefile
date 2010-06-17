@@ -26,9 +26,9 @@ OBJECTS = atom.o \
 			 sim-engine.o \
 			 sim-io.o \
 			 SFMT.o
-QT_HEADERS = gui-mainwindow.h gui-view.h
-QT_SOURCES = gui-mainwindow.cpp gui-view.cpp
-QT_OBJECTS = gui-mainwindow.o gui-view.o moc_gui-mainwindow.o moc_gui-view.o
+QT_HEADERS = window.h viewer.h
+QT_SOURCES = window.cpp viewer.cpp
+QT_OBJECTS = window.o viewer.o moc_window.o moc_viewer.o
 
 DEFINES = -D_REENTRANT -DMEXP=132049 -DGIT_TAG=`git describe --tags | sed "s/\(.*\)/\"\1\"/"`
 FLAGS   = -pipe -O3 -Wall -W

@@ -1,14 +1,14 @@
-/* gui-view.cpp
+/* viewer.cpp
  */
 
 #ifdef HAVE_QT
 
 #include <iostream>
-#include "gui-view.h"
+#include "viewer.h"
 
 
 // Constructor
-GuiView::GuiView( Options* newOptions, Sim* newSim, QWidget *parent ) 
+Viewer::Viewer( Options* newOptions, Sim* newSim, QWidget *parent ) 
 	: QGLWidget( parent )
 {
    // Copy constructor arguments
@@ -39,7 +39,7 @@ GuiView::GuiView( Options* newOptions, Sim* newSim, QWidget *parent )
 
 // Set up view range
 void
-GuiView::adjustPaintRegion()
+Viewer::adjustPaintRegion()
 {
    if( 1 )
    {
@@ -60,18 +60,18 @@ GuiView::adjustPaintRegion()
 }
 
 
-// ...
+// Set the gui to viewer mode
 void
-GuiView::startPaint()
+Viewer::startPaint()
 {
    running = 1;
    updateGL();
 }
 
 
-// ...
+// Set the gui to previewer mode
 void
-GuiView::resetPaint()
+Viewer::resetPaint()
 {
    running = 0;
    updateGL();
@@ -81,7 +81,7 @@ GuiView::resetPaint()
 // Mark an Atom as tracked when the mouse is
 // pressed on or near its position
 void
-GuiView::mousePressEvent( QMouseEvent *event )
+Viewer::mousePressEvent( QMouseEvent *event )
 {
    int mouseX, mouseY, x, y;
    mouseX = event->x() * ( zoomXRange ) / ( zoomXWindow ) + minX;
@@ -142,7 +142,7 @@ GuiView::mousePressEvent( QMouseEvent *event )
 // display lists, etc.; gets called once before
 // the first time resizeGL() or paintGL() is called
 void
-GuiView::initializeGL()
+Viewer::initializeGL()
 {
    // Set background color
    qglClearColor( Qt::black );
@@ -170,7 +170,7 @@ GuiView::initializeGL()
 // because all newly created widgets get a resize
 // event automatically)
 void
-GuiView::resizeGL( int width, int height )
+Viewer::resizeGL( int width, int height )
 {
    // Specify the position and size of the viewport
    glViewport( 0, 0, (GLint)width, (GLint)height );
@@ -197,7 +197,7 @@ GuiView::resizeGL( int width, int height )
 // Renders the OpenGL scene; gets called whenever
 // the widget needs to be updated
 void
-GuiView::paintGL()
+Viewer::paintGL()
 {
    // Do something important
    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
@@ -286,6 +286,10 @@ GuiView::paintGL()
       }
       // Finish specifying points as vertices
       glEnd();
+   }
+   else
+   // World preview visualization
+   {
    }
 }
 

@@ -1,8 +1,8 @@
-/* gui-view.h
+/* viewer.h
  */
 
-#ifndef GUI_VIEW_H
-#define GUI_VIEW_H 
+#ifndef VIEWER_H
+#define VIEWER_H 
 #ifdef HAVE_QT
 
 #include <QGLWidget>
@@ -10,13 +10,13 @@
 #include "options.h"
 #include "sim.h"
 
-class GuiView : public QGLWidget
+class Viewer : public QGLWidget
 {
    Q_OBJECT
 
    public:
       // Constructor
-      GuiView( Options* newOptions, Sim* newSim, QWidget *parent = 0 );
+      Viewer( Options* newOptions, Sim* newSim, QWidget *parent = 0 );
 
    public slots:
       void adjustPaintRegion();
@@ -48,5 +48,5 @@ class GuiView : public QGLWidget
 };
 
 #endif /* HAVE_QT */
-#endif /* GUI_VIEW_H */
+#endif /* VIEWER_H */
 
