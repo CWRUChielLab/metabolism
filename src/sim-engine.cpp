@@ -520,6 +520,7 @@ Sim::moveAtoms()
 void
 Sim::executeRxns()
 {
+   Element* solventEle = periodicTable[ "Solvent" ];
    Atom* thisAtom;
    int neighborX, neighborY;
    Atom* neighborAtom;
@@ -543,7 +544,7 @@ Sim::executeRxns()
          else
          // Else solvent is encountered
          {
-            thisAtom = safeNew( Atom( periodicTable[ "Solvent" ], x, y) );
+            thisAtom = safeNew( Atom( solventEle, x, y) );
          }
 
          // Determine which neighbor to attempt to react with, if any
@@ -585,7 +586,7 @@ Sim::executeRxns()
             }
             else
             {
-               neighborAtom = safeNew( Atom( periodicTable[ "Solvent" ], neighborX, neighborY ) );
+               neighborAtom = safeNew( Atom( solventEle, neighborX, neighborY ) );
             }
          }
 
@@ -721,7 +722,7 @@ Sim::executeRxns()
             else
             // Else solvent is encountered
             {
-               thisAtom = safeNew( Atom( periodicTable[ "Solvent" ], x, y) );
+               thisAtom = safeNew( Atom( solventEle, x, y) );
             }
 
             // Determine which neighbor to attempt to react with, if any
@@ -763,15 +764,15 @@ Sim::executeRxns()
                }
                else
                {
-                  neighborAtom = safeNew( Atom( periodicTable[ "Solvent" ], neighborX, neighborY ) );
+                  neighborAtom = safeNew( Atom( solventEle, neighborX, neighborY ) );
                }
             }
 
             // Propagate tracking for decomposition reactions
-            if( thisAtom->getType() == periodicTable[ "Solvent" ] )
+            if( thisAtom->getType() == solventEle )
                if( neighborAtom != NULL && neighborAtom->isTracked() )
                   thisAtom->toggleTracked();
-            if( neighborAtom != NULL && neighborAtom->getType() == periodicTable[ "Solvent" ] )
+            if( neighborAtom != NULL && neighborAtom->getType() == solventEle )
                if( thisAtom->isTracked() )
                   neighborAtom->toggleTracked();
 
@@ -880,13 +881,13 @@ Sim::executeRxns()
             }
 
             // Delete any solvent atoms that are newly created or never reacted
-            if( thisAtom->getType() == periodicTable[ "Solvent" ] )
+            if( thisAtom->getType() == solventEle )
             {
                delete thisAtom;
                thisAtom = NULL;
                world[ getWorldIndex(x,y) ] = NULL;
             }
-            if( neighborAtom != NULL && neighborAtom->getType() == periodicTable[ "Solvent" ] )
+            if( neighborAtom != NULL && neighborAtom->getType() == solventEle )
             {
                delete neighborAtom;
                neighborAtom = NULL;
