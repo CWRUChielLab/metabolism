@@ -20,6 +20,12 @@ This project uses the following:
       can be found at
       http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/.
 
+   Qt
+      An API for building graphical user interfaces. Used by
+      default but not required (see 'Compilation
+      Instructions'). Available at
+      http://qt.nokia.com/.
+
    ncurses
       An API for building text user interfaces. Used by
       default but not required (see 'Compilation
@@ -42,23 +48,28 @@ This project uses the following:
 Compilation Instructions
 ============================================================
 
-Compiles with g++ (Ubuntu 4.4.1-4ubuntu9) 4.4.1.
+Compiles with g++ (Ubuntu 4.4.3-4ubuntu5) 4.4.3,
+              gcc (Ubuntu 4.4.3-4ubuntu5) 4.4.3,
+              Qt version 4.6.2.
 
 Execute the following for a standard compilation:
 
    cd metabolism/src
    make
 
-The program created is called "metabolism". By default,
-ncurses is linked to the program. If developer's libraries
-are not available, the program can be compiled without
-ncurses using the following:
+The program created is called "metabolism".
 
-   cd metabolism/src
+By default, Qt and ncurses are linked to the program. If
+developer's libraries are not available, the program can be
+compiled without Qt, ncurses, or both. Alternative make
+targets are:
+
+   make metabolism-no-qt
+      for compiling without Qt
    make metabolism-no-ncurses
-
-The program created will then be called
-"metabolism-no-ncurses".
+      for compiling without ncurses
+   make metabolism-minimal
+      for compiling without either Qt or ncurses
 
 
 An Example Simulation and Analysis
@@ -66,7 +77,7 @@ An Example Simulation and Analysis
 
 Once compiled, try running:
 
-   ./metabolism --no-gui -x 512 -y 512 --iters 200 --atoms 39322
+   ./metabolism --gui-off -x 512 -y 512 --iters 200 --atoms 39322
 
 This will run a quick simulation with the default reaction
 system enabled. Data is output to the files diffusion.out
@@ -75,18 +86,19 @@ in config.out. To conduct a reaction rate analysis, run:
 
    ../scripts/rate_analysis.R second 0.5 config.out census.out plots stats.out false
 
-(The parameters here are explained at the beginning of the
-script's comments.) A PDF file is generated and some
-statistics are stored in the file stats.out. View the PDF:
+(The parameters specified here are explained at the
+beginning of the script's comments.) A PDF file is generated
+and some statistics are stored in the file stats.out. View
+the PDF:
 
    evince plots.pdf
 
 Notice that the data deviates from the expected trajectory
 (the red line). Now try:
 
-   ./metabolism --no-gui -x 512 -y 512 --iters 200 --atoms 39322 --shuffle
-   ../scripts/rate_analysis.R second 0.5 config.out census.out plots stats.out false
-   evince plots.pdf
+   ./metabolism --gui-off -x 512 -y 512 --iters 200 --atoms 39322 --shuffle
+   ../scripts/rate_analysis.R second 0.5 config.out census.out plots-shuffle stats.out false
+   evince plots-shuffle.pdf
 
 This will run the same simulation with shuffling of particle
 positions each iteration. Shuffling simulates mixing. Now
@@ -99,17 +111,17 @@ Using the Simulation Platform
 All command line options are available via --help and can be
 used to specify simulation parameters such as the size of
 the lattice or the number of particles. By default, the
-program produces a configuration file named config.out (the
-name can be specified using --files) which records the
-simulation parameters. config files can be loaded to run
-exact reproductions of simulations using --load.
+program produces a configuration file named config.out which
+records the simulation parameters. config files can be
+loaded to run exact reproductions of simulations using
+--load.
 
 To change the types of particles in the lattice or the
 reactions that are defined in the reaction table, you will
 need to create a custom config file or use one of the
-provided files in metabolism/load. Create a new file and
-fill it with any parameters you would like to specify using
-the format:
+provided files in the directory metabolism/load. Create a
+new file and fill it with any parameters you would like to
+specify using the format:
 
    keyword value
 
@@ -126,26 +138,32 @@ be specified and examples of valid values are:
 
 In addition to these (which are described in more detail in
 --help), particle types and reactions can be specified using
-the keywords "ele", "rxn", and "init". Add one line
-beginning with "ele" for each particle type ("element")
-using the following format:
+the keywords "ele", "rxn", and "init". Add a line beginning
+with "ele" for each particle type ("element") using the
+following format:
 
-   ele name symbol color charge
+   ele name symbol color
 
-"name" is a string, "symbol" is a single character that is
-used to represent particles of that type in the ncurses text
-interface, and "color" and "charge" are integers (currently
-not used).
+"name" is a string that names the particle type, "symbol" is
+a single character that is used to represent particles of
+that type in the ncurses text interface, and "color" is a
+string that names the color that will be used by the Qt gui
+to distinguish particles of that type. The following colors
+are used by the default settings and are distinguishable by
+users with and without color deficient vision: "teal",
+"hotpink", "darkorange", and "yellow". All valid color names
+can be found at
+http://www.w3.org/TR/SVG/types.html#ColorKeywords.
 
 An example will help clarify how to build a config file. The
 Michaelis-Menten enzyme kinetics system consists of three
 reactions: E + S -> ES, ES -> E + S, and ES -> E + P. The
 particle types for this system could be defined using:
 
-   ele Enzyme E 0 0
-   ele Substrate S 0 0
-   ele ES F 0 0
-   ele Product P 0 0
+   ele Enzyme E yellow
+   ele Substrate S teal
+   ele ES C darkorange
+   ele Product P hotpink
 
 When specifying reactions, each unique reaction should
 receive its own line beginning with "rxn". Up to two
@@ -164,7 +182,7 @@ symbol "*" for the reactants or products, respectively
 (e.g., * -> A, or A -> *). "n" is a stoichiometric
 coefficient. Since at most two reactants and two products
 can be specified, this number must be either "1" (in which
-case it is not necessary) or "2" (in which case there can be
+case it may be omitted) or "2" (in which case there can be
 no other reaction participants listed on that side of the
 reaction arrow). Additionally, at most two separate
 reactions can be specified with the same set of reactants.
@@ -182,7 +200,7 @@ with "prob"'s = 0.5, 0.01, and 0.01.
 
 Finally, although the number of particles placed in the
 lattice is set by a command line option, the initial types
-for each particle must be specified in the config file. Use
+for the particles must be specified in the config file. Use
 the keyword "init" to start a list of initial particle
 types:
 

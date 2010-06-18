@@ -66,7 +66,7 @@ metabolism-no-ncurses: qt-makefile-no-ncurses $(SOURCES) $(QT_SOURCES) $(HEADERS
 	make -f $<
 metabolism-no-qt: DEFINES+=-DHAVE_NCURSES
 metabolism-no-qt: LIBS+=-lncurses
-metabolism-no-qt metabolism-no-qt-ncurses: $(OBJECTS) 
+metabolism-no-qt metabolism-minimal: $(OBJECTS) 
 	g++ $(LFLAGS) $(LIBS) -o $@ $(OBJECTS)
 
 
@@ -74,14 +74,14 @@ bless: clean metabolism
 	./metabolism --gui-off --load $(CHECK_LOAD) --iters 100 -x 128 -y 128 --atoms 500 --seed 42 --shuffle \
 		--files $(CHECK_CONFIG) $(CHECK_CENSUS) $(CHECK_DIFFUSION) $(CHECK_RAND)
 
-check: clean metabolism-no-qt-ncurses
-	./metabolism-no-qt-ncurses --load $(CHECK_CONFIG)
+check: clean metabolism-minimal
+	./metabolism-minimal --load $(CHECK_CONFIG)
 	diff census.out $(CHECK_CENSUS) | wc -l
 	diff diffusion.out $(CHECK_DIFFUSION) | wc -l
 	diff rand.out $(CHECK_RAND) | wc -l
 
 clean:
-	rm -f metabolism metabolism-no-* qt-makefile* moc_* *.o *.out *.pdf *~
+	rm -f metabolism* qt-makefile* moc_* *.o *.out *.pdf *~
 
 
 qt-makefile: qt-project.pro $(SOURCES) $(QT_SOURCES) $(HEADERS) $(QT_HEADERS)
