@@ -170,6 +170,9 @@ Sim::iterate()
       if( o->doRxns )
          executeRxns();
 
+      // Increment the iteration counter
+      itersCompleted++;
+
       // Print out the progress of the simulation
       // at most once each second
       if( o->progress )
@@ -183,9 +186,6 @@ Sim::iterate()
       // Sleep the simulation
       if( o->sleep != 0 )
          usleep( o->sleep * 1000 );
-
-      // Increment the iteration counter
-      itersCompleted++;
 
       return 1;
    }
