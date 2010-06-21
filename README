@@ -61,13 +61,13 @@ The program created is called "metabolism".
 
 By default, Qt and ncurses are linked to the program. If
 developer's libraries are not available, the program can be
-compiled without Qt, ncurses, or both. Alternative make
+compiled without ncurses, Qt, or both. Alternative make
 targets are:
 
-   make metabolism-no-qt
-      for compiling without Qt
-   make metabolism-no-ncurses
-      for compiling without ncurses
+   make metabolism-qt
+      for compiling with Qt and without ncurses
+   make metabolism-ncurses
+      for compiling with ncurses and without Qt
    make metabolism-minimal
       for compiling without either Qt or ncurses
 

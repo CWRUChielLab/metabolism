@@ -5,7 +5,7 @@
 TEMPLATE = app
 # RESOURCES = resources.qrc
 INCLUDEPATH += ../SFMT
-DEFINES += MEXP=132049 GIT_TAG="`git describe --tags | sed \"s/\\(.*\\)/\\\"\\1\\\"/\"`" HAVE_QT
+DEFINES += HAVE_QT MEXP=132049 GIT_TAG="`git describe --tags | sed \"s/\\(.*\\)/\\\"\\1\\\"/\"`"
 
 QMAKE_CFLAGS_RELEASE -= -O2
 QMAKE_CFLAGS_RELEASE += -O3
@@ -14,14 +14,10 @@ QMAKE_CXXFLAGS_RELEASE += -O3
 CONFIG += warn_on 
 QT += opengl
 
-no-ncurses {
-   message( "Building with Qt and without ncurses." )
-   TARGET = metabolism-no-ncurses
-} else {
+contains( DEFINES, HAVE_NCURSES ) {
    message( "Building with Qt and ncurses." )
-   TARGET = metabolism
-   DEFINES += HAVE_NCURSES
-   LIBS += -lncurses
+} else {
+   message( "Building with Qt and without ncurses." )
 }
 
 isEmpty( MACTARGET ) {
@@ -76,8 +72,4 @@ win32 {
    LIBS += -lqwt
    RC_FILE = win32_resources.rc
 }
-
-# Input
-HEADERS += atom.h element.h window.h viewer.h options.h reaction.h safecalls.h sim.h
-SOURCES += atom.cpp element.cpp window.cpp viewer.cpp main.cpp options.cpp reaction.cpp safecalls.cpp sim-engine.cpp sim-io.cpp ../SFMT/SFMT.c
 

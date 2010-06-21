@@ -2,38 +2,84 @@
 # metabolism makefile #
 #######################
 
-HEADERS = atom.h \
-			 element.h \
-			 options.h \
-			 reaction.h \
-			 safecalls.h \
-			 sim.h
-SOURCES = atom.cpp \
-			 element.cpp \
-			 main.cpp \
-			 options.cpp \
-			 reaction.cpp \
-			 safecalls.cpp \
-			 sim-engine.cpp \
-			 sim-io.cpp \
-			 ../SFMT/SFMT.c
-OBJECTS = atom.o \
-			 element.o \
-			 main.o \
-			 options.o \
-			 reaction.o \
-			 safecalls.o \
-			 sim-engine.o \
-			 sim-io.o \
-			 SFMT.o
-QT_HEADERS = window.h viewer.h
-QT_SOURCES = window.cpp viewer.cpp
-QT_OBJECTS = window.o viewer.o moc_window.o moc_viewer.o
+APPS = metabolism \
+		 metabolism-qt \
+		 metabolism-ncurses \
+		 metabolism-minimal
+
+default: metabolism
+
+all: $(APPS)
+
+
+
+ifndef OBJDIR
+
+BUILD = build
+
+$(APPS): OBJDIR=$(BUILD)/$@
+$(APPS):
+	-mkdir -p $(OBJDIR)
+	make $@ OBJDIR=$(OBJDIR)
+
+# File locations used for make bless and make check
+CHECK_LOAD      = ../load/mm.load
+CHECK_CONFIG    = ../check/config.check.out
+CHECK_CENSUS    = ../check/census.check.out
+CHECK_DIFFUSION = ../check/diffusion.check.out
+CHECK_RAND      = ../check/rand.check.out
+
+bless: metabolism
+	./metabolism --gui-off --load $(CHECK_LOAD) --iters 100 -x 128 -y 128 --atoms 500 --seed 42 --shuffle \
+		--files $(CHECK_CONFIG) $(CHECK_CENSUS) $(CHECK_DIFFUSION) $(CHECK_RAND)
+
+check: metabolism-minimal
+	./metabolism-minimal --load $(CHECK_CONFIG)
+	@echo
+	@echo "census.out:" `diff census.out $(CHECK_CENSUS) | wc -l` "deviations"
+	@echo "diffusion.out:" `diff diffusion.out $(CHECK_DIFFUSION) | wc -l` "deviations"
+	@echo "rand.out:" `diff rand.out $(CHECK_RAND) | wc -l` "deviations"
+
+profile: metabolism
+	sudo opcontrol --reset
+	sudo opcontrol --no-vmlinux --start
+	./metabolism --gui-off --iters 50 --atoms 25000 -x 1000 -y 1000
+	sudo opcontrol --stop
+	opreport --symbols metabolism
+
+clean:
+	rm -rf $(APPS) $(BUILD)/ qt-makefile* *.out *.pdf *~
+
+
+
+else
+
+HEADERS    = atom.h \
+			 	 element.h \
+			 	 options.h \
+			 	 reaction.h \
+			 	 safecalls.h \
+			 	 sim.h
+QT_HEADERS = window.h \
+				 viewer.h
+SOURCES    = atom.cpp \
+			    element.cpp \
+				 main.cpp \
+			 	 options.cpp \
+			 	 reaction.cpp \
+			 	 safecalls.cpp \
+			 	 sim-engine.cpp \
+			 	 sim-io.cpp \
+			 	 ../SFMT/SFMT.c
+QT_SOURCES = window.cpp \
+				 viewer.cpp
+OBJECTS    = $(addprefix $(OBJDIR)/, $(addsuffix .o, $(basename $(notdir $(SOURCES)))))
+QT_PROJECT = qt-project.pro
 
 DEFINES = -D_REENTRANT -DMEXP=132049 -DGIT_TAG=`git describe --tags | sed "s/\(.*\)/\"\1\"/"`
 FLAGS   = -pipe -O3 -Wall -W
-INCPATH = -I. -I../SFMT
 LIBS    = -L/usr/lib
+INCPATH = -I. -I../SFMT
 
 # OS-specific flags
 OS        := $(shell sh -c 'uname -s 2>/dev/null || echo not')
@@ -49,91 +95,74 @@ ifeq ($(OS),Darwin) # Mac
   endif
 endif
 
-# File locations used for make bless and make check
-CHECK_LOAD      = ../load/mm.load
-CHECK_CONFIG    = ../check/config.check.out
-CHECK_CENSUS    = ../check/census.check.out
-CHECK_DIFFUSION = ../check/diffusion.check.out
-CHECK_RAND      = ../check/rand.check.out
 
 
+$(OBJDIR)/%.o: %.cpp
+	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o $@ $<
 
-default: metabolism
+metabolism-ncurses: DEFINES+=-DHAVE_NCURSES
+metabolism-ncurses: LIBS+=-lncurses
 
 metabolism: qt-makefile $(SOURCES) $(QT_SOURCES) $(HEADERS) $(QT_HEADERS)
 	make -f $<
-metabolism-no-ncurses: qt-makefile-no-ncurses $(SOURCES) $(QT_SOURCES) $(HEADERS) $(QT_HEADERS)
+metabolism-qt: qt-makefile-no-ncurses $(SOURCES) $(QT_SOURCES) $(HEADERS) $(QT_HEADERS)
 	make -f $<
-metabolism-no-qt: DEFINES+=-DHAVE_NCURSES
-metabolism-no-qt: LIBS+=-lncurses
-metabolism-no-qt metabolism-minimal: $(OBJECTS) 
-	g++ $(LFLAGS) $(LIBS) -o $@ $(OBJECTS)
+metabolism-ncurses metabolism-minimal: $(OBJECTS)
+	g++ $(LFLAGS) $(LIBS) -o $@ $^
 
 
-bless: clean metabolism
-	./metabolism --gui-off --load $(CHECK_LOAD) --iters 100 -x 128 -y 128 --atoms 500 --seed 42 --shuffle \
-		--files $(CHECK_CONFIG) $(CHECK_CENSUS) $(CHECK_DIFFUSION) $(CHECK_RAND)
-
-check: clean metabolism-minimal
-	./metabolism-minimal --load $(CHECK_CONFIG)
-	diff census.out $(CHECK_CENSUS) | wc -l
-	diff diffusion.out $(CHECK_DIFFUSION) | wc -l
-	diff rand.out $(CHECK_RAND) | wc -l
-
-clean:
-	rm -f metabolism* qt-makefile* moc_* *.o *.out *.pdf *~
-
-
-qt-makefile: qt-project.pro $(SOURCES) $(QT_SOURCES) $(HEADERS) $(QT_HEADERS)
-	qmake -o $@
-qt-makefile-no-ncurses: qt-project.pro $(SOURCES) $(QT_SOURCES) $(HEADERS) $(QT_HEADERS)
-	qmake -o $@ "CONFIG += no-ncurses"
+qt-makefile: $(QT_PROJECT) $(SOURCES) $(QT_SOURCES) $(HEADERS) $(QT_HEADERS)
+	qmake -o $@ "TARGET=metabolism" \
+		"DEFINES+=HAVE_NCURSES" \
+		"LIBS+=-lncurses" \
+		"OBJECTS_DIR=$(OBJDIR)" \
+		"MOC_DIR=$(OBJDIR)" \
+		"HEADERS=$(HEADERS) $(QT_HEADERS)" \
+		"SOURCES=$(SOURCES) $(QT_SOURCES)"
+qt-makefile-no-ncurses: $(QT_PROJECT) $(SOURCES) $(QT_SOURCES) $(HEADERS) $(QT_HEADERS)
+	qmake -o $@ "TARGET=metabolism-qt" \
+		"OBJECTS_DIR=$(OBJDIR)" \
+		"MOC_DIR=$(OBJDIR)" \
+		"HEADERS=$(HEADERS) $(QT_HEADERS)" \
+		"SOURCES=$(SOURCES) $(QT_SOURCES)"
 
 
-atom.o: atom.cpp atom.h \
+$(OBJDIR)/atom.o: atom.cpp atom.h \
 		element.h
-	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o $@ $<
 
-element.o: element.cpp element.h
-	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o $@ $<
+$(OBJDIR)/element.o: element.cpp element.h
 
-main.o: main.cpp \
+$(OBJDIR)/main.o: main.cpp \
 		options.h \
 		safecalls.h \
 		sim.h \
 		atom.h \
 		element.h \
 		reaction.h
-	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o $@ $<
 
-options.o: options.cpp options.h \
+$(OBJDIR)/options.o: options.cpp options.h \
 		safecalls.h
-	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o $@ $<
 
-reaction.o: reaction.cpp reaction.h \
+$(OBJDIR)/reaction.o: reaction.cpp reaction.h \
 		element.h
-	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o $@ $<
 
-safecalls.o: safecalls.cpp safecalls.h
-	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o $@ $<
+$(OBJDIR)/safecalls.o: safecalls.cpp safecalls.h
 
-sim-engine.o: sim-engine.cpp sim.h \
+$(OBJDIR)/sim-engine.o: sim-engine.cpp sim.h \
 		safecalls.h \
 		atom.h \
 		element.h \
 		options.h \
 		reaction.h
-	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o $@ $<
 
-sim-io.o: sim-io.cpp sim.h \
+$(OBJDIR)/sim-io.o: sim-io.cpp sim.h \
 		safecalls.h \
 		atom.h \
 		element.h \
 		options.h \
 		reaction.h
-	g++ -c $(FLAGS) $(DEFINES) $(INCPATH) -o $@ $<
 
-SFMT.o: ../SFMT/SFMT.c ../SFMT/SFMT.h \
+$(OBJDIR)/SFMT.o: ../SFMT/SFMT.c ../SFMT/SFMT.h \
 		../SFMT/SFMT-params.h \
 		../SFMT/SFMT-params607.h \
 		../SFMT/SFMT-params1279.h \
@@ -148,6 +177,8 @@ SFMT.o: ../SFMT/SFMT.c ../SFMT/SFMT.h \
 		../SFMT/SFMT-alti.h \
 		../SFMT/SFMT-sse2.h
 	gcc -c -msse2 $(FLAGS) $(DEFINES) $(INCPATH) -o $@ $<
+
+endif
 
 # End
 
