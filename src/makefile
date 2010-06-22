@@ -60,8 +60,8 @@ HEADERS    = atom.h \
 			 	 reaction.h \
 			 	 safecalls.h \
 			 	 sim.h
-QT_HEADERS = window.h \
-				 viewer.h
+QT_HEADERS = viewer.h \
+				 window.h
 SOURCES    = atom.cpp \
 			    element.cpp \
 				 main.cpp \
@@ -71,8 +71,8 @@ SOURCES    = atom.cpp \
 			 	 sim-engine.cpp \
 			 	 sim-io.cpp \
 			 	 ../SFMT/SFMT.c
-QT_SOURCES = window.cpp \
-				 viewer.cpp
+QT_SOURCES = viewer.cpp \
+				 window.cpp
 OBJECTS    = $(addprefix $(OBJDIR)/, $(addsuffix .o, $(basename $(notdir $(SOURCES)))))
 QT_PROJECT = qt-project.pro
 
@@ -138,12 +138,14 @@ $(OBJDIR)/atom.o: atom.cpp atom.h \
 $(OBJDIR)/element.o: element.cpp element.h
 
 $(OBJDIR)/main.o: main.cpp \
-		options.h \
-		safecalls.h \
-		sim.h \
 		atom.h \
 		element.h \
-		reaction.h
+		options.h \
+		reaction.h \
+		safecalls.h \
+		sim.h \
+		viewer.h \
+		window.h
 
 $(OBJDIR)/options.o: options.cpp options.h \
 		safecalls.h
@@ -152,20 +154,6 @@ $(OBJDIR)/reaction.o: reaction.cpp reaction.h \
 		element.h
 
 $(OBJDIR)/safecalls.o: safecalls.cpp safecalls.h
-
-$(OBJDIR)/sim-engine.o: sim-engine.cpp sim.h \
-		safecalls.h \
-		atom.h \
-		element.h \
-		options.h \
-		reaction.h
-
-$(OBJDIR)/sim-io.o: sim-io.cpp sim.h \
-		safecalls.h \
-		atom.h \
-		element.h \
-		options.h \
-		reaction.h
 
 $(OBJDIR)/SFMT.o: ../SFMT/SFMT.c ../SFMT/SFMT.h \
 		../SFMT/SFMT-params.h \
@@ -182,6 +170,36 @@ $(OBJDIR)/SFMT.o: ../SFMT/SFMT.c ../SFMT/SFMT.h \
 		../SFMT/SFMT-alti.h \
 		../SFMT/SFMT-sse2.h
 	gcc -c -msse2 $(FLAGS) $(DEFINES) $(INCPATH) -o $@ $<
+
+$(OBJDIR)/sim-engine.o: sim-engine.cpp sim.h \
+		atom.h \
+		element.h \
+		options.h \
+		reaction.h \
+		safecalls.h
+
+$(OBJDIR)/sim-io.o: sim-io.cpp sim.h \
+		atom.h \
+		element.h \
+		options.h \
+		reaction.h \
+		safecalls.h
+
+$(OBJDIR)/viewer.o: viewer.cpp viewer.h \
+		atom.h \
+		element.h \
+		options.h \
+		reaction.h \
+		sim.h
+
+$(OBJDIR)/window.o: window.cpp window.h \
+		atom.h \
+		element.h \
+		options.h \
+		safecalls.h \
+		sim.h \
+		reaction.h \
+		viewer.h
 
 endif
 
