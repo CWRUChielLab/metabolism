@@ -5,7 +5,8 @@
 APPS = metabolism \
 		 metabolism-qt \
 		 metabolism-ncurses \
-		 metabolism-minimal
+		 metabolism-minimal \
+		 metabolism-debug
 
 default: metabolism
 
@@ -42,12 +43,10 @@ check: metabolism-minimal
 	@echo "diffusion.out:" `diff diffusion.out $(CHECK_DIFFUSION) | wc -l` "deviations"
 	@echo "rand.out:" `diff rand.out $(CHECK_RAND) | wc -l` "deviations"
 
-profile: metabolism
-	sudo opcontrol --reset
-	sudo opcontrol --no-vmlinux --start
-	./metabolism --gui-off --iters 50 --atoms 25000 -x 1000 -y 1000
-	sudo opcontrol --stop
-	opreport --symbols metabolism
+profile: metabolism-debug
+	./$< --iters 50 --atoms 25000 -x 1000 -y 1000
+	gprof $< > profile.out
+	cat profile.out | less
 
 clean:
 	rm -rf $(APPS) $(BUILD)/ qt-makefile* *.out *.pdf *~
@@ -110,11 +109,14 @@ $(OBJDIR)/%.o: %.cpp
 metabolism-ncurses: DEFINES+=-DHAVE_NCURSES
 metabolism-ncurses: LIBS+=-lncurses
 
+metabolism-debug: FLAGS+=-g -pg
+metabolism-debug: LFLAGS+=-g -pg
+
 metabolism: qt-makefile $(SOURCES) $(QT_SOURCES) $(HEADERS) $(QT_HEADERS)
 	make -f $<
 metabolism-qt: qt-makefile-no-ncurses $(SOURCES) $(QT_SOURCES) $(HEADERS) $(QT_HEADERS)
 	make -f $<
-metabolism-ncurses metabolism-minimal: $(OBJECTS)
+metabolism-ncurses metabolism-minimal metabolism-debug: $(OBJECTS)
 	g++ $(LFLAGS) $(LIBS) -o $@ $^
 
 
