@@ -18,9 +18,11 @@ ifndef OBJDIR
 BUILD = build
 
 $(APPS): OBJDIR=$(BUILD)/$@
-$(APPS):
+$(APPS): FORCE
 	-mkdir -p $(OBJDIR)
 	make $@ OBJDIR=$(OBJDIR)
+
+FORCE:
 
 # File locations used for make bless and make check
 CHECK_LOAD      = ../load/mm.load
