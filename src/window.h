@@ -6,9 +6,10 @@
 #ifdef HAVE_QT
 
 #include <QtGui>
-#include "viewer.h"
 #include "options.h"
+#include "plot.h"
 #include "sim.h"
+#include "viewer.h"
 
 class Window : public QMainWindow
 {
@@ -35,10 +36,10 @@ class Window : public QMainWindow
 
       // GUI components
       Viewer* viewer;
+      Plot* plot;
       QPushButton* button;
-      QVBoxLayout* mainLayout;
-      QWidget* mainWidget;
 };
 
 #endif /* HAVE_QT */
 #endif /* WINDOW_H */
+

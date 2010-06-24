@@ -3,8 +3,8 @@
 
 #ifdef HAVE_QT
 
-#include "window.h"
 #include "safecalls.h"
+#include "window.h"
 using namespace SafeCalls;
 
 
@@ -18,13 +18,23 @@ Window::Window( Options* newOptions, Sim* newSim, QWidget* parent, Qt::WindowFla
 
    // Set up GUI components
    viewer = safeNew( Viewer( o, sim, this ) );
+   plot = safeNew( Plot( o, sim, this ) );
    button = safeNew( QPushButton( "Click to start" ) );
 
    // Set up GUI layout
-   mainLayout = safeNew( QVBoxLayout() );
-   mainLayout->addWidget( viewer );
+   QFrame* frame = safeNew( QFrame() );
+   frame->setFrameStyle( QFrame::Box | QFrame::Sunken );
+
+   QHBoxLayout* frameLayout = safeNew( QHBoxLayout() );
+   frame->setLayout( frameLayout );
+   frameLayout->addWidget( viewer );
+   frameLayout->addWidget( plot );
+
+   QVBoxLayout* mainLayout = safeNew( QVBoxLayout() );
+   mainLayout->addWidget( frame );
    mainLayout->addWidget( button );
-   mainWidget = safeNew( QWidget() );
+
+   QWidget* mainWidget = safeNew( QWidget() );
    mainWidget->setLayout( mainLayout );
 
    setCentralWidget( mainWidget );
@@ -35,6 +45,7 @@ Window::Window( Options* newOptions, Sim* newSim, QWidget* parent, Qt::WindowFla
    connect( button, SIGNAL( clicked() ), viewer, SLOT( startPaint() ) );
    connect( button, SIGNAL( clicked() ), this, SLOT( runSim() ) );
    connect( this, SIGNAL( iterDone() ), this, SLOT( updateButton() ) );
+   connect( this, SIGNAL( iterDone() ), plot, SLOT( update() ) );
    connect( this, SIGNAL( iterDone() ), viewer, SLOT( updateGL() ) );
 }
 

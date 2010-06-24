@@ -62,7 +62,8 @@ HEADERS    = atom.h \
 			 	 reaction.h \
 			 	 safecalls.h \
 			 	 sim.h
-QT_HEADERS = viewer.h \
+QT_HEADERS = plot.h \
+				 viewer.h \
 				 window.h
 SOURCES    = atom.cpp \
 			    element.cpp \
@@ -70,10 +71,11 @@ SOURCES    = atom.cpp \
 			 	 options.cpp \
 			 	 reaction.cpp \
 			 	 safecalls.cpp \
+			 	 ../SFMT/SFMT.c \
 			 	 sim-engine.cpp \
-			 	 sim-io.cpp \
-			 	 ../SFMT/SFMT.c
-QT_SOURCES = viewer.cpp \
+			 	 sim-io.cpp
+QT_SOURCES = plot.cpp \
+				 viewer.cpp \
 				 window.cpp
 OBJECTS    = $(addprefix $(OBJDIR)/, $(addsuffix .o, $(basename $(notdir $(SOURCES)))))
 QT_PROJECT = qt-project.pro
@@ -186,22 +188,6 @@ $(OBJDIR)/sim-io.o: sim-io.cpp sim.h \
 		options.h \
 		reaction.h \
 		safecalls.h
-
-$(OBJDIR)/viewer.o: viewer.cpp viewer.h \
-		atom.h \
-		element.h \
-		options.h \
-		reaction.h \
-		sim.h
-
-$(OBJDIR)/window.o: window.cpp window.h \
-		atom.h \
-		element.h \
-		options.h \
-		safecalls.h \
-		sim.h \
-		reaction.h \
-		viewer.h
 
 endif
 
