@@ -1,7 +1,7 @@
 ele A A teal
 ele B B darkorange
 
-rxn 0.5 A + B -> *
+rxn 1.0 A + B -> *
 
 init 2 A B 
 
