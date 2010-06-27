@@ -9,12 +9,12 @@ using namespace SafeCalls;
 
 
 // Constructor
-Plot::Plot( Options* newOptions, Sim* newSim, QWidget* parent )
+Plot::Plot( Options* initOptions, Sim* initSim, QWidget* parent )
    : QwtPlot( parent )
 {
    // Copy constructor arguments
-   o = newOptions;
-   sim = newSim;
+   o = initOptions;
+   sim = initSim;
 
    // Set up the plot
    setMinimumWidth( 350 );
@@ -34,7 +34,7 @@ Plot::Plot( Options* newOptions, Sim* newSim, QWidget* parent )
          // Create and initialize the array of y-coordinate
          // values for this Element
          density[ ele->getName() ] = safeNew( double [ o->maxIters ] );
-         density[ ele->getName() ][ sim->getItersCompleted() ] = (double)ele->getCount() / (double)(o->worldX * o->worldY);
+         density[ ele->getName() ][ sim->getItersCompleted() ] = (double)ele->count / (double)(o->worldX * o->worldY);
 
          // Create and initialize the curve for this Element
          curves[ ele->getName() ] = safeNew( QwtPlotCurve( ele->getName().c_str() ) );
@@ -60,7 +60,7 @@ Plot::update()
       {
          // Update the array of y-coordinate values
          // for this Element
-         density[ ele->getName() ][ sim->getItersCompleted() ] = (double)ele->getCount() / (double)(o->worldX * o->worldY);
+         density[ ele->getName() ][ sim->getItersCompleted() ] = (double)ele->count / (double)(o->worldX * o->worldY);
 
          // Update the curve for this Element
          curves[ ele->getName() ]->setData( iterData, density[ ele->getName() ], sim->getItersCompleted() );

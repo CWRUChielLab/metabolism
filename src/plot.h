@@ -19,7 +19,7 @@ class Plot : public QwtPlot
 
    public:
       // Constructor
-      Plot( Options* newOptions, Sim* newSim, QWidget* parent = 0 );
+      Plot( Options* initOptions, Sim* initSim, QWidget* parent = 0 );
 
    public slots:
       void update();

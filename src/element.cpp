@@ -72,17 +72,3 @@ Element::setColor( std::string newColor )
    color = newColor;
 }
 
-
-int
-Element::getCount()
-{
-   return count;
-}
-
-
-void
-Element::setCount( int newCount )
-{
-   count = newCount;
-}
-

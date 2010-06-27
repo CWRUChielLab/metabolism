@@ -16,7 +16,7 @@ class Viewer : public QGLWidget
 
    public:
       // Constructor
-      Viewer( Options* newOptions, Sim* newSim, QWidget *parent = 0 );
+      Viewer( Options* initOptions, Sim* initSim, QWidget *parent = 0 );
 
    public slots:
       void adjustPaintRegion();
@@ -32,7 +32,7 @@ class Viewer : public QGLWidget
    private:
       Options* o;
       Sim* sim;
-      int running;
+      bool running;
       int minX;
       int minY;
       int maxX;

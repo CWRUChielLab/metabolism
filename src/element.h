@@ -18,8 +18,8 @@ class Element
       char getSymbol();
       std::string getColor();
       void setColor( std::string newColor );
-      int getCount();
-      void setCount( int newCount );
+
+      int count;
 
    private:
       // Element attributes
@@ -27,7 +27,6 @@ class Element
       std::string name;
       char symbol;
       std::string color;
-      int count;
 };
 
 #endif /* ELEMENT_H */

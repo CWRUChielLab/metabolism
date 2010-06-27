@@ -24,11 +24,11 @@ class Options
       int worldY;
       int atomCount;
       int gui;
-      int doRxns;
-      int doShuffle;
+      bool doRxns;
+      bool doShuffle;
       int sleep;
-      int verbose;
-      int progress;
+      bool verbose;
+      bool progress;
       std::string loadFile;
       std::string configFile;
       std::string censusFile;

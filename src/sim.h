@@ -22,10 +22,10 @@ class Sim
 {
    public:
       // Constructor
-      Sim( Options* newOptions );
+      Sim( Options* initOptions );
 
       // Public engine methods
-      int iterate();
+      bool iterate();
       void end();
       int getItersCompleted();
 
@@ -37,6 +37,7 @@ class Sim
 
       Atom** world;
       ElementMap periodicTable;
+      ReactionMap rxnTable;
       int getWorldIndex( int x, int y );
 
    private:
@@ -44,11 +45,10 @@ class Sim
       Options* o;
       int itersCompleted;
 
-      int elesLoaded;
-      int rxnsLoaded;
-      int initsLoaded;
+      bool elesLoaded;
+      bool rxnsLoaded;
+      bool initsLoaded;
 
-      ReactionMap rxnTable;
       ElementVector initialTypes;
 
       uint8_t* claimed;

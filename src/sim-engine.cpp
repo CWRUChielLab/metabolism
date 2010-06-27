@@ -16,10 +16,10 @@ using namespace SafeCalls;
 
 
 // Constructor
-Sim::Sim( Options* newOptions )
+Sim::Sim( Options* initOptions )
 {
    // Copy constructor arguments
-   o = newOptions;
+   o = initOptions;
 
    // Initialize the Sim
    initializeEngine();
@@ -33,10 +33,10 @@ Sim::Sim( Options* newOptions )
 void
 Sim::initializeEngine()
 {
-   static int initialized = 0;
+   static bool initialized = false;
    if( !initialized )
    {
-      initialized = 1;
+      initialized = true;
 
       // Set up the world
       itersCompleted = 0;
@@ -76,26 +76,26 @@ Sim::initializeEngine()
       periodicTable[ "Solvent" ] = tempEle;
 
       // Load periodicTable, rxnTable, and initialType if available
-      elesLoaded = 0;
-      rxnsLoaded = 0;
-      initsLoaded = 0;
+      elesLoaded = false;
+      rxnsLoaded = false;
+      initsLoaded = false;
       loadChemistry();
 
       // Set up default periodicTable if one was not loaded
-      if( elesLoaded == 0 )
+      if( !elesLoaded )
       {
          tempEle = safeNew( Element( "A", 'A', "teal" ) );
-         periodicTable[ "A" ] = tempEle;
+         periodicTable[ tempEle->getName() ] = tempEle;
          tempEle = safeNew( Element( "B", 'B', "hotpink" ) );
-         periodicTable[ "B" ] = tempEle;
+         periodicTable[ tempEle->getName() ] = tempEle;
          tempEle = safeNew( Element( "C", 'C', "darkorange" ) );
-         periodicTable[ "C" ] = tempEle;
+         periodicTable[ tempEle->getName() ] = tempEle;
          tempEle = safeNew( Element( "D", 'D', "yellow" ) );
-         periodicTable[ "D" ] = tempEle;
+         periodicTable[ tempEle->getName() ] = tempEle;
       }
 
       // Set up default rxnTable if one was not loaded
-      if( rxnsLoaded == 0 )
+      if( !rxnsLoaded )
       {
          Reaction* tempRxn;
          tempRxn = safeNew( Reaction( ev(2,"A","B"), ev(2,"C","D"), 0.5 ) );
@@ -103,7 +103,7 @@ Sim::initializeEngine()
       }
 
       // Set up default initialTypes if one was not loaded
-      if( initsLoaded == 0 )
+      if( !initsLoaded )
       {
          initialTypes = ev(2,"A","B");
       }
@@ -143,11 +143,11 @@ Sim::initializeEngine()
 
 
 // Execute one step of the simulation;
-// returns 1 if the simulation succeeded in
-// executing one step, and 0 if the
+// returns true if the simulation succeeded in
+// executing one step, and false if the
 // simulation had already reached its
 // maxIters
-int
+bool
 Sim::iterate()
 {
    if( itersCompleted < o->maxIters )
@@ -186,14 +186,14 @@ Sim::iterate()
       if( o->sleep != 0 )
          usleep( o->sleep * 1000 );
 
-      return 1;
+      return true;
    }
    else
    {
       // Finish collecting data and clean up
       cleanup();
 
-      return 0;
+      return false;
    }
 }
 
@@ -211,10 +211,10 @@ Sim::end()
 void
 Sim::cleanup()
 {
-   static int finalized = 0;
+   static bool finalized = false;
    if( !finalized )
    {
-      finalized = 1;
+      finalized = true;
 
       // Guard against any more iterations
       o->maxIters = itersCompleted;
@@ -287,13 +287,14 @@ Sim::getWorldIndex( int x, int y )
 void
 Sim::initRNG( int initSeed )
 {
-   static int allocated = 0;
-
    // Set the seed
    init_gen_rand( (uint32_t)(initSeed) );
 
+   static bool allocated = false;
    if( !allocated )
    {
+      allocated = true;
+
       // The array randNums will be treated by the
       // RNG as an array of 64-bit ints.  The length
       // of the array (in 64-bit ints) must be a
@@ -333,8 +334,6 @@ Sim::initRNG( int initSeed )
 #endif
       assert( rc == 0 );
       assert( randNums );
-
-      allocated = 1;
    }
 }
 
@@ -344,24 +343,25 @@ Sim::initRNG( int initSeed )
 void
 Sim::generateRandNums()
 {
-   static int firstTime = 1;
-   
    // fill_array64 fills randNums with 64-bit ints.
    // See initRNG method for more information.
    fill_array64( (uint64_t*)(randNums), randNums_length_in_64_bit_ints );
 
-   if (firstTime)
+   // Dump a few random numbers to file if this
+   // is the first time the array has been filled
+   static bool firstTime = true;
+   if( firstTime )
    {
+      firstTime = false;
+
       static std::ofstream randFile;
       randFile.open( o->randFile.c_str() );
 
-      for( int i=0; i<10; i++ )
+      for( int i = 0; i < 10; i++ )
       {
          randFile << randNums[i] << std::endl;
       }
       randFile.close();
-
-      firstTime = 0;
    }
 }
 
@@ -419,8 +419,8 @@ Sim::shuffleWorld()
             int newX = positions[ getWorldIndex(x,y) ] % o->worldX;
             int newY = positions[ getWorldIndex(x,y) ] / o->worldX;
             temp[ getWorldIndex(newX,newY) ] = world[ getWorldIndex(x,y) ];
-            temp[ getWorldIndex(newX,newY) ]->setX(newX);
-            temp[ getWorldIndex(newX,newY) ]->setY(newY);
+            temp[ getWorldIndex(newX,newY) ]->x = newX;
+            temp[ getWorldIndex(newX,newY) ]->y = newY;
          }
       }
    }
@@ -482,17 +482,17 @@ Sim::moveAtoms()
             int dy = dirdy[ randNums[ getWorldIndex(x,y) ] & 0x7 ];
             Atom* thisAtom = world[ getWorldIndex(x,y) ];
 
-            thisAtom->setDxIdeal( thisAtom->getDxIdeal() + dx );
-            thisAtom->setDyIdeal( thisAtom->getDyIdeal() + dy );
+            thisAtom->dx_ideal += dx;
+            thisAtom->dy_ideal += dy;
 
             if( claimed[ getWorldIndex(x,y) ] == 1 && claimed[ getWorldIndex(x+dx,y+dy) ] == 1 )
             // Move if there are no collisions
             {
-               thisAtom->setDxActual( thisAtom->getDxActual() + dx );
-               thisAtom->setDyActual( thisAtom->getDyActual() + dy );
+               thisAtom->dx_actual += dx;
+               thisAtom->dy_actual += dy;
 
-               thisAtom->setX( ( (x+dx) + o->worldX ) % o->worldX );
-               thisAtom->setY( ( (y+dy) + o->worldY ) % o->worldY );
+               thisAtom->x = ( (x+dx) + o->worldX ) % o->worldX;
+               thisAtom->y = ( (y+dy) + o->worldY ) % o->worldY;
 
                world[ getWorldIndex(x,y) ] = NULL;
                world[ getWorldIndex(x+dx,y+dy) ] = thisAtom;
@@ -503,7 +503,7 @@ Sim::moveAtoms()
             else
             // Else increment collisions
             {
-               thisAtom->setCollisions( thisAtom->getCollisions() + 1 );
+               thisAtom->collisions++;
 
                // Mark the unmoved atom as processed
                claimed[ getWorldIndex(x,y) ] = 0;
@@ -543,7 +543,7 @@ Sim::executeRxns()
          else
          // Else solvent is encountered
          {
-            thisAtom = safeNew( Atom( solventEle, x, y) );
+            thisAtom = safeNew( Atom( solventEle, x, y ) );
          }
 
          // Determine which neighbor to attempt to react with, if any
@@ -850,7 +850,7 @@ Sim::executeRxns()
                // If the reaction is first-order
                {
                   // Execute the reaction
-                  thisAtom->setType(thisRxnProducts[0]);
+                  thisAtom->setType( thisRxnProducts[0] );
                   world[ getWorldIndex(x,y) ] = thisAtom;
 
                   // Mark the atom as having already reacted
@@ -860,17 +860,14 @@ Sim::executeRxns()
                // Else the reaction is second-order
                {
                   // Execute the reaction
-                  thisAtom->setType(thisRxnProducts[0]);
-                  neighborAtom->setType(thisRxnProducts[1]);
+                  thisAtom->setType( thisRxnProducts[0] );
+                  neighborAtom->setType( thisRxnProducts[1] );
                   world[ getWorldIndex(x,y) ] = thisAtom;
                   world[ getWorldIndex(neighborX,neighborY) ] = neighborAtom;
 
                   // Propogate tracking
-                  if( thisAtom->isTracked() || neighborAtom->isTracked() )
-                  {
-                     thisAtom->setTracked(1);
-                     neighborAtom->setTracked(1);
-                  }
+                  thisAtom->setTracked(     thisAtom->isTracked() || neighborAtom->isTracked() );
+                  neighborAtom->setTracked( thisAtom->isTracked() || neighborAtom->isTracked() );
 
                   // Mark the reaction participants as having already reacted
                   claimed[ getWorldIndex(x,y) ] = 0;

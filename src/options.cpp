@@ -33,11 +33,11 @@ Options::Options( int argc, char* argv[] )
    gui = GUI_OFF;
 #endif
 #endif
-   doRxns = 1;
-   doShuffle = 0;
+   doRxns = true;
+   doShuffle = false;
    sleep = 0;
-   verbose = 0;
-   progress = 1;
+   verbose = false;
+   progress = true;
    loadFile = "";
    configFile = "config.out";
    censusFile = "census.out";
@@ -59,28 +59,28 @@ Options::Options( int argc, char* argv[] )
    struct option long_options[] =
    {
    // { "long_option_name", "no_argument(0), required_argument(1), optional_argument(2)", NULL, retval }
-      { "atoms",        required_argument, 0, 'a' },
-      { "files",        required_argument, 0, 'f' },
+      { "atoms",        required_argument, NULL, 'a' },
+      { "files",        required_argument, NULL, 'f' },
 #if defined(HAVE_QT) | defined(HAVE_NCURSES)
-      { "gui-off",      no_argument,       0, 'g' },
+      { "gui-off",      no_argument,       NULL, 'g' },
 #endif
-      { "help",         no_argument,       0, 'h' },
-      { "iters",        required_argument, 0, 'i' },
-      { "load",         required_argument, 0, 'l' },
-      { "progress-off", no_argument,       0, 'p' },
-      { "rxns-off",     no_argument,       0, 'r' },
-      { "seed",         required_argument, 0, 's' },
-      { "shuffle",      no_argument,       0, 'S' },
-      { "version",      no_argument,       0, 'v' },
-      { "verbose",      no_argument,       0, 'V' },
-      { "width",        required_argument, 0, 'x' },
-      { "height",       required_argument, 0, 'y' },
-      { "sleep",        required_argument, 0, 'z' },
+      { "help",         no_argument,       NULL, 'h' },
+      { "iters",        required_argument, NULL, 'i' },
+      { "load",         required_argument, NULL, 'l' },
+      { "progress-off", no_argument,       NULL, 'p' },
+      { "rxns-off",     no_argument,       NULL, 'r' },
+      { "seed",         required_argument, NULL, 's' },
+      { "shuffle",      no_argument,       NULL, 'S' },
+      { "version",      no_argument,       NULL, 'v' },
+      { "verbose",      no_argument,       NULL, 'V' },
+      { "width",        required_argument, NULL, 'x' },
+      { "height",       required_argument, NULL, 'y' },
+      { "sleep",        required_argument, NULL, 'z' },
 #if defined(HAVE_QT) & defined(HAVE_NCURSES)
-      { "gui-ncurses",  no_argument,       0, OPT_GUI_NCURSES },
+      { "gui-ncurses",  no_argument,       NULL, OPT_GUI_NCURSES },
 #endif
-      { "rxns-on",      no_argument,       0, OPT_RXNS_ON },
-      { "shuffle-off",  no_argument,       0, OPT_SHUFFLE_OFF }
+      { "rxns-on",      no_argument,       NULL, OPT_RXNS_ON },
+      { "shuffle-off",  no_argument,       NULL, OPT_SHUFFLE_OFF }
    };
 
    // Any options that take short-opt form should be listed here.
@@ -106,7 +106,7 @@ Options::Options( int argc, char* argv[] )
    std::string onOrOff;
 
    // First pass through arguments to look for --load option
-   while( 1 )
+   while( true )
    {
       c = getopt_long( argc, argv, options_string, long_options, &option_index );
       if( c == -1 )
@@ -146,13 +146,13 @@ Options::Options( int argc, char* argv[] )
                            load >> onOrOff;
                            if( onOrOff == "on" )
                            {
-                              doRxns = 1;
+                              doRxns = true;
                            }
                            else
                            {
                               if( onOrOff == "off" )
                               {
-                                 doRxns = 0;
+                                 doRxns = false;
                               }
                               else
                               {
@@ -175,13 +175,13 @@ Options::Options( int argc, char* argv[] )
                                  load >> onOrOff;
                                  if( onOrOff == "on" )
                                  {
-                                    doShuffle = 1;
+                                    doShuffle = true;
                                  }
                                  else
                                  {
                                     if( onOrOff == "off" )
                                     {
-                                       doShuffle = 0;
+                                       doShuffle = false;
                                     }
                                     else
                                     {
@@ -233,7 +233,7 @@ Options::Options( int argc, char* argv[] )
    optind = 1;
 
    // Second pass through arguments to read in all other options
-   while( 1 )
+   while( true )
    {
       c = getopt_long( argc, argv, options_string, long_options, &option_index );
       if( c == -1 )
@@ -301,23 +301,23 @@ Options::Options( int argc, char* argv[] )
          case 'l':
             break;
          case 'p':
-            progress = 0;
+            progress = false;
             break;
          case 'r':
-            doRxns = 0;
+            doRxns = false;
             break;
          case 's':
             seed = safeStrtol( optarg );
             break;
          case 'S':
-            doShuffle = 1;
+            doShuffle = true;
             break;
          case 'v':
             printVersion();
             exit( EXIT_SUCCESS );
             break;
          case 'V':
-            verbose = 1;
+            verbose = true;
             break;
          case 'x':
             worldX = safeStrtol( optarg );
@@ -334,10 +334,10 @@ Options::Options( int argc, char* argv[] )
             break;
 #endif
          case OPT_RXNS_ON:
-            doRxns = 1;
+            doRxns = true;
             break;
          case OPT_SHUFFLE_OFF:
-            doShuffle = 0;
+            doShuffle = false;
             break;
          default:
             std::cout << "Unknown option.  Try --help for a full list." << std::endl;

@@ -9,12 +9,12 @@ using namespace SafeCalls;
 
 
 // Constructor
-Window::Window( Options* newOptions, Sim* newSim, QWidget* parent, Qt::WindowFlags flags )
+Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowFlags flags )
    : QMainWindow( parent, flags )
 {
    // Copy constructor arguments
-   o = newOptions;
-   sim = newSim;
+   o = initOptions;
+   sim = initSim;
 
    // Set up GUI components
    viewer = safeNew( Viewer( o, sim, this ) );

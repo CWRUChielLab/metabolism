@@ -20,10 +20,10 @@ using namespace SafeCalls;
 void
 Sim::initializeIO()
 {
-   static int initialized = 0;
+   static bool initialized = false;
    if( !initialized )
    {
-      initialized = 1;
+      initialized = true;
 
       // Open the census file and take an initial survey
       writeCensus();
@@ -104,6 +104,8 @@ Sim::loadChemistry()
       while( load.good() )
       {
          load >> keyword;
+
+         // Read in Elements
          if( keyword == "ele")
          {
             std::string name;
@@ -113,188 +115,188 @@ Sim::loadChemistry()
             load >> name >> symbol >> color;
             tempEle = safeNew( Element( name, symbol, color ) );
             periodicTable[ name ] = tempEle;
-            elesLoaded++;
+            elesLoaded = true;
          }
-         else
+
+         // Read in Reactions
+         if( keyword == "rxn")
          {
-            if( keyword == "rxn")
+            std::string word;
+            int n;
+            double prob;
+            StringCounter reactantCount;
+            StringCounter productCount;
+            ElementVector reactants, products;
+
+            load.exceptions( std::ifstream::failbit );
+            load >> prob;
+
+            // Read in the names of reactants, adding
+            // them up along the way
+            word = "+";
+            while( word == "+" )
             {
-               std::string word;
-               int n;
-               double prob;
-               StringCounter reactantCount;
-               StringCounter productCount;
-               ElementVector reactants, products;
-
-               load.exceptions( std::ifstream::failbit );
-               load >> prob;
-
-               // Read in the names of reactants, adding
-               // them up along the way
-               word = "+";
-               while( word == "+" )
+               n = 1;
+               try
                {
-                  n = 1;
-                  try
-                  {
-                     load >> n;
-                  }
-                  catch( std::ifstream::failure e )
-                  {
-                     load.clear();
-                  }
-                  load >> word;
-                  for( int i = 0; i < n; i++ )
-                  {
-                     if( word != "*" && word != "Solvent" )
-                     {
-                        if( periodicTable[ word ] != NULL )
-                        {
-                           reactantCount[ word ]++;
-                        }
-                        else
-                        {
-                           std::cout << "Loading rxn: " << word << " is not a defined Element!" << std::endl;
-                           exit( EXIT_FAILURE );
-                        }
-                     }
-                  }
-                  while( load.peek() == ' ' )
-                  {
-                     word = load.get();
-                  }
-                  if( load.peek() == '\n' )
-                  {
-                     std::cout << "Loading rxn: premature line-break, was expecting \"->\"!" << std::endl;
-                     exit( EXIT_FAILURE );
-                     break;
-                  }
-                  load >> word;
-               }
-
-               // Ensure that the reactants and products
-               // are divided by a reaction arrow
-               if( word != "->" )
-               {
-                  std::cout << "Loading rxn: confused by \"" << word << "\", was expecting \"->\"!" << std::endl;
-                  exit( EXIT_FAILURE );
-               }
-
-               // Read in the names of products, adding
-               // them up along the way
-               word = "+";
-               while( word == "+" )
-               {
-                  n = 1;
-                  try
-                  {
-                     load >> n;
-                  }
-                  catch( std::ifstream::failure e )
-                  {
-                     load.clear();
-                  }
-                  load >> word;
-                  for( int i = 0; i < n; i++ )
-                  {
-                     if( word != "*" && word != "Solvent" )
-                     {
-                        if( periodicTable[ word ] != NULL )
-                        {
-                           productCount[ word ]++;
-                        }
-                        else
-                        {
-                           std::cout << "Loading rxn: " << word << " is not a defined Element!" << std::endl;
-                           exit( EXIT_FAILURE );
-                        }
-                     }
-                  }
-                  while( load.peek() == ' ' )
-                  {
-                     word = load.get();
-                  }
-                  if( load.peek() == '\n' )
-                  {
-                     break;
-                  }
-                  load >> word;
-               }
-
-               load.exceptions( std::ifstream::goodbit );
-
-               // Store the reactants and products in the ElementVectors,
-               // adding Solvent as placeholders to balance the reaction
-               // if necessary
-               for( StringCounter::iterator i = reactantCount.begin(); i != reactantCount.end(); i++ )
-               {
-                  word = i->first;
-                  n = i->second;
-                  for( int j = 0; j < n; j++ )
-                     reactants.push_back( periodicTable[ word ] );
-               }
-               for( StringCounter::iterator i = productCount.begin(); i != productCount.end(); i++ )
-               {
-                  word = i->first;
-                  n = i->second;
-                  for( int j = 0; j < n; j++ )
-                     products.push_back( periodicTable[ word ] );
-               }
-               while( products.size() > reactants.size() )
-               {
-                  reactants.push_back( periodicTable[ "Solvent" ] );
-               }
-               while( reactants.size() > products.size() )
-               {
-                  products.push_back( periodicTable[ "Solvent" ] );
-               }
-
-               // Create the reaction and store it in the rxnTable;
-               // if a Reaction with the same reactants already exists,
-               // make this its second set of products
-               tempRxn = safeNew( Reaction( reactants, products, prob ) );
-               if( rxnTable[ tempRxn->getKey() ] == NULL )
-               {
-                  rxnTable[ tempRxn->getKey() ] = tempRxn;
-               }
-               else
-               {
-                  rxnTable[ tempRxn->getKey() ]->setSecondProducts( products );
-                  rxnTable[ tempRxn->getKey() ]->setSecondProb( prob );
-               }
-
-               rxnsLoaded++;
-            }
-            else
-            {
-               if( keyword == "init" )
-               {
-                  std::string word;
-                  int n;
-
                   load >> n;
-                  for( int i = 0; i < n; i++ )
+               }
+               catch( std::ifstream::failure e )
+               {
+                  load.clear();
+               }
+               load >> word;
+               for( int i = 0; i < n; i++ )
+               {
+                  if( word != "*" && word != "Solvent" )
                   {
-                     load >> word;
                      if( periodicTable[ word ] != NULL )
                      {
-                        initialTypes.push_back( periodicTable[ word ] );
+                        reactantCount[ word ]++;
                      }
                      else
                      {
-                        std::cout << "Loading init: " << word << " is not a defined Element!" << std::endl;
+                        std::cout << "Loading rxn: " << word << " is not a defined Element!" << std::endl;
                         exit( EXIT_FAILURE );
                      }
                   }
-                  initsLoaded++;
-                  if( initsLoaded > 1 )
+               }
+               while( load.peek() == ' ' )
+               {
+                  word = load.get();
+               }
+               if( load.peek() == '\n' )
+               {
+                  std::cout << "Loading rxn: premature line-break, was expecting \"->\"!" << std::endl;
+                  exit( EXIT_FAILURE );
+                  break;
+               }
+               load >> word;
+            }
+
+            // Ensure that the reactants and products
+            // are divided by a reaction arrow
+            if( word != "->" )
+            {
+               std::cout << "Loading rxn: confused by \"" << word << "\", was expecting \"->\"!" << std::endl;
+               exit( EXIT_FAILURE );
+            }
+
+            // Read in the names of products, adding
+            // them up along the way
+            word = "+";
+            while( word == "+" )
+            {
+               n = 1;
+               try
+               {
+                  load >> n;
+               }
+               catch( std::ifstream::failure e )
+               {
+                  load.clear();
+               }
+               load >> word;
+               for( int i = 0; i < n; i++ )
+               {
+                  if( word != "*" && word != "Solvent" )
                   {
-                     std::cout << "Loading init: only one init keyword is permitted!" << std::endl;
-                     exit( EXIT_FAILURE );
+                     if( periodicTable[ word ] != NULL )
+                     {
+                        productCount[ word ]++;
+                     }
+                     else
+                     {
+                        std::cout << "Loading rxn: " << word << " is not a defined Element!" << std::endl;
+                        exit( EXIT_FAILURE );
+                     }
                   }
                }
+               while( load.peek() == ' ' )
+               {
+                  word = load.get();
+               }
+               if( load.peek() == '\n' )
+               {
+                  break;
+               }
+               load >> word;
             }
+
+            load.exceptions( std::ifstream::goodbit );
+
+            // Store the reactants and products in the ElementVectors,
+            // adding Solvent as placeholders to balance the reaction
+            // if necessary
+            for( StringCounter::iterator i = reactantCount.begin(); i != reactantCount.end(); i++ )
+            {
+               word = i->first;
+               n = i->second;
+               for( int j = 0; j < n; j++ )
+                  reactants.push_back( periodicTable[ word ] );
+            }
+            for( StringCounter::iterator i = productCount.begin(); i != productCount.end(); i++ )
+            {
+               word = i->first;
+               n = i->second;
+               for( int j = 0; j < n; j++ )
+                  products.push_back( periodicTable[ word ] );
+            }
+            while( products.size() > reactants.size() )
+            {
+               reactants.push_back( periodicTable[ "Solvent" ] );
+            }
+            while( reactants.size() > products.size() )
+            {
+               products.push_back( periodicTable[ "Solvent" ] );
+            }
+
+            // Create the reaction and store it in the rxnTable;
+            // if a Reaction with the same reactants already exists,
+            // make this its second set of products
+            tempRxn = safeNew( Reaction( reactants, products, prob ) );
+            if( rxnTable[ tempRxn->getKey() ] == NULL )
+            {
+               rxnTable[ tempRxn->getKey() ] = tempRxn;
+            }
+            else
+            {
+               rxnTable[ tempRxn->getKey() ]->setSecondProducts( products );
+               rxnTable[ tempRxn->getKey() ]->setSecondProb( prob );
+            }
+
+            rxnsLoaded = true;
          }
+
+         // Read in inits
+         if( keyword == "init" )
+         {
+            std::string word;
+            int n;
+
+            load >> n;
+            for( int i = 0; i < n; i++ )
+            {
+               load >> word;
+               if( periodicTable[ word ] != NULL )
+               {
+                  initialTypes.push_back( periodicTable[ word ] );
+               }
+               else
+               {
+                  std::cout << "Loading init: " << word << " is not a defined Element!" << std::endl;
+                  exit( EXIT_FAILURE );
+               }
+            }
+            if( initsLoaded )
+            {
+               std::cout << "Loading init: only one init keyword is permitted!" << std::endl;
+               exit( EXIT_FAILURE );
+            }
+
+            initsLoaded = true;
+         }
+
          keyword = "";
       }
    }
@@ -307,13 +309,14 @@ void
 Sim::writeCensus()
 {
    int colwidth = 12;
-   static int initialized = 0;
    static std::ofstream censusFile;
    int totalAtoms = 0;
 
+   static bool initialized = false;
    if( !initialized )
    {
-      initialized = 1;
+      initialized = true;
+
       censusFile.open( o->censusFile.c_str() );
       censusFile.flags(std::ios::left);
       censusFile << std::setw(colwidth) << "iter";
@@ -334,9 +337,9 @@ Sim::writeCensus()
       Element* ele = i->second;
       if( ele != periodicTable[ "Solvent" ] )
       {
-         censusFile << std::setw(colwidth) << ele->getCount();
+         censusFile << std::setw(colwidth) << ele->count;
       }
-      totalAtoms += ele->getCount();
+      totalAtoms += ele->count;
    }
    censusFile << std::setw(colwidth) << totalAtoms << std::endl;
 }
@@ -402,11 +405,11 @@ Sim::writeDiffusion()
             Atom* thisAtom = world[ getWorldIndex(x,y) ];
             diffusionFile << std::setw(colwidth) <<
                              thisAtom->getType()->getName() << std::setw(colwidth) <<
-                             thisAtom->getDxActual() << std::setw(colwidth) <<
-                             thisAtom->getDyActual() << std::setw(colwidth) <<
-                             thisAtom->getDxIdeal() << std::setw(colwidth) <<
-                             thisAtom->getDyIdeal() << std::setw(colwidth) <<
-                             thisAtom->getCollisions() << std::endl;
+                             thisAtom->dx_actual << std::setw(colwidth) <<
+                             thisAtom->dy_actual << std::setw(colwidth) <<
+                             thisAtom->dx_ideal << std::setw(colwidth) <<
+                             thisAtom->dy_ideal << std::setw(colwidth) <<
+                             thisAtom->collisions << std::endl;
          }
       }
    }

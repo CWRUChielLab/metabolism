@@ -8,16 +8,16 @@
 
 
 // Constructor
-Viewer::Viewer( Options* newOptions, Sim* newSim, QWidget *parent ) 
+Viewer::Viewer( Options* initOptions, Sim* initSim, QWidget *parent ) 
 	: QGLWidget( parent )
 {
    // Copy constructor arguments
-   o = newOptions;
-   sim = newSim;
+   o = initOptions;
+   sim = initSim;
 
    // Let the GUI know that the simulation is
    // not yet running
-   running = 0;
+   running = false;
 
    // Degrees to rotate the coordinate space
    // counterclockwise around the associated axis
@@ -41,7 +41,7 @@ Viewer::Viewer( Options* newOptions, Sim* newSim, QWidget *parent )
 void
 Viewer::adjustPaintRegion()
 {
-   if( 1 )
+   if( true )
    {
       zoomXRange  = o->worldX;
       zoomYRange  = o->worldY;
@@ -64,7 +64,7 @@ Viewer::adjustPaintRegion()
 void
 Viewer::startPaint()
 {
-   running = 1;
+   running = true;
    updateGL();
 }
 
@@ -73,7 +73,7 @@ Viewer::startPaint()
 void
 Viewer::resetPaint()
 {
-   running = 0;
+   running = false;
    updateGL();
 }
 
@@ -104,7 +104,8 @@ Viewer::mousePressEvent( QMouseEvent *event )
 
    if( sim->world[ sim->getWorldIndex( x, y ) ] == NULL || sim->world[ sim->getWorldIndex( x, y ) ]->isTracked() )
    {
-      int offset = 1, done = 0;
+      bool done = false;
+      int offset = 1;
       double offsetMax = 5.0 * (double)zoomXWindow / (double)zoomXRange;
 
       while( !done && offset < offsetMax )
@@ -115,7 +116,7 @@ Viewer::mousePressEvent( QMouseEvent *event )
             {
                if( sim->world[ sim->getWorldIndex( x, y ) ] != NULL && !sim->world[ sim->getWorldIndex( x, y ) ]->isTracked() )
                {
-                  done = 1;
+                  done = true;
                }
             }
          }
@@ -128,7 +129,7 @@ Viewer::mousePressEvent( QMouseEvent *event )
 
    if( sim->world[ sim->getWorldIndex( x, y ) ] != NULL )
    {
-      sim->world[ sim->getWorldIndex( x, y ) ]->setTracked(1);
+      sim->world[ sim->getWorldIndex( x, y ) ]->setTracked( true );
    } else {
       event->ignore();
    }
@@ -239,7 +240,7 @@ Viewer::paintGL()
 
    // Realtime world visualization
    //if( running )
-   if( 1 )
+   if( true )
    {
       // Start specifying points as vertices
       glBegin( GL_POINTS );

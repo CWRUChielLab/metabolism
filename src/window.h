@@ -17,7 +17,7 @@ class Window : public QMainWindow
 
    public:
       // Constructor
-      Window( Options* newOptions, Sim* newSim, QWidget* parent = 0, Qt::WindowFlags flags = 0 );
+      Window( Options* initOptions, Sim* initSim, QWidget* parent = 0, Qt::WindowFlags flags = 0 );
 
    protected:
       void closeEvent( QCloseEvent* event );

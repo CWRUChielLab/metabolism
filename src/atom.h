@@ -10,7 +10,7 @@ class Atom
 {
    public:
       // Constructor
-      Atom( Element* initType, int initX, int initY, int initDxActual = 0, int initDyActual = 0, int initDxIdeal = 0, int initDyIdeal = 0, int initCollisions = 0, int initTracked = 0 );
+      Atom( Element* initType, int initX, int initY );
 
       // Deconstructor
       ~Atom();
@@ -18,27 +18,10 @@ class Atom
       // Get and set functions
       Element* getType();
       void setType( Element* newType );
-      int getX();
-      void setX( int newX );
-      int getY();
-      void setY( int newY );
-      int getDxActual();
-      void setDxActual( int newDxActual );
-      int getDyActual();
-      void setDyActual( int newDyActual );
-      int getDxIdeal();
-      void setDxIdeal( int newDxIdeal );
-      int getDyIdeal();
-      void setDyIdeal( int newDyIdeal );
-      int getCollisions();
-      void setCollisions( int newCollisions );
-      int isTracked();
-      void setTracked( int newTracked );
+      bool isTracked();
+      void setTracked( bool newTracked );
       void toggleTracked();
 
-   private:
-      // Atom attributes
-      Element* type;
       int x;
       int y;
       int dx_actual;
@@ -46,7 +29,11 @@ class Atom
       int dx_ideal;
       int dy_ideal;
       int collisions;
-      int tracked;
+
+   private:
+      // Atom attributes
+      Element* type;
+      bool tracked;
 };
 
 #endif /* ATOM_H */
