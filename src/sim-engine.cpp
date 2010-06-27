@@ -99,7 +99,7 @@ Sim::initializeEngine()
       {
          Reaction* tempRxn;
          tempRxn = safeNew( Reaction( ev(2,"A","B"), ev(2,"C","D"), 0.5 ) );
-         rxnTable[ tempRxn->getKey() ] = tempRxn;
+         rxnTable.insert( std::pair<int,Reaction*>( tempRxn->getKey(), tempRxn ) );
       }
 
       // Set up default initialTypes if one was not loaded
@@ -523,8 +523,8 @@ Sim::executeRxns()
    Atom* thisAtom;
    int neighborX, neighborY;
    Atom* neighborAtom;
-   std::vector<Element*> thisRxnProducts;
-   double thisRxnProb;
+   Reaction* thisRxn;
+   std::pair<ReactionMap::iterator,ReactionMap::iterator> range;
 
    // Initially set all claimed flags to 0
    std::memset( claimed, 0, o->worldX * o->worldY );
@@ -589,78 +589,35 @@ Sim::executeRxns()
             }
          }
 
-         thisRxnProb = 0;
-
+         // Determine the appropriate Reaction
+         thisRxn = NULL;
+         range = rxnTable.equal_range( NULL );
          if( neighborAtom == NULL )
          // If the reaction is first-order
-         {
-            switch( (randNums[ getWorldIndex(x,y) ] >> 3) % 2 )
-            // Determine which set of products to consider
-            {
-               case 0:  // First products
-                  if( rxnTable[ thisAtom->getType()->getKey() ] != NULL &&
-                     !rxnTable[ thisAtom->getType()->getKey() ]->getFirstProducts().empty() )
-                  // If the reaction exists and has first products
-                  {
-                     thisRxnProducts = rxnTable[ thisAtom->getType()->getKey() ]->getFirstProducts();
-                     thisRxnProb     = rxnTable[ thisAtom->getType()->getKey() ]->getFirstProb();
-                  }
-                  break;
-               case 1:  // Second products
-                  if( rxnTable[ thisAtom->getType()->getKey() ] != NULL &&
-                     !rxnTable[ thisAtom->getType()->getKey() ]->getSecondProducts().empty() )
-                  // If the reaction exists and has second products
-                  {
-                     thisRxnProducts = rxnTable[ thisAtom->getType()->getKey() ]->getSecondProducts();
-                     thisRxnProb     = rxnTable[ thisAtom->getType()->getKey() ]->getSecondProb();
-                  }
-                  break;
-               default:
-                  assert( 0 );
-                  break;
-            }
-         }
+            range = rxnTable.equal_range( thisAtom->getType()->getKey() );
          else
          // Else the reaction is second-order
+            range = rxnTable.equal_range( thisAtom->getType()->getKey() *
+                                      neighborAtom->getType()->getKey() );
+         // Find the n'th Reaction with the matching set of
+         // reactants, where n is a random number between 0 and
+         // MAX_RXNS_PER_SET_OF_REACTANTS
+         ReactionMap::iterator i = range.first;
+         for( unsigned int j = 0; j < (randNums[ getWorldIndex(x,y) ] >> 3) % MAX_RXNS_PER_SET_OF_REACTANTS; j++ )
          {
-            switch( (randNums[ getWorldIndex(x,y) ] >> 3) % 2 )
-            // Determine which set of products to consider
-            {
-               case 0:  // First products
-                  if( rxnTable[ thisAtom->getType()->getKey() *
-                            neighborAtom->getType()->getKey() ] != NULL &&
-                     !rxnTable[ thisAtom->getType()->getKey() *
-                            neighborAtom->getType()->getKey() ]->getFirstProducts().empty() )
-                  // If the reaction exists and has first products
-                  {
-                     thisRxnProducts = rxnTable[ thisAtom->getType()->getKey() *
-                                             neighborAtom->getType()->getKey() ]->getFirstProducts();
-                     thisRxnProb     = rxnTable[ thisAtom->getType()->getKey() *
-                                             neighborAtom->getType()->getKey() ]->getFirstProb();
-                  }
-                  break;
-               case 1:  // Second products
-                  if( rxnTable[ thisAtom->getType()->getKey() *
-                            neighborAtom->getType()->getKey() ] != NULL &&
-                     !rxnTable[ thisAtom->getType()->getKey() *
-                            neighborAtom->getType()->getKey() ]->getSecondProducts().empty() )
-                  // If the reaction exists and has second products
-                  {
-                     thisRxnProducts = rxnTable[ thisAtom->getType()->getKey() *
-                                             neighborAtom->getType()->getKey() ]->getSecondProducts();
-                     thisRxnProb     = rxnTable[ thisAtom->getType()->getKey() *
-                                             neighborAtom->getType()->getKey() ]->getSecondProb();
-                  }
-                  break;
-               default:
-                  assert( 0 );
-                  break;
-            }
+            if( i != range.second )
+               i++;
+            else
+               break;
          }
+         if( i != range.second )
+            thisRxn = i->second;
 
-         if( (double)(randNums[ getWorldIndex(x,y) ] >> 3) /
+         // Perform the reaction
+         if( thisRxn != NULL &&
+             (double)(randNums[ getWorldIndex(x,y) ] >> 3) /
              (double)((uint64_t)1 << (8 * sizeof(*randNums) - 3))
-               < thisRxnProb )
+               < thisRxn->getProb() )
          // If the reactant have enough energy
          {
             if( neighborAtom == NULL )
@@ -767,90 +724,47 @@ Sim::executeRxns()
                }
             }
 
-            thisRxnProb = 0;
-
+            // Determine the appropriate Reaction
+            thisRxn = NULL;
+            range = rxnTable.equal_range( NULL );
             if( neighborAtom == NULL )
             // If the reaction is first-order
-            {
-               switch( (randNums[ getWorldIndex(x,y) ] >> 3) % 2 )
-               // Determine which set of products to consider
-               {
-                  case 0:  // First products
-                     if( rxnTable[ thisAtom->getType()->getKey() ] != NULL &&
-                        !rxnTable[ thisAtom->getType()->getKey() ]->getFirstProducts().empty() )
-                     // If the reaction exists and has first products
-                     {
-                        thisRxnProducts = rxnTable[ thisAtom->getType()->getKey() ]->getFirstProducts();
-                        thisRxnProb     = rxnTable[ thisAtom->getType()->getKey() ]->getFirstProb();
-                     }
-                     break;
-                  case 1:  // Second products
-                     if( rxnTable[ thisAtom->getType()->getKey() ] != NULL &&
-                        !rxnTable[ thisAtom->getType()->getKey() ]->getSecondProducts().empty() )
-                     // If the reaction exists and has second products
-                     {
-                        thisRxnProducts = rxnTable[ thisAtom->getType()->getKey() ]->getSecondProducts();
-                        thisRxnProb     = rxnTable[ thisAtom->getType()->getKey() ]->getSecondProb();
-                     }
-                     break;
-                  default:
-                     assert( 0 );
-                     break;
-               }
-            }
+               range = rxnTable.equal_range( thisAtom->getType()->getKey() );
             else
             // Else the reaction is second-order
-            {
                if( claimed[ getWorldIndex(neighborX,neighborY) ] == 1 )
                // If the neighbor has not been processed yet and
                // could undergo a reaction
-               {
-                  switch( (randNums[ getWorldIndex(x,y) ] >> 3) % 2 )
-                  // Determine which set of products to consider
-                  {
-                     case 0:  // First products
-                        if( rxnTable[ thisAtom->getType()->getKey() *
-                                  neighborAtom->getType()->getKey() ] != NULL &&
-                           !rxnTable[ thisAtom->getType()->getKey() *
-                                  neighborAtom->getType()->getKey() ]->getFirstProducts().empty() )
-                        // If the reaction exists and has first products
-                        {
-                           thisRxnProducts = rxnTable[ thisAtom->getType()->getKey() *
-                                                   neighborAtom->getType()->getKey() ]->getFirstProducts();
-                           thisRxnProb     = rxnTable[ thisAtom->getType()->getKey() *
-                                                   neighborAtom->getType()->getKey() ]->getFirstProb();
-                        }
-                        break;
-                     case 1:  // Second products
-                        if( rxnTable[ thisAtom->getType()->getKey() *
-                                  neighborAtom->getType()->getKey() ] != NULL &&
-                           !rxnTable[ thisAtom->getType()->getKey() *
-                                  neighborAtom->getType()->getKey() ]->getSecondProducts().empty() )
-                        // If the reaction exists and has second products
-                        {
-                           thisRxnProducts = rxnTable[ thisAtom->getType()->getKey() *
-                                                   neighborAtom->getType()->getKey() ]->getSecondProducts();
-                           thisRxnProb     = rxnTable[ thisAtom->getType()->getKey() *
-                                                   neighborAtom->getType()->getKey() ]->getSecondProb();
-                        }
-                        break;
-                     default:
-                        assert( 0 );
-                        break;
-                  }
-               }
+                  range = rxnTable.equal_range( thisAtom->getType()->getKey() *
+                                            neighborAtom->getType()->getKey() );
+            // Find the n'th Reaction with the matching set of
+            // reactants, where n is a random number between 0 and
+            // MAX_RXNS_PER_SET_OF_REACTANTS
+            ReactionMap::iterator i = range.first;
+            for( unsigned int j = 0; j < (randNums[ getWorldIndex(x,y) ] >> 3) % MAX_RXNS_PER_SET_OF_REACTANTS; j++ )
+            {
+               if( i != range.second )
+                  i++;
+               else
+                  break;
+            }
+            if( i != range.second )
+            {
+               thisRxn = i->second;
             }
 
-            if( (double)(randNums[ getWorldIndex(x,y) ] >> 3) /
+            // Perform the reaction
+            if( thisRxn != NULL &&
+                (double)(randNums[ getWorldIndex(x,y) ] >> 3) /
                 (double)((uint64_t)1 << (8 * sizeof(*randNums) - 3))
-                  < thisRxnProb )
+                  < thisRxn->getProb() )
             // If the reactant have enough energy
             {
                if( neighborAtom == NULL )
                // If the reaction is first-order
                {
                   // Execute the reaction
-                  thisAtom->setType( thisRxnProducts[0] );
+                  thisAtom->setType( thisRxn->getProducts()[0] );
                   world[ getWorldIndex(x,y) ] = thisAtom;
 
                   // Mark the atom as having already reacted
@@ -860,8 +774,8 @@ Sim::executeRxns()
                // Else the reaction is second-order
                {
                   // Execute the reaction
-                  thisAtom->setType( thisRxnProducts[0] );
-                  neighborAtom->setType( thisRxnProducts[1] );
+                  thisAtom->setType( thisRxn->getProducts()[0] );
+                  neighborAtom->setType( thisRxn->getProducts()[1] );
                   world[ getWorldIndex(x,y) ] = thisAtom;
                   world[ getWorldIndex(neighborX,neighborY) ] = neighborAtom;
 

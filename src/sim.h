@@ -14,7 +14,7 @@
 #include "reaction.h"
 
 typedef std::map<std::string,Element*> ElementMap;
-typedef std::map<int,Reaction*> ReactionMap;
+typedef std::multimap<int,Reaction*> ReactionMap;
 typedef std::map<std::string,int> StringCounter;
 typedef std::vector<Element*> ElementVector;
 
@@ -44,6 +44,7 @@ class Sim
       // Sim attributes
       Options* o;
       int itersCompleted;
+      static const unsigned int MAX_RXNS_PER_SET_OF_REACTANTS = 2;
 
       bool elesLoaded;
       bool rxnsLoaded;

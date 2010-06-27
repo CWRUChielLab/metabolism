@@ -11,28 +11,22 @@ class Reaction
 {
    public:
       // Constructor
-      Reaction( std::vector<Element*> initReactants, std::vector<Element*> initFirstProducts, double initFirstProb );
+      Reaction( std::vector<Element*> initReactants, std::vector<Element*> initProducts, double initProb );
       
       // Get and set functions
       int getKey();
       std::vector<Element*> getReactants();
-      std::vector<Element*> getFirstProducts();
-      std::vector<Element*> getSecondProducts();
-      void setFirstProducts( std::vector<Element*> newFirstProducts );
-      void setSecondProducts( std::vector<Element*> newSecondProducts );
-      double getFirstProb();
-      double getSecondProb();
-      void setFirstProb( double newFirstProb );
-      void setSecondProb( double newSecondProb );
+      std::vector<Element*> getProducts();
+      void setProducts( std::vector<Element*> newProducts );
+      double getProb();
+      void setProb( double newProb );
 
    private:
       // Reaction attributes
       int key;
       std::vector<Element*> reactants;
-      std::vector<Element*> firstProducts;
-      std::vector<Element*> secondProducts;
-      double firstProb;
-      double secondProb;
+      std::vector<Element*> products;
+      double prob;
 };
 
 #endif /* REACTION_H */

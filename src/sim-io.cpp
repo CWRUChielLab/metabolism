@@ -251,21 +251,19 @@ Sim::loadChemistry()
                products.push_back( periodicTable[ "Solvent" ] );
             }
 
-            // Create the reaction and store it in the rxnTable;
-            // if a Reaction with the same reactants already exists,
-            // make this its second set of products
+            // Create the reaction and store it in the rxnTable
             tempRxn = safeNew( Reaction( reactants, products, prob ) );
-            if( rxnTable[ tempRxn->getKey() ] == NULL )
+            if( rxnTable.count( tempRxn->getKey() ) < MAX_RXNS_PER_SET_OF_REACTANTS )
             {
-               rxnTable[ tempRxn->getKey() ] = tempRxn;
+               rxnTable.insert( std::pair<int,Reaction*>( tempRxn->getKey(), tempRxn ) );
+               rxnsLoaded = true;
             }
             else
             {
-               rxnTable[ tempRxn->getKey() ]->setSecondProducts( products );
-               rxnTable[ tempRxn->getKey() ]->setSecondProb( prob );
+               std::cout << "Loading rxn: the limit of " << MAX_RXNS_PER_SET_OF_REACTANTS <<
+                  " reactions per set of reactants has been exceeded!" << std::endl;
+               exit( EXIT_FAILURE );
             }
-
-            rxnsLoaded = true;
          }
 
          // Read in inits
@@ -502,20 +500,21 @@ Sim::printWorld()
 void
 Sim::printEles( std::ostream* out )
 {
+   // Loop through the periodicTable, printing each Element
    for( ElementMap::iterator i = periodicTable.begin(); i != periodicTable.end(); i++ )
    {
-      Element* ele = i->second;
-      if( ele->getName() != "Solvent" )
+      Element* thisEle = i->second;
+      if( thisEle->getName() != "Solvent" )
       {
          if( out == (std::ostream*)(NULL) )
          {
 #ifdef HAVE_NCURSES
-            printw( "ele %s %c %s\n", ele->getName().c_str(), ele->getSymbol(), ele->getColor().c_str() );
+            printw( "ele %s %c %s\n", thisEle->getName().c_str(), thisEle->getSymbol(), thisEle->getColor().c_str() );
 #endif
          }
          else
          {
-            *out <<  "ele " << ele->getName() << " " << ele->getSymbol() << " " << ele->getColor() << std::endl;
+            *out <<  "ele " << thisEle->getName() << " " << thisEle->getSymbol() << " " << thisEle->getColor() << std::endl;
          }
       }
    }
@@ -531,253 +530,222 @@ Sim::printRxns( std::ostream* out )
    // Loop through the rxnTable, printing each Reaction
    for( ReactionMap::iterator i = rxnTable.begin(); i != rxnTable.end(); i++ )
    {
-      Reaction* rxn = i->second;
-      if( rxn != NULL )
+      Reaction* thisRxn = i->second;
+
+      // Count up the number of each type of reactant and product
+      StringCounter reactantCount;
+      StringCounter productCount;
+      for( unsigned int j = 0; j < thisRxn->getReactants().size(); j++ )
       {
-         // Determine how many sets of products this reaction has
-         int numProductSets;
-         if( !rxn->getSecondProducts().empty() )
-            numProductSets = 2;
-         else
-            numProductSets = 1;
+         if( thisRxn->getReactants()[j]->getName() != "Solvent" )
+            reactantCount[ thisRxn->getReactants()[j]->getName() ]++;
+      }
+      for( unsigned int j = 0; j < thisRxn->getProducts().size(); j++ )
+      {
+         if( thisRxn->getProducts()[j]->getName() != "Solvent" )
+            productCount[ thisRxn->getProducts()[j]->getName() ]++;
+      }
 
-         // Loop through each set of products, printing a separate
-         // line for each reactant-product pair
-         for( int j = 0; j < numProductSets; j++ )
+      // Print the "rxn" keyword and the probability
+      if( out == (std::ostream*)(NULL) )
+      {
+#ifdef HAVE_NCURSES
+         printw( "rxn %f ", thisRxn->getProb() );
+#endif
+      }
+      else
+      {
+         *out << "rxn " << thisRxn->getProb() << " ";
+      }
+
+      // Print the reactants, grouping copies of one type together
+      // with stoichiometric coefficients
+      int coefficient;
+      std::string name;
+      if( reactantCount.empty() )
+      {
+         if( out == (std::ostream*)(NULL) )
          {
-            double currentProb = 0;
-            ElementVector currentProducts;
-            switch( j )
-            {
-               case 0:
-                  currentProb = rxn->getFirstProb();
-                  currentProducts = rxn->getFirstProducts();
-                  break;
-               case 1:
-                  currentProb = rxn->getSecondProb();
-                  currentProducts = rxn->getSecondProducts();
-                  break;
-               default:
-                  assert( numProductSets >= 1 && numProductSets <= 2 );
-                  break;
-            }
-
-            // Count up the number of each type of reactant and product
-            StringCounter reactantCount;
-            StringCounter currentProductCount;
-            for( unsigned int k = 0; k < rxn->getReactants().size(); k++ )
-            {
-               if( rxn->getReactants()[k]->getName() != "Solvent" )
-                  reactantCount[ rxn->getReactants()[k]->getName() ]++;
-            }
-            for( unsigned int k = 0; k < currentProducts.size(); k++ )
-            {
-               if( currentProducts[k]->getName() != "Solvent" )
-                  currentProductCount[ currentProducts[k]->getName() ]++;
-            }
-
-            // Print the "rxn" keyword and the probability
-            if( out == (std::ostream*)(NULL) )
-            {
 #ifdef HAVE_NCURSES
-               printw( "rxn %f ", currentProb );
+            printw( "*" );
 #endif
-            }
-            else
+         }
+         else
+         {
+            *out << "*";
+         }
+      }
+      else
+      {
+         for( StringCounter::iterator j = reactantCount.begin(); j != reactantCount.end(); j++ )
+         {
+            coefficient = j->second;
+            name = j->first;
+            if( coefficient == 1 )
             {
-               *out << "rxn " << currentProb << " ";
-            }
-
-            // Print the reactants, grouping copies of one type together
-            // with stoichiometric coefficients
-            int coefficient;
-            std::string name;
-            if( reactantCount.empty() )
-            {
-               if( out == (std::ostream*)(NULL) )
+               if( j == reactantCount.begin() )
                {
-#ifdef HAVE_NCURSES
-                  printw( "*" );
-#endif
-               }
-               else
-               {
-                  *out << "*";
-               }
-            }
-            else
-            {
-               for( StringCounter::iterator k = reactantCount.begin(); k != reactantCount.end(); k++ )
-               {
-                  coefficient = k->second;
-                  name = k->first;
-                  if( coefficient == 1 )
+                  if( out == (std::ostream*)(NULL) )
                   {
-                     if( k == reactantCount.begin() )
-                     {
-                        if( out == (std::ostream*)(NULL) )
-                        {
 #ifdef HAVE_NCURSES
-                           printw( "%s", name.c_str() );
+                     printw( "%s", name.c_str() );
 #endif
-                        }
-                        else
-                        {
-                           *out << name;
-                        }
-                     }
-                     else
-                     {
-                        if( out == (std::ostream*)(NULL) )
-                        {
-#ifdef HAVE_NCURSES
-                           printw( " + %s", name.c_str() );
-#endif
-                        }
-                        else
-                        {
-                           *out << " + " << name;
-                        }
-                     }
                   }
                   else
                   {
-                     if( k == reactantCount.begin() )
-                     {
-                        if( out == (std::ostream*)(NULL) )
-                        {
-#ifdef HAVE_NCURSES
-                           printw( "%d %s", coefficient, name.c_str() );
-#endif
-                        }
-                        else
-                        {
-                           *out << coefficient << " " << name;
-                        }
-                     }
-                     else
-                     {
-                        if( out == (std::ostream*)(NULL) )
-                        {
-#ifdef HAVE_NCURSES
-                           printw( " + %d %s", coefficient, name.c_str() );
-#endif
-                        }
-                        else
-                        {
-                           *out << " + " << coefficient << " " << name;
-                        }
-                     }
+                     *out << name;
                   }
-               }
-            }
-
-            // Print the reaction arrow, separating reactants from products
-            if( out == (std::ostream*)(NULL) )
-            {
-#ifdef HAVE_NCURSES
-               printw( " -> " );
-#endif
-            }
-            else
-            {
-               *out << " -> ";
-            }
-
-            // Print the products, grouping copies of one type together
-            // with stoichiometric coefficients
-            if( currentProductCount.empty() )
-            {
-               if( out == (std::ostream*)(NULL) )
-               {
-#ifdef HAVE_NCURSES
-                  printw( "*" );
-#endif
                }
                else
                {
-                  *out << "*";
-               }
-            }
-            else
-            {
-               for( StringCounter::iterator k = currentProductCount.begin(); k != currentProductCount.end(); k++ )
-               {
-                  coefficient = k->second;
-                  name = k->first;
-                  if( coefficient == 1 )
+                  if( out == (std::ostream*)(NULL) )
                   {
-                     if( k == currentProductCount.begin() )
-                     {
-                        if( out == (std::ostream*)(NULL) )
-                        {
 #ifdef HAVE_NCURSES
-                           printw( "%s", name.c_str() );
+                     printw( " + %s", name.c_str() );
 #endif
-                        }
-                        else
-                        {
-                           *out << name;
-                        }
-                     }
-                     else
-                     {
-                        if( out == (std::ostream*)(NULL) )
-                        {
-#ifdef HAVE_NCURSES
-                           printw(" + %s", name.c_str() );
-#endif
-                        }
-                        else
-                        {
-                           *out << " + " << name;
-                        }
-                     }
                   }
                   else
                   {
-                     if( k == currentProductCount.begin() )
-                     {
-                        if( out == (std::ostream*)(NULL) )
-                        {
-#ifdef HAVE_NCURSES
-                           printw( "%d %s", coefficient, name.c_str() );
-#endif
-                        }
-                        else
-                        {
-                           *out << coefficient << " " << name;
-                        }
-                     }
-                     else
-                     {
-                        if( out == (std::ostream*)(NULL) )
-                        {
-#ifdef HAVE_NCURSES
-                           printw( " + %d %s", coefficient, name.c_str() );
-#endif
-                        }
-                        else
-                        {
-                           *out << " + " << coefficient << " " << name;
-                        }
-                     }
+                     *out << " + " << name;
                   }
                }
             }
-
-            // End the line
-            if( out == (std::ostream*)(NULL) )
-            {
-#ifdef HAVE_NCURSES
-               printw( "\n" );
-#endif
-            }
             else
             {
-               *out << std::endl;
+               if( j == reactantCount.begin() )
+               {
+                  if( out == (std::ostream*)(NULL) )
+                  {
+#ifdef HAVE_NCURSES
+                     printw( "%d %s", coefficient, name.c_str() );
+#endif
+                  }
+                  else
+                  {
+                     *out << coefficient << " " << name;
+                  }
+               }
+               else
+               {
+                  if( out == (std::ostream*)(NULL) )
+                  {
+#ifdef HAVE_NCURSES
+                     printw( " + %d %s", coefficient, name.c_str() );
+#endif
+                  }
+                  else
+                  {
+                     *out << " + " << coefficient << " " << name;
+                  }
+               }
             }
          }
+      }
+
+      // Print the reaction arrow, separating reactants from products
+      if( out == (std::ostream*)(NULL) )
+      {
+#ifdef HAVE_NCURSES
+         printw( " -> " );
+#endif
+      }
+      else
+      {
+         *out << " -> ";
+      }
+
+      // Print the products, grouping copies of one type together
+      // with stoichiometric coefficients
+      if( productCount.empty() )
+      {
+         if( out == (std::ostream*)(NULL) )
+         {
+#ifdef HAVE_NCURSES
+            printw( "*" );
+#endif
+         }
+         else
+         {
+            *out << "*";
+         }
+      }
+      else
+      {
+         for( StringCounter::iterator j = productCount.begin(); j != productCount.end(); j++ )
+         {
+            coefficient = j->second;
+            name = j->first;
+            if( coefficient == 1 )
+            {
+               if( j == productCount.begin() )
+               {
+                  if( out == (std::ostream*)(NULL) )
+                  {
+#ifdef HAVE_NCURSES
+                     printw( "%s", name.c_str() );
+#endif
+                  }
+                  else
+                  {
+                     *out << name;
+                  }
+               }
+               else
+               {
+                  if( out == (std::ostream*)(NULL) )
+                  {
+#ifdef HAVE_NCURSES
+                     printw(" + %s", name.c_str() );
+#endif
+                  }
+                  else
+                  {
+                     *out << " + " << name;
+                  }
+               }
+            }
+            else
+            {
+               if( j == productCount.begin() )
+               {
+                  if( out == (std::ostream*)(NULL) )
+                  {
+#ifdef HAVE_NCURSES
+                     printw( "%d %s", coefficient, name.c_str() );
+#endif
+                  }
+                  else
+                  {
+                     *out << coefficient << " " << name;
+                  }
+               }
+               else
+               {
+                  if( out == (std::ostream*)(NULL) )
+                  {
+#ifdef HAVE_NCURSES
+                     printw( " + %d %s", coefficient, name.c_str() );
+#endif
+                  }
+                  else
+                  {
+                     *out << " + " << coefficient << " " << name;
+                  }
+               }
+            }
+         }
+      }
+
+      // End the line
+      if( out == (std::ostream*)(NULL) )
+      {
+#ifdef HAVE_NCURSES
+         printw( "\n" );
+#endif
+      }
+      else
+      {
+         *out << std::endl;
       }
    }
 }

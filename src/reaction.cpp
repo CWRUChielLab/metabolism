@@ -7,10 +7,10 @@
 
 
 // Constructor
-Reaction::Reaction( std::vector<Element*> initReactants, std::vector<Element*> initFirstProducts, double initFirstProb )
+Reaction::Reaction( std::vector<Element*> initReactants, std::vector<Element*> initProducts, double initProb )
 {
    // Ensure that products and reactants are balanced
-   if( initReactants.size() != initFirstProducts.size() )
+   if( initReactants.size() != initProducts.size() )
    {
       std::cout << "Loading rxn: reaction is not balanced!" << std::endl;
       exit( EXIT_FAILURE );
@@ -24,7 +24,7 @@ Reaction::Reaction( std::vector<Element*> initReactants, std::vector<Element*> i
    }
 
    // Ensure that probabilities are sane
-   if( initFirstProb < 0 || initFirstProb > 1 )
+   if( initProb < 0 || initProb > 1 )
    {
       std::cout << "Loading rxn: probability must fall between 0 and 1!" << std::endl;
       exit( EXIT_FAILURE );
@@ -39,11 +39,8 @@ Reaction::Reaction( std::vector<Element*> initReactants, std::vector<Element*> i
 
    // Copy constructor arguments
    reactants = initReactants;
-   firstProducts = initFirstProducts;
-   std::vector<Element*> temp;
-   secondProducts = temp;
-   firstProb = initFirstProb;
-   secondProb = 0.0;
+   products = initProducts;
+   prob = initProb;
 }
 
 
@@ -62,85 +59,43 @@ Reaction::getReactants()
 
 
 std::vector<Element*>
-Reaction::getFirstProducts()
+Reaction::getProducts()
 {
-   return firstProducts;
-}
-
-
-std::vector<Element*>
-Reaction::getSecondProducts()
-{
-   return secondProducts;
+   return products;
 }
 
 
 void
-Reaction::setFirstProducts( std::vector<Element*> newFirstProducts )
+Reaction::setProducts( std::vector<Element*> newProducts )
 {
    // Ensure that products and reactants are balanced
-   if( newFirstProducts.size() != reactants.size() )
+   if( newProducts.size() != reactants.size() )
    {
-      std::cout << "setFirstProducts: reaction is not balanced!" << std::endl;
+      std::cout << "setProducts: reaction is not balanced!" << std::endl;
       exit( EXIT_FAILURE );
    }
 
-   firstProducts = newFirstProducts;
-}
-
-
-void
-Reaction::setSecondProducts( std::vector<Element*> newSecondProducts )
-{
-   // Ensure that products and reactants are balanced
-   if( newSecondProducts.size() != reactants.size() )
-   {
-      std::cout << "setSecondProducts: reaction is not balanced!" << std::endl;
-      exit( EXIT_FAILURE );
-   }
-
-   secondProducts = newSecondProducts;
+   products = newProducts;
 }
 
 
 double
-Reaction::getFirstProb()
+Reaction::getProb()
 {
-   return firstProb;
-}
-
-
-double
-Reaction::getSecondProb()
-{
-   return secondProb;
+   return prob;
 }
 
 
 void
-Reaction::setFirstProb( double newFirstProb )
+Reaction::setProb( double newProb )
 {
    // Ensure that probabilities are sane
-   if( newFirstProb < 0 || newFirstProb > 1 )
+   if( newProb < 0 || newProb > 1 )
    {
-      std::cout << "setFirstProb: probability must fall between 0 and 1!" << std::endl;
+      std::cout << "setProb: probability must fall between 0 and 1!" << std::endl;
       exit( EXIT_FAILURE );
    }
 
-   firstProb = newFirstProb;
-}
-
-
-void
-Reaction::setSecondProb( double newSecondProb )
-{
-   // Ensure that probabilities are sane
-   if( newSecondProb < 0 || newSecondProb > 1 )
-   {
-      std::cout << "setSecondProb: probability must fall between 0 and 1!" << std::endl;
-      exit( EXIT_FAILURE );
-   }
-
-   secondProb = newSecondProb;
+   prob = newProb;
 }
 
