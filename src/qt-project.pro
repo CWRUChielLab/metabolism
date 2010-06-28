@@ -5,7 +5,7 @@
 TEMPLATE = app
 # RESOURCES = resources.qrc
 INCLUDEPATH += ../SFMT
-DEFINES += HAVE_QT MEXP=132049
+DEFINES += HAVE_QT MEXP=132049 GIT_TAG="`git describe --tags | sed \"s/\\(.*\\)/\\\"\\1\\\"/\"`"
 
 QMAKE_CFLAGS_RELEASE -= -O2
 QMAKE_CFLAGS_RELEASE += -O3
@@ -31,7 +31,7 @@ isEmpty( MACTARGET ) {
 unix:!macx {
    message( "Generating makefile for Linux systems." )
    INCLUDEPATH += /usr/include/qwt-qt4
-   DEFINES += BLR_USELINUX HAVE_SSE2 GIT_TAG="`git describe --tags | sed \"s/\\(.*\\)/\\\"\\1\\\"/\"`"
+   DEFINES += BLR_USELINUX HAVE_SSE2
    LIBS += -lqwt-qt4
    QMAKE_CFLAGS += -msse2
 }
@@ -39,7 +39,7 @@ unix:!macx {
 macx {
    INCLUDEPATH += /usr/local/qwt-5.1.1/include
    QMAKE_LIBDIR += /usr/local/qwt-5.1.1/lib
-   DEFINES += BLR_USEMAC GIT_TAG="\"foo\""
+   DEFINES += BLR_USEMAC
    LIBS += -lqwt
    #ICON = img/nernst.icns
 
@@ -68,7 +68,7 @@ win32 {
    message( "Generating makefile for Windows." )
    INCLUDEPATH += "C:\Qwt\static\src"
    QMAKE_LIBDIR += "C:\Qwt\static\lib"
-   DEFINES += BLR_USEWIN GIT_TAG="`git describe --tags | sed \"s/\\(.*\\)/\\\"\\1\\\"/\"`"
+   DEFINES += BLR_USEWIN
    LIBS += -lqwt
    RC_FILE = win32_resources.rc
 }
