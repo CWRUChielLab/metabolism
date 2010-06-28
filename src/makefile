@@ -90,9 +90,11 @@ PROCESSOR := $(shell sh -c 'uname -p 2>/dev/null || echo not')
 ifeq ($(OS),Linux) # Linux
   DEFINES += -DBLR_USELINUX -DHAVE_SSE2
   LFLAGS = -Wl,-O1
+  SPEC = linux-g++
 endif
 ifeq ($(OS),Darwin) # Mac
   DEFINES += -DBLR_USEMAC
+  SPEC = macx-g++
   ifneq ($(PROCESSOR),powerpc) # Intel Mac
     MACTARGET = intel
     DEFINES += -DHAVE_SSE2
@@ -121,7 +123,7 @@ metabolism-ncurses metabolism-minimal metabolism-debug: $(OBJECTS)
 
 
 qt-makefile: $(QT_PROJECT) $(SOURCES) $(QT_SOURCES) $(HEADERS) $(QT_HEADERS)
-	qmake -o $@ "TARGET=metabolism" \
+	qmake -o $@ -spec $(SPEC) "TARGET=metabolism" \
 		"MACTARGET=$(MACTARGET)" \
 		"DEFINES+=HAVE_NCURSES" \
 		"LIBS+=-lncurses" \
@@ -130,7 +132,7 @@ qt-makefile: $(QT_PROJECT) $(SOURCES) $(QT_SOURCES) $(HEADERS) $(QT_HEADERS)
 		"HEADERS=$(HEADERS) $(QT_HEADERS)" \
 		"SOURCES=$(SOURCES) $(QT_SOURCES)"
 qt-makefile-no-ncurses: $(QT_PROJECT) $(SOURCES) $(QT_SOURCES) $(HEADERS) $(QT_HEADERS)
-	qmake -o $@ "TARGET=metabolism-qt" \
+	qmake -o $@ -spec $(SPEC) "TARGET=metabolism-qt" \
 		"MACTARGET=$(MACTARGET)" \
 		"OBJECTS_DIR=$(OBJDIR)" \
 		"MOC_DIR=$(OBJDIR)" \
