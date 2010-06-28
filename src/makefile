@@ -49,7 +49,7 @@ profile: metabolism-debug
 	cat profile.out | less
 
 clean:
-	rm -rf $(APPS) $(BUILD)/ qt-makefile* *.out *.pdf *~
+	rm -rf metabolism* $(BUILD)/ qt-makefile* *.out *.pdf *~
 
 
 
