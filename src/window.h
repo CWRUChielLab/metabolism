@@ -33,6 +33,7 @@ class Window : public QMainWindow
       // GUI attributes
       Options* o;
       Sim* sim;
+      bool running;
 
       // GUI components
       Viewer* viewer;

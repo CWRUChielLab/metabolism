@@ -16,6 +16,8 @@ Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowF
    o = initOptions;
    sim = initSim;
 
+   running = false;
+
    // Set up GUI components
    viewer = safeNew( Viewer( o, sim, this ) );
    plot = safeNew( Plot( o, sim, this ) );
@@ -72,13 +74,20 @@ Window::updateButton()
 void
 Window::runSim()
 {
-   while( sim->iterate() )
+   if( !running )
    {
-      // Check for Qt signals and events
-      QCoreApplication::processEvents();
+      running = true;
 
-      // Signal that an iteration has completed
-      emit iterDone();
+      while( sim->iterate() )
+      {
+         // Check for Qt signals and events
+         QCoreApplication::processEvents();
+
+         // Signal that an iteration has completed
+         emit iterDone();
+      }
+
+      running = false;
    }
 }
 
