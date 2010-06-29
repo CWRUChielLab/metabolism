@@ -523,8 +523,6 @@ Sim::executeRxns()
    Atom* thisAtom;
    int neighborX, neighborY;
    Atom* neighborAtom;
-   Reaction* thisRxn;
-   std::pair<ReactionMap::iterator,ReactionMap::iterator> range;
 
    // Initially set all claimed flags to 0
    std::memset( claimed, 0, o->worldX * o->worldY );
@@ -590,8 +588,8 @@ Sim::executeRxns()
          }
 
          // Determine the appropriate Reaction
-         thisRxn = NULL;
-         range = rxnTable.equal_range( NULL );
+         Reaction* thisRxn;
+         std::pair<ReactionMap::iterator,ReactionMap::iterator> range;
          if( neighborAtom == NULL )
          // If the reaction is first-order
             range = rxnTable.equal_range( thisAtom->getType()->getKey() );
@@ -612,6 +610,8 @@ Sim::executeRxns()
          }
          if( i != range.second )
             thisRxn = i->second;
+         else
+            thisRxn = NULL;
 
          // Perform the reaction
          if( thisRxn != NULL &&
@@ -725,8 +725,8 @@ Sim::executeRxns()
             }
 
             // Determine the appropriate Reaction
-            thisRxn = NULL;
-            range = rxnTable.equal_range( NULL );
+            Reaction* thisRxn;
+            std::pair<ReactionMap::iterator,ReactionMap::iterator> range;
             if( neighborAtom == NULL )
             // If the reaction is first-order
                range = rxnTable.equal_range( thisAtom->getType()->getKey() );
@@ -749,9 +749,9 @@ Sim::executeRxns()
                   break;
             }
             if( i != range.second )
-            {
                thisRxn = i->second;
-            }
+            else
+               thisRxn = NULL;
 
             // Perform the reaction
             if( thisRxn != NULL &&
