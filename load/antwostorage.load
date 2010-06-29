@@ -1,0 +1,25 @@
+ele Ant A darkorange
+ele Ant-Inter B red
+ele Ant-Store C yellow
+ele GH D green
+ele GH-Inter E blue
+ele Food X hotpink
+
+rxn 0.5 Ant + Food -> Ant-Inter
+rxn 0.05 Ant-Inter -> 2 Ant
+rxn 0.02 Ant-Inter -> Ant-Store
+rxn 0.01 Ant-Store -> Ant-Inter
+
+rxn 0.5 GH + Food -> GH-Inter
+rxn 0.05 GH-Inter -> 2 GH
+
+rxn 0.08 Ant -> *
+rxn 0.08 Ant-Inter -> *
+rxn 0.00 Ant-Store -> *
+rxn 0.08 GH -> *
+rxn 0.08 GH-Inter -> *
+
+rxn 0.02 * -> Food
+
+init 8 Ant GH Food Food Food Food Food Food
+ 
