@@ -1,6 +1,7 @@
 /* sim-engine.cpp
  */
 
+#define __USE_XOPEN2K   // Needed for posix_memalign on louder -- why?
 #include <cassert>
 #include <cmath>   // ceil
 #include <cstdarg> // variable arguments handling
