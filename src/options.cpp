@@ -372,14 +372,19 @@ Options::Options( int argc, char* argv[] )
             break;
       }
    }
+}
 
+
+void
+Options::openFiles()
+{
    // Assign default file names for files not specified
    if( !configFile.is_open() )
    {
       configFile.open( "config.out" );
       if( configFile.fail() )
       {
-            std::cout << "options: unable to open file \"config.out\"!" << std::endl;
+            std::cout << "openFiles: unable to open file \"config.out\"!" << std::endl;
             exit( EXIT_FAILURE );
       }
    }
@@ -388,7 +393,7 @@ Options::Options( int argc, char* argv[] )
       censusFile.open( "census.out" );
       if( censusFile.fail() )
       {
-            std::cout << "options: unable to open file \"census.out\"!" << std::endl;
+            std::cout << "openFiles: unable to open file \"census.out\"!" << std::endl;
             exit( EXIT_FAILURE );
       }
    }
@@ -397,7 +402,7 @@ Options::Options( int argc, char* argv[] )
       diffusionFile.open( "diffusion.out" );
       if( diffusionFile.fail() )
       {
-            std::cout << "options: unable to open file \"diffusion.out\"!" << std::endl;
+            std::cout << "openFiles: unable to open file \"diffusion.out\"!" << std::endl;
             exit( EXIT_FAILURE );
       }
    }
@@ -406,7 +411,7 @@ Options::Options( int argc, char* argv[] )
       randFile.open( "rand.out" );
       if( randFile.fail() )
       {
-            std::cout << "options: unable to open file \"rand.out\"!" << std::endl;
+            std::cout << "openFiles: unable to open file \"rand.out\"!" << std::endl;
             exit( EXIT_FAILURE );
       }
    }

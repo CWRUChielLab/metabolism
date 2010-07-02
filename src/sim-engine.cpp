@@ -82,6 +82,10 @@ Sim::initializeEngine()
       initsLoaded = false;
       loadChemistry();
 
+      // Open files after load file has been successfully read
+      // in case the load file is also the default config file
+      o->openFiles();
+
       // Set up default periodicTable if one was not loaded
       if( !elesLoaded )
       {

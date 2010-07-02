@@ -15,6 +15,7 @@ class Options
       Options( int argc, char* argv[] );
 
       // Options output methods
+      void openFiles();
       void printVersion();
       void printHelp();
 
