@@ -3,7 +3,6 @@
 
 #include <cassert>
 #include <cstdlib> // exit
-#include <fstream>
 #include "options.h"
 #include "safecalls.h"
 using namespace SafeCalls;
@@ -38,11 +37,6 @@ Options::Options( int argc, char* argv[] )
    sleep = 0;
    verbose = false;
    progress = true;
-   loadFile = "";
-   configFile = "config.out";
-   censusFile = "census.out";
-   diffusionFile = "diffusion.out";
-   randFile = "rand.out";
 
    // Options that take only long-opt form should be indexed here.
    // In order to not clash with single-letter options, start from
@@ -117,33 +111,37 @@ Options::Options( int argc, char* argv[] )
       switch( c )
       {
          case 'l':
-            loadFile = optarg;
-            load.open( loadFile.c_str() );
-            while( load.good() )
+            loadFile.open( optarg );
+            if( loadFile.fail() )
             {
-               load >> keyword;
+               std::cout << "options: unable to open file \"" << optarg << "\"!" << std::endl;
+               exit( EXIT_FAILURE );
+            }
+            while( loadFile.good() )
+            {
+               loadFile >> keyword;
                if( keyword == "version" || keyword == "ele" || keyword == "rxn" || keyword == "init" )
                {
-                  load.ignore(1024,'\n');
+                  loadFile.ignore(1024,'\n');
                }
                else
                {
                   if( keyword == "atoms" )
                   {
-                     load >> atomCount;
+                     loadFile >> atomCount;
                   }
                   else
                   {
                      if( keyword == "iters" )
                      {
-                        load >> maxIters;
+                        loadFile >> maxIters;
                      }
                      else
                      {
                         if( keyword == "reactions" )
                         {
                            onOrOff = "";
-                           load >> onOrOff;
+                           loadFile >> onOrOff;
                            if( onOrOff == "on" )
                            {
                               doRxns = true;
@@ -165,14 +163,14 @@ Options::Options( int argc, char* argv[] )
                         {
                            if( keyword == "seed" )
                            {
-                              load >> seed;
+                              loadFile >> seed;
                            }
                            else
                            {
                               if( keyword == "shuffle" )
                               {
                                  onOrOff = "";
-                                 load >> onOrOff;
+                                 loadFile >> onOrOff;
                                  if( onOrOff == "on" )
                                  {
                                     doShuffle = true;
@@ -194,13 +192,13 @@ Options::Options( int argc, char* argv[] )
                               {
                                  if( keyword == "x" )
                                  {
-                                    load >> worldX;
+                                    loadFile >> worldX;
                                  }
                                  else
                                  {
                                     if( keyword == "y" )
                                     {
-                                       load >> worldY;
+                                       loadFile >> worldY;
                                     }
                                     else
                                     {
@@ -223,6 +221,11 @@ Options::Options( int argc, char* argv[] )
                }
                keyword = "";
             }
+
+            // When all is done, reload the file so
+            // that loadChemistry can scan it again
+            loadFile.close();
+            loadFile.open( optarg );
             break;
          default:
             break;
@@ -254,16 +257,34 @@ Options::Options( int argc, char* argv[] )
             switch( files_read_in_so_far )
             {
                case 1:
-                  censusFile = optarg;
-                  files_read_in_so_far++;
+                  censusFile.open( optarg );
+                  if( censusFile.fail() )
+                  {
+                     std::cout << "options: unable to open file \"" << optarg << "\"!" << std::endl;
+                     exit( EXIT_FAILURE );
+                  } else {
+                     files_read_in_so_far++;
+                  }
                   break;
                case 2:
-                  diffusionFile = optarg;
-                  files_read_in_so_far++;
+                  diffusionFile.open( optarg );
+                  if( diffusionFile.fail() )
+                  {
+                     std::cout << "options: unable to open file \"" << optarg << "\"!" << std::endl;
+                     exit( EXIT_FAILURE );
+                  } else {
+                     files_read_in_so_far++;
+                  }
                   break;
                case 3:
-                  randFile = optarg;
-                  files_read_in_so_far++;
+                  randFile.open( optarg );
+                  if( randFile.fail() )
+                  {
+                     std::cout << "options: unable to open file \"" << optarg << "\"!" << std::endl;
+                     exit( EXIT_FAILURE );
+                  } else {
+                     files_read_in_so_far++;
+                  }
                   break;
                default:
                   if( files_read_in_so_far >= 4 )
@@ -283,8 +304,14 @@ Options::Options( int argc, char* argv[] )
             // The first parameter read in for --files will
             // have c='f'. All others will have c=1.
             assert( files_read_in_so_far == 0 );
-            configFile = optarg;
-            files_read_in_so_far++;
+            configFile.open( optarg );
+            if( configFile.fail() )
+            {
+               std::cout << "options: unable to open file \"" << optarg << "\"!" << std::endl;
+               exit( EXIT_FAILURE );
+            } else {
+               files_read_in_so_far++;
+            }
             break;
 #if defined(HAVE_QT) | defined(HAVE_NCURSES)
          case 'g':
@@ -343,6 +370,44 @@ Options::Options( int argc, char* argv[] )
             std::cout << "Unknown option.  Try --help for a full list." << std::endl;
             exit( EXIT_FAILURE );
             break;
+      }
+   }
+
+   // Assign default file names for files not specified
+   if( !configFile.is_open() )
+   {
+      configFile.open( "config.out" );
+      if( configFile.fail() )
+      {
+            std::cout << "options: unable to open file \"config.out\"!" << std::endl;
+            exit( EXIT_FAILURE );
+      }
+   }
+   if( !censusFile.is_open() )
+   {
+      censusFile.open( "census.out" );
+      if( censusFile.fail() )
+      {
+            std::cout << "options: unable to open file \"census.out\"!" << std::endl;
+            exit( EXIT_FAILURE );
+      }
+   }
+   if( !diffusionFile.is_open() )
+   {
+      diffusionFile.open( "diffusion.out" );
+      if( diffusionFile.fail() )
+      {
+            std::cout << "options: unable to open file \"diffusion.out\"!" << std::endl;
+            exit( EXIT_FAILURE );
+      }
+   }
+   if( !randFile.is_open() )
+   {
+      randFile.open( "rand.out" );
+      if( randFile.fail() )
+      {
+            std::cout << "options: unable to open file \"rand.out\"!" << std::endl;
+            exit( EXIT_FAILURE );
       }
    }
 }

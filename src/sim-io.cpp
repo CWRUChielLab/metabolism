@@ -93,17 +93,15 @@ Sim::killncurses()
 void
 Sim::loadChemistry()
 {
-   std::ifstream load;
    std::string keyword;
    Element* tempEle;
    Reaction* tempRxn;
 
-   if( o->loadFile != "" )
+   if( o->loadFile.is_open() )
    {
-      load.open( o->loadFile.c_str() );
-      while( load.good() )
+      while( o->loadFile.good() )
       {
-         load >> keyword;
+         o->loadFile >> keyword;
 
          // Read in Elements
          if( keyword == "ele")
@@ -112,7 +110,7 @@ Sim::loadChemistry()
             char symbol;
             std::string color;
 
-            load >> name >> symbol >> color;
+            o->loadFile >> name >> symbol >> color;
             tempEle = safeNew( Element( name, symbol, color ) );
             periodicTable[ name ] = tempEle;
             elesLoaded = true;
@@ -128,8 +126,8 @@ Sim::loadChemistry()
             StringCounter productCount;
             ElementVector reactants, products;
 
-            load.exceptions( std::ifstream::failbit );
-            load >> prob;
+            o->loadFile.exceptions( std::ifstream::failbit );
+            o->loadFile >> prob;
 
             // Read in the names of reactants, adding
             // them up along the way
@@ -139,13 +137,13 @@ Sim::loadChemistry()
                n = 1;
                try
                {
-                  load >> n;
+                  o->loadFile >> n;
                }
                catch( std::ifstream::failure e )
                {
-                  load.clear();
+                  o->loadFile.clear();
                }
-               load >> word;
+               o->loadFile >> word;
                for( int i = 0; i < n; i++ )
                {
                   if( word != "*" && word != "Solvent" )
@@ -161,17 +159,17 @@ Sim::loadChemistry()
                      }
                   }
                }
-               while( load.peek() == ' ' )
+               while( o->loadFile.peek() == ' ' )
                {
-                  word = load.get();
+                  word = o->loadFile.get();
                }
-               if( load.peek() == '\n' )
+               if( o->loadFile.peek() == '\n' )
                {
                   std::cout << "Loading rxn: premature line-break, was expecting \"->\"!" << std::endl;
                   exit( EXIT_FAILURE );
                   break;
                }
-               load >> word;
+               o->loadFile >> word;
             }
 
             // Ensure that the reactants and products
@@ -190,13 +188,13 @@ Sim::loadChemistry()
                n = 1;
                try
                {
-                  load >> n;
+                  o->loadFile >> n;
                }
                catch( std::ifstream::failure e )
                {
-                  load.clear();
+                  o->loadFile.clear();
                }
-               load >> word;
+               o->loadFile >> word;
                for( int i = 0; i < n; i++ )
                {
                   if( word != "*" && word != "Solvent" )
@@ -212,18 +210,18 @@ Sim::loadChemistry()
                      }
                   }
                }
-               while( load.peek() == ' ' )
+               while( o->loadFile.peek() == ' ' )
                {
-                  word = load.get();
+                  word = o->loadFile.get();
                }
-               if( load.peek() == '\n' )
+               if( o->loadFile.peek() == '\n' )
                {
                   break;
                }
-               load >> word;
+               o->loadFile >> word;
             }
 
-            load.exceptions( std::ifstream::goodbit );
+            o->loadFile.exceptions( std::ifstream::goodbit );
 
             // Store the reactants and products in the ElementVectors,
             // adding Solvent as placeholders to balance the reaction
@@ -272,10 +270,10 @@ Sim::loadChemistry()
             std::string word;
             int n;
 
-            load >> n;
+            o->loadFile >> n;
             for( int i = 0; i < n; i++ )
             {
-               load >> word;
+               o->loadFile >> word;
                if( periodicTable[ word ] != NULL )
                {
                   initialTypes.push_back( periodicTable[ word ] );
@@ -306,8 +304,13 @@ Sim::loadChemistry()
 void
 Sim::writeCensus()
 {
+   if( !o->censusFile.is_open() )
+   {
+      std::cout << "writeCensus: file not open!" << std::endl;
+      exit( EXIT_FAILURE );
+   }
+
    int colwidth = 12;
-   static std::ofstream censusFile;
    int totalAtoms = 0;
 
    static bool initialized = false;
@@ -315,31 +318,30 @@ Sim::writeCensus()
    {
       initialized = true;
 
-      censusFile.open( o->censusFile.c_str() );
-      censusFile.flags(std::ios::left);
-      censusFile << std::setw(colwidth) << "iter";
+      o->censusFile.flags(std::ios::left);
+      o->censusFile << std::setw(colwidth) << "iter";
       for( ElementMap::iterator i = periodicTable.begin(); i != periodicTable.end(); i++ )
       {
          Element* ele = i->second;
          if( ele != periodicTable[ "Solvent" ] )
          {
-            censusFile << std::setw(colwidth) << ele->getName();
+            o->censusFile << std::setw(colwidth) << ele->getName();
          }
       }
-      censusFile << std::setw(colwidth) << "total" << std::endl;
+      o->censusFile << std::setw(colwidth) << "total" << std::endl;
    }
 
-   censusFile << std::setw(colwidth) << itersCompleted;
+   o->censusFile << std::setw(colwidth) << itersCompleted;
    for( ElementMap::iterator i = periodicTable.begin(); i != periodicTable.end(); i++ )
    {
       Element* ele = i->second;
       if( ele != periodicTable[ "Solvent" ] )
       {
-         censusFile << std::setw(colwidth) << ele->count;
+         o->censusFile << std::setw(colwidth) << ele->count;
       }
       totalAtoms += ele->count;
    }
-   censusFile << std::setw(colwidth) << totalAtoms << std::endl;
+   o->censusFile << std::setw(colwidth) << totalAtoms << std::endl;
 }
 
 
@@ -347,33 +349,36 @@ Sim::writeCensus()
 void
 Sim::writeConfig()
 {
-   static std::ofstream configFile;
-   configFile.open( o->configFile.c_str() );
+   if( !o->configFile.is_open() )
+   {
+      std::cout << "writeConfig: file not open!" << std::endl;
+      exit( EXIT_FAILURE );
+   }
 
    // Write parameters to file
-   configFile << "version "   << GIT_TAG << std::endl;
-   configFile << "seed "      << o->seed << std::endl;
-   configFile << "iters "     << itersCompleted << std::endl;
-   configFile << "x "         << o->worldX << std::endl;
-   configFile << "y "         << o->worldY << std::endl;
-   configFile << "atoms "     << o->atomCount << std::endl;
-   configFile << "reactions " << (o->doRxns ? "on" : "off") << std::endl;
-   configFile << "shuffle "   << (o->doShuffle ? "on" : "off") << std::endl;
-   configFile << std::endl;
+   o->configFile << "version "   << GIT_TAG << std::endl;
+   o->configFile << "seed "      << o->seed << std::endl;
+   o->configFile << "iters "     << itersCompleted << std::endl;
+   o->configFile << "x "         << o->worldX << std::endl;
+   o->configFile << "y "         << o->worldY << std::endl;
+   o->configFile << "atoms "     << o->atomCount << std::endl;
+   o->configFile << "reactions " << (o->doRxns ? "on" : "off") << std::endl;
+   o->configFile << "shuffle "   << (o->doShuffle ? "on" : "off") << std::endl;
+   o->configFile << std::endl;
 
    // Write Elements to file
-   printEles( &configFile );
-   configFile << std::endl;
+   printEles( &(o->configFile) );
+   o->configFile << std::endl;
 
    // Write Reactions to file
-   printRxns( &configFile );
-   configFile << std::endl;
+   printRxns( &(o->configFile) );
+   o->configFile << std::endl;
 
    // Write initialTypes to file
-   printInits( &configFile );
-   configFile << std::endl;
+   printInits( &(o->configFile) );
+   o->configFile << std::endl;
 
-   configFile.close();
+   o->configFile.close();
 }
 
 
@@ -383,17 +388,22 @@ Sim::writeConfig()
 void
 Sim::writeDiffusion()
 {
+   if( !o->diffusionFile.is_open() )
+   {
+      std::cout << "writeDiffusion: file not open!" << std::endl;
+      exit( EXIT_FAILURE );
+   }
+
    int colwidth = 12;
-   std::ofstream diffusionFile;
-   diffusionFile.open( o->diffusionFile.c_str() );
-   diffusionFile.flags(std::ios::left);
-   diffusionFile << std::setw(colwidth) <<
-                    "type" << std::setw(colwidth) <<
-                    "dx_actual" << std::setw(colwidth) <<
-                    "dy_actual" << std::setw(colwidth) <<
-                    "dx_ideal" << std::setw(colwidth) <<
-                    "dy_ideal" << std::setw(colwidth) <<
-                    "collisions" << std::endl;
+
+   o->diffusionFile.flags(std::ios::left);
+   o->diffusionFile << std::setw(colwidth) <<
+      "type" << std::setw(colwidth) <<
+      "dx_actual" << std::setw(colwidth) <<
+      "dy_actual" << std::setw(colwidth) <<
+      "dx_ideal" << std::setw(colwidth) <<
+      "dy_ideal" << std::setw(colwidth) <<
+      "collisions" << std::endl;
    for( int x = 0; x < o->worldX; x++ )
    {
       for( int y = 0; y < o->worldY; y++ )
@@ -401,17 +411,17 @@ Sim::writeDiffusion()
          if( world[ getWorldIndex(x,y) ] != NULL )
          {
             Atom* thisAtom = world[ getWorldIndex(x,y) ];
-            diffusionFile << std::setw(colwidth) <<
-                             thisAtom->getType()->getName() << std::setw(colwidth) <<
-                             thisAtom->dx_actual << std::setw(colwidth) <<
-                             thisAtom->dy_actual << std::setw(colwidth) <<
-                             thisAtom->dx_ideal << std::setw(colwidth) <<
-                             thisAtom->dy_ideal << std::setw(colwidth) <<
-                             thisAtom->collisions << std::endl;
+            o->diffusionFile << std::setw(colwidth) <<
+               thisAtom->getType()->getName() << std::setw(colwidth) <<
+               thisAtom->dx_actual << std::setw(colwidth) <<
+               thisAtom->dy_actual << std::setw(colwidth) <<
+               thisAtom->dx_ideal << std::setw(colwidth) <<
+               thisAtom->dy_ideal << std::setw(colwidth) <<
+               thisAtom->collisions << std::endl;
          }
       }
    }
-   diffusionFile.close();
+   o->diffusionFile.close();
 }
 
 

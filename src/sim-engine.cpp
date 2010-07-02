@@ -355,14 +355,17 @@ Sim::generateRandNums()
    {
       firstTime = false;
 
-      static std::ofstream randFile;
-      randFile.open( o->randFile.c_str() );
+      if( !o->randFile.is_open() )
+      {
+         std::cout << "generateRandNums: file not open!" << std::endl;
+         exit( EXIT_FAILURE );
+      }
 
       for( int i = 0; i < 10; i++ )
       {
-         randFile << randNums[i] << std::endl;
+         o->randFile << randNums[i] << std::endl;
       }
-      randFile.close();
+      o->randFile.close();
    }
 }
 

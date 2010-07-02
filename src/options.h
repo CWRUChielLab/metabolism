@@ -4,6 +4,7 @@
 #ifndef OPTIONS_H
 #define OPTIONS_H
 
+#include <fstream>
 #include <getopt.h>
 #include <string>
 
@@ -29,11 +30,11 @@ class Options
       int sleep;
       bool verbose;
       bool progress;
-      std::string loadFile;
-      std::string configFile;
-      std::string censusFile;
-      std::string diffusionFile;
-      std::string randFile;
+      std::ifstream loadFile;
+      std::ofstream configFile;
+      std::ofstream censusFile;
+      std::ofstream diffusionFile;
+      std::ofstream randFile;
 
       // Options attribute values
       enum
