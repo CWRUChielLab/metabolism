@@ -11,5 +11,7 @@ metabolism*
 data
 *.out
 *.pdf
+*.png
+*.tex
 .Rhistory
 
