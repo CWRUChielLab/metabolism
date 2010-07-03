@@ -219,7 +219,7 @@ rates = function(t, state, params)
             }
             return(list(derivatives))
          }
-quadrature = ode(init, seq(1, iters, length.out=10000), rates)
+quadrature = ode(init, seq(0, iters, length.out=10000), rates)
 
 # For corner.label
 library(plotrix)
@@ -262,6 +262,7 @@ if (output_type == "latex")
 
 plot(iter_data, ele_data[[1]],
    col=ele_colors[[ names(ele_data)[1] ]],
+   main="Observed Chemical Density Trajectories",
    xlab="Iterations", ylab="Density",
    ylim=c(0, max(ele_data)),
    type="l")
@@ -307,6 +308,7 @@ if (output_type == "latex")
 
 plot(quadrature[, "time"], quadrature[, names(ele_data)[1]],
    col=ele_colors[[ names(ele_data)[1] ]],
+   main="Expected Chemical Density Trajectories",
    xlab="Iterations", ylab="Density",
    ylim=c(0, max(ele_data)),
    type="l")
@@ -354,13 +356,20 @@ for( i in 1:length(ele_data) )
 
    plot(iter_data, ele_data[[i]],
       col=ele_colors[[ names(ele_data)[i] ]],
-      xlab="Iterations", ylab=names(ele_data)[i],
+      main=paste("Density Trajectory of ", names(ele_data)[i], sep=""),
+      xlab="Iterations", ylab="Density",
       ylim=c(0, max(ele_data[[i]], quadrature[, names(ele_data)[i]])),
       type="l")
 
    points(quadrature[, "time"], quadrature[, names(ele_data)[i]],
       col=ele_colors[[ names(ele_data)[i] ]],
-      type="l", lty=2)
+      lty=2, type="l")
+
+   legend("topright",
+      legend=c("Observed", "Expected"),
+      col=rep(ele_colors[[ names(ele_data)[i] ]], 2),
+      lty=c(1,2),
+      bg="white")
 
    # If individual LaTeX documents or PNG graphics are
    # to be created, close the current graphics device
@@ -393,9 +402,20 @@ if (output_type == "latex")
 
 plot(iter_data, total_data,
    col=ele_colors[["total"]],
-   xlab="Iterations", ylab="Overall Density",
+   main="Overall Density Trajectory",
+   xlab="Iterations", ylab="Density",
    ylim=c(0, max(total_data)),
    type="l")
+
+points(quadrature[, "time"], rowSums(quadrature[, colnames(quadrature) != "time"]),
+   col=ele_colors[["total"]],
+   lty=2, type="l")
+
+legend("topright",
+   legend=c("Observed", "Expected"),
+   col=rep(ele_colors[["total"]], 2),
+   lty=c(1,2),
+   bg="white")
 
 # If individual LaTeX documents or PNG graphics are
 # to be created, close the current graphics device
