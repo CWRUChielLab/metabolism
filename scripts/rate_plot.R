@@ -2,22 +2,21 @@
 #
 # Analyzes reaction rate data in R and creates graphs
 #
-# Usage: ./rate_plot.R outputtype pathtoconfig pathtocensus pathtoplots pathtostats
+# Usage: ./rate_plot.R outputtype pathtoconfig pathtocensus pathtoplots
 #   outputtype    the type of output that the R script should create; valid options
 #                    are "pdf", "png", and "latex"
 #   pathtoconfig  the path of the config.out file
 #   pathtocensus  the path of the census.out file
 #   pathtoplots   the path of the output that the R script will create without
 #                    the file extension
-#   pathtostats   the path of the text file that the R script will create
 
 # Import command line arguments
 Args = commandArgs()
-if (length(Args) > 10)
+if (length(Args) > 9)
 {
    sink(stderr())
    print("ANALYSIS FAILED: Too many parameters!")
-   print("  Usage: ./rate_plot.R outputtype pathtoconfig pathtocensus pathtoplots pathtostats")
+   print("  Usage: ./rate_plot.R outputtype pathtoconfig pathtocensus pathtoplots")
    sink()
    q(save="no", status=1, runLast=FALSE)
 }
@@ -47,13 +46,6 @@ if (!is.na(Args[9]))
    path_to_plots = as.character(Args[9])
 } else {
    path_to_plots = "plots"
-}
-
-if (!is.na(Args[10]))
-{
-   path_to_stats = as.character(Args[10])
-} else {
-   path_to_stats = "stats.out"
 }
 
 # Colors
