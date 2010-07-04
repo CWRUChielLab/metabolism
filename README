@@ -38,11 +38,17 @@ This project uses the following:
       simulation. Available at
       http://www.r-project.org/.
 
+   deSolve
+      General solvers for R for initial value problems of
+      differential equations. Required by some scripts for
+      analysis. Available at
+      http://cran.r-project.org/web/packages/deSolve/.
+
    tikzDevice
-      LaTeX graphics for R. Optional parameter 'uselatex'
-      for each R script allows LaTeX documents to be built
-      instead of PDFs. Available at
-      http://r-forge.r-project.org/projects/tikzdevice/.
+      LaTeX graphics for R. Optional parameter 'outputtype'
+      or 'uselatex' for each R script allows LaTeX documents
+      to be built instead of PDFs or PNGs. Available at
+      http://cran.r-project.org/web/packages/tikzDevice/.
 
 
 Compilation Instructions
@@ -77,32 +83,40 @@ An Example Simulation and Analysis
 
 Once compiled, try running:
 
-   ./metabolism --gui-off -x 512 -y 512 --iters 200 --atoms 39322
+   ./metabolism --gui-off --load ../load/mm.load --iters 2000 
 
-This will run a quick simulation with the default reaction
-system enabled. Data is output to the files diffusion.out
-and census.out, and the simulation parameters are recorded
-in config.out. To conduct a reaction rate analysis, run:
+This will run a quick simulation of the Michaelis-Menten
+enzyme kinetics system. Data is output to the files
+diffusion.out and census.out, and the simulation parameters
+are recorded in config.out. To plot the trajectory of the
+reaction, run:
 
-   ../scripts/rate_analysis.R second 0.5 config.out census.out plots stats.out false
+   ../scripts/rate_plot.R
 
-(The parameters specified here are explained at the
-beginning of the script's comments.) A PDF file is generated
-and some statistics are stored in the file stats.out. View
-the PDF:
+A PDF file is generated containing plots of the changes in
+chemical species concentration against time. View the PDF:
 
    evince plots.pdf
 
-Notice that the data deviates from the expected trajectory
-(the red line). Now try:
+Both observed (simulated) and expected trajectories are
+plotted for all chemical species. Expected trajectories are
+found through numerical integration of the rate laws. Notice
+that the simulated reactions occurred at a slightly slower
+rate than expected (in particular, note the rate of
+"Product" formation). This is because the chemicals need to
+be "mixed" or "stirred" to maximize the rate of collisions
+between reactants. Now try:
 
-   ./metabolism --gui-off -x 512 -y 512 --iters 200 --atoms 39322 --shuffle
-   ../scripts/rate_analysis.R second 0.5 config.out census.out plots-shuffle stats.out false
+   ./metabolism --gui-off --load ../load/mm.load --iters 2000 --shuffle
+   ../scripts/rate_plot.R pdf config.out census.out plots-shuffle
    evince plots-shuffle.pdf
 
-This will run the same simulation with shuffling of particle
-positions each iteration. Shuffling simulates mixing. Now
-the data fits the expected trajectory much better.
+(The extra parameters passed to the script are explained
+in the comments header of the file.) This will run the same
+simulation while shuffling the positions of all particles
+each iteration, thereby simulating mixing. Now the simulated
+reaction rates match the the expected trajectories much
+better.
 
 
 Using the Simulation Platform
