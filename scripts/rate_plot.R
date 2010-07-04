@@ -1,14 +1,14 @@
 #!/usr/bin/Rscript
 #
-# Analyzes reaction rate data in R and creates graphs
+# Creates plots in R of the observed and expected reaction trajectories
 #
-# Usage: ./rate_plot.R outputtype pathtoconfig pathtocensus pathtoplots
-#   outputtype    the type of output that the R script should create; valid options
-#                    are "pdf", "png", and "latex"
-#   pathtoconfig  the path of the config.out file
-#   pathtocensus  the path of the census.out file
-#   pathtoplots   the path of the output that the R script will create without
-#                    the file extension
+# Usage: ./rate_plot.R output_type path_to_config path_to_census path_to_plots
+#   output_type     the type of output that the R script should create; valid options
+#                      are "pdf", "png", and "latex"
+#   path_to_config  the path of the config.out file to be read
+#   path_to_census  the path of the census.out file to be read
+#   path_to_plots   the path of the output that the R script will create without
+#                      the file extension
 
 # Import command line arguments
 Args = commandArgs()
@@ -16,10 +16,13 @@ if (length(Args) > 9)
 {
    sink(stderr())
    print("ANALYSIS FAILED: Too many parameters!")
-   print("  Usage: ./rate_plot.R outputtype pathtoconfig pathtocensus pathtoplots")
+   print("  Usage: ./rate_plot.R output_type path_to_config path_to_census path_to_plots")
    sink()
    q(save="no", status=1, runLast=FALSE)
 }
+
+# Set parameters to default values if they were not
+# specified on the command line
 if (!is.na(Args[6]))
 {
    output_type = as.character(Args[6])
@@ -65,39 +68,46 @@ iters = as.integer(unlist(strsplit(config[grepl("iters", config)], " "))[2])
 x = as.integer(unlist(strsplit(config[grepl("x", config)], " "))[2])
 y = as.integer(unlist(strsplit(config[grepl("y", config)], " "))[2])
 
-# Parse Elements
+# Read in the list of Elements and store their names and
+# colors
 config_ele = strsplit(config[grepl("ele", config)], " ")
 ele_names = list()
 ele_colors = list()
-for( i in 1:length(config_ele) )
+for (i in 1:length(config_ele))
 {
    ele_names[[i]] = config_ele[[i]][[2]]
-   if( !is.null( colors[[ config_ele[[i]][[4]] ]] ) )
+   if (!is.null( colors[[ config_ele[[i]][[4]] ]] ))
       ele_colors[[ ele_names[[i]] ]] = colors[[ config_ele[[i]][[4]] ]]
    else
       ele_colors[[ ele_names[[i]] ]] = config_ele[[i]][[4]]
 }
 ele_colors[[ "total" ]] = colors[[ "black" ]]
 
-# Parse Reactions
+# Read in the list of Reactions, separate the reactants from
+# the products, and calculate the rate constants
 config_rxn = strsplit(config[grepl("rxn", config)], " ")
 reactants = list()
 products = list()
-rateconstants = vector()
-for( i in 1:length(config_rxn) )
+rate_constants = vector()
+for (i in 1:length(config_rxn))
 {
+   # Grab the probability of reaction (the second word in
+   # the line)
    prob = as.numeric(config_rxn[[i]][[2]])
 
-   # Build the list of reactants
+   # Build the list of reactants for this Reaction by
+   # reading in words until a reaction arrow is found;
+   # '*'s are ignored, and so zeroth-order reactions
+   # will have zero reactants listed
    j = 3
    reactants[[i]] = list()
-   while( config_rxn[[i]][[j]] != "->" )
+   while (config_rxn[[i]][[j]] != "->")
    {
-      if( config_rxn[[i]][[j]] != "+" && config_rxn[[i]][[j]] != "*")
+      if (config_rxn[[i]][[j]] != "+" && config_rxn[[i]][[j]] != "*")
       {
-         if( config_rxn[[i]][[j]] == "1" || config_rxn[[i]][[j]] == "2" )
+         if (config_rxn[[i]][[j]] == "1" || config_rxn[[i]][[j]] == "2")
          {
-            for( n in 1:as.integer(config_rxn[[i]][[j]]) )
+            for (n in 1:as.integer(config_rxn[[i]][[j]]))
             {
                reactants[[i]] = c(reactants[[i]], config_rxn[[i]][[j+1]])
             }
@@ -111,16 +121,18 @@ for( i in 1:length(config_rxn) )
       }
    }
 
-   # Built the list of products
+   # Built the list of products for this Reaction by reading
+   # in all remaining words; '*'s are ignored again, and so
+   # annihilation reactions will have zero products listed
    j = j + 1
    products[[i]] = list()
-   while( j <= length(config_rxn[[i]]) )
+   while (j <= length(config_rxn[[i]]))
    {
-      if( config_rxn[[i]][[j]] != "+" && config_rxn[[i]][[j]] != "*" )
+      if (config_rxn[[i]][[j]] != "+" && config_rxn[[i]][[j]] != "*")
       {
-         if( config_rxn[[i]][[j]] == "1" || config_rxn[[i]][[j]] == "2" )
+         if (config_rxn[[i]][[j]] == "1" || config_rxn[[i]][[j]] == "2")
          {
-            for( n in 1:as.integer(config_rxn[[i]][[j]]) )
+            for (n in 1:as.integer(config_rxn[[i]][[j]]))
             {
                products[[i]] = c(products[[i]], config_rxn[[i]][[j+1]])
             }
@@ -134,57 +146,76 @@ for( i in 1:length(config_rxn) )
       }
    }
 
-   # Calculate rate constant
+   # Calculate the rate constant for this Reaction using the
+   # probability of reaction; the calculation depends on the
+   # numbers and type of reactants and products as well; see
+   # table 1 of "Zeroth-, First-, and Second-Order Chemical
+   # Reactions and Michaelis-Menten Enzyme Kinetics in an
+   # Artificial Chemistry" (Gill, 2010)
    r = length(reactants[[i]])
    p = length(products[[i]])
-   if( r < 2 && p < 2 )
+   if (r < 2 && p < 2)
    {
-      rateconstants[i] = 1/10 * prob
+      rate_constants[i] = 1/10 * prob
    } else {
-      rateconstants[i] = 4/5 * prob
-      if( (r == 0 && p == 2) || (r == 2 && reactants[[i]][[1]] == reactants[[i]][[2]]) )
+      rate_constants[i] = 4/5 * prob
+      if ((r == 0 && p == 2) || (r == 2 && reactants[[i]][[1]] == reactants[[i]][[2]]))
       {
-         rateconstants[i] = rateconstants[i] / 2
+         rate_constants[i] = rate_constants[i] / 2
       }
    }
 }
 
-# Build rate laws
-ratelaws = list()
-for( i in 1:length(ele_names))
+# Determine the rate laws for each Element and store them
+# as strings containing R commands that can be evaluated
+# dynamically when needed if values for a state vector
+# (particle concentrations at any given time) are provided
+rate_laws = list()
+for (i in 1:length(ele_names))
 {
-   ratelaws[[ ele_names[[i]] ]] = "0"
-   for( j in 1:length(config_rxn) )
+   rate_laws[[ ele_names[[i]] ]] = "0"
+
+   # Walk through the list of reactions
+   for (j in 1:length(config_rxn))
    {
-      if( length(reactants[[j]]) > 0 )
+      if (length(reactants[[j]]) > 0)
       {
-         for( k in 1:length(reactants[[j]]) )
+         # Walk through the list of reactants for this reaction
+         for (k in 1:length(reactants[[j]]))
          {
-            if( reactants[[j]][[k]] == ele_names[[i]] )
+            if (reactants[[j]][[k]] == ele_names[[i]])
             {
-               # Deduct from rate
-               ratelaws[[ ele_names[[i]] ]] = paste(ratelaws[[ ele_names[[i]] ]], "-rateconstants[", j, "]", sep="")
-               for( l in 1:length(reactants[[j]]) )
+               # If a reactant matches this Element (the Element is
+               # consumed in the reaction), subtract an appropriate term
+               # representing this reaction to the rate law string; the
+               # vector "state" will contain the concentration value of
+               # each Element
+               rate_laws[[ ele_names[[i]] ]] = paste(rate_laws[[ ele_names[[i]] ]], " - rate_constants[", j, "]", sep="")
+               for (l in 1:length(reactants[[j]]))
                {
-                  ratelaws[[ ele_names[[i]] ]] = paste(ratelaws[[ ele_names[[i]] ]], "*state[\"", reactants[[j]][[l]], "\"]", sep="")
+                  rate_laws[[ ele_names[[i]] ]] = paste(rate_laws[[ ele_names[[i]] ]], "*state[\"", reactants[[j]][[l]], "\"]", sep="")
                }
             }
          }
       }
 
-      if( length(products[[j]]) > 0 )
+      if (length(products[[j]]) > 0)
       {
-         for( k in 1:length(products[[j]]) )
+         # Walk through the list of products for this reaction
+         for (k in 1:length(products[[j]]))
          {
-            if( products[[j]][[k]] == ele_names[[i]] )
+            if (products[[j]][[k]] == ele_names[[i]])
             {
-               # Add to rate
-               ratelaws[[ ele_names[[i]] ]] = paste(ratelaws[[ ele_names[[i]] ]], "+rateconstants[", j, "]", sep="")
-               if( length(reactants[[j]]) > 0 )
+               # If a product matches this Element (the Element is created
+               # in the reaction), add an appropriate term representing
+               # this reaction to the rate law string; the vector "state"
+               # will contain the concentration value of each Element
+               rate_laws[[ ele_names[[i]] ]] = paste(rate_laws[[ ele_names[[i]] ]], " + rate_constants[", j, "]", sep="")
+               if (length(reactants[[j]]) > 0)
                {
-                  for( l in 1:length(reactants[[j]]) )
+                  for (l in 1:length(reactants[[j]]))
                   {
-                     ratelaws[[ ele_names[[i]] ]] = paste(ratelaws[[ ele_names[[i]] ]], "*state[\"", reactants[[j]][[l]], "\"]", sep="")
+                     rate_laws[[ ele_names[[i]] ]] = paste(rate_laws[[ ele_names[[i]] ]], "*state[\"", reactants[[j]][[l]], "\"]", sep="")
                   }
                }
             }
@@ -193,13 +224,16 @@ for( i in 1:length(ele_names))
    }
 }
 
-# Import rate data
+# Import particle count data
 rate_data = read.table(path_to_census, header=TRUE, check.names=FALSE)
 iter_data = rate_data[["iter"]]
 ele_data = rate_data[names(rate_data) != "iter" & names(rate_data) != "total"] / (x*y)
 total_data = rate_data[["total"]] / (x*y)
 
-# Numerical integration
+# Define a function that returns the value of the rate laws
+# when passed a state vector and perform a numerical
+# integration on each rate law to find the expected
+# trajectories of each Element
 library(deSolve)
 init = unlist(ele_data[1,])
 rates = function(t, state, params)
@@ -207,24 +241,21 @@ rates = function(t, state, params)
             derivatives = vector()
             for( i in 1:length(names(state)) )
             {
-               derivatives[[ names(state)[i] ]] = as.numeric(eval(parse(text=ratelaws[[ names(state)[i] ]])))
+               derivatives[[ names(state)[i] ]] = as.numeric(eval(parse(text=rate_laws[[ names(state)[i] ]])))
             }
             return(list(derivatives))
          }
-quadrature = ode(init, seq(0, iters, length.out=10000), rates)
+expected_data = ode(init, seq(0, iters, length.out=10000), rates)
 
-# For corner.label
-library(plotrix)
-
-# If individual LaTeX documents are to be created,
-# load the TikZ package
+# If individual LaTeX documents are to be created, load the
+# TikZ package
 if (output_type == "latex")
 {
    library(tikzDevice)
 }
 
-# If all plots are to be drawn in a single PDF,
-# open a PDF graphics device and set a few parameters
+# If all plots are to be drawn in a single PDF, open a PDF
+# graphics device and set a few parameters
 if (output_type == "pdf")
 {
    pdf(file=paste(path_to_plots, ".pdf", sep=""), family="Palatino")
@@ -235,16 +266,16 @@ if (output_type == "pdf")
 # Plot all atoms #
 ##################
 
-# If individual PNG graphics are to be created,
-# open a PNG graphics device and set a few parameters
+# If individual PNG graphics are to be created, open a PNG
+# graphics device and set a few parameters
 if (output_type == "png")
 {
    png(file=paste(path_to_plots, "_all.png", sep=""))
    par(font.lab=2)
-} 
+}
 
-# If individual LaTeX documents are to be created, 
-# open a TikZ graphics device and set a few parameters
+# If individual LaTeX documents are to be created, open a
+# TikZ graphics device and set a few parameters
 if (output_type == "latex")
 {
    tikz(file=paste(path_to_plots, "_all.tex", sep=""), width=3, height=2.7)
@@ -258,7 +289,7 @@ plot(iter_data, ele_data[[1]],
    xlab="Iterations", ylab="Density",
    ylim=c(0, max(ele_data)),
    type="l")
-for( i in 2:length(ele_data) )
+for (i in 2:length(ele_data))
 {
    points(iter_data, ele_data[[i]],
       col=ele_colors[[ names(ele_data)[i] ]],
@@ -270,9 +301,9 @@ legend("topright",
    fill=unlist(ele_colors[ names(ele_data) ]),
    bg="white")
 
-# If individual LaTeX documents or PNG graphics are
-# to be created, close the current graphics device
-if (output_type != "pdf")
+# If individual LaTeX documents or PNG graphics are to be
+# created, close the current graphics device
+if (output_type == "png" || output_type == "latex")
 {
    dev.off()
 }
@@ -281,16 +312,16 @@ if (output_type != "pdf")
 # Plot expected trajectories #
 ##############################
 
-# If individual PNG graphics are to be created,
-# open a PNG graphics device and set a few parameters
+# If individual PNG graphics are to be created, open a PNG
+# graphics device and set a few parameters
 if (output_type == "png")
 {
    png(file=paste(path_to_plots, "_expected.png", sep=""))
    par(font.lab=2)
-} 
+}
 
-# If individual LaTeX documents are to be created, 
-# open a TikZ graphics device and set a few parameters
+# If individual LaTeX documents are to be created, open a
+# TikZ graphics device and set a few parameters
 if (output_type == "latex")
 {
    tikz(file=paste(path_to_plots, "_expected.tex", sep=""), width=3, height=2.7)
@@ -298,15 +329,15 @@ if (output_type == "latex")
    par(font.main=1)
 }
 
-plot(quadrature[, "time"], quadrature[, names(ele_data)[1]],
+plot(expected_data[, "time"], expected_data[, names(ele_data)[1]],
    col=ele_colors[[ names(ele_data)[1] ]],
    main="Expected Chemical Density Trajectories",
    xlab="Iterations", ylab="Density",
    ylim=c(0, max(ele_data)),
    type="l")
-for( i in 2:length(ele_data) )
+for (i in 2:length(ele_data))
 {
-   points(quadrature[, "time"], quadrature[, names(ele_data)[i]],
+   points(expected_data[, "time"], expected_data[, names(ele_data)[i]],
       col=ele_colors[[ names(ele_data)[i] ]],
       type="l")
 }
@@ -316,9 +347,9 @@ legend("topright",
    fill=unlist(ele_colors[ names(ele_data) ]),
    bg="white")
 
-# If individual LaTeX documents or PNG graphics are
-# to be created, close the current graphics device
-if (output_type != "pdf")
+# If individual LaTeX documents or PNG graphics are to be
+# created, close the current graphics device
+if (output_type == "png" || output_type == "latex")
 {
    dev.off()
 }
@@ -327,18 +358,18 @@ if (output_type != "pdf")
 # Plot individual atoms #
 #########################
 
-for( i in 1:length(ele_data) )
+for (i in 1:length(ele_data))
 {
-   # If individual PNG graphics are to be created,
-   # open a PNG graphics device and set a few parameters
+   # If individual PNG graphics are to be created, open a PNG
+   # graphics device and set a few parameters
    if (output_type == "png")
    {
       png(file=paste(path_to_plots, "_", names(ele_data)[i], ".png", sep=""))
       par(font.lab=2)
-   } 
+   }
 
-   # If individual LaTeX documents are to be created, 
-   # open a TikZ graphics device and set a few parameters
+   # If individual LaTeX documents are to be created, open a
+   # TikZ graphics device and set a few parameters
    if (output_type == "latex")
    {
       tikz(file=paste(path_to_plots, "_", names(ele_data)[i], ".tex", sep=""), width=3, height=2.7)
@@ -350,10 +381,10 @@ for( i in 1:length(ele_data) )
       col=ele_colors[[ names(ele_data)[i] ]],
       main=paste("Density Trajectory of ", names(ele_data)[i], sep=""),
       xlab="Iterations", ylab="Density",
-      ylim=c(0, max(ele_data[[i]], quadrature[, names(ele_data)[i]])),
+      ylim=c(0, max(ele_data[[i]], expected_data[, names(ele_data)[i]])),
       type="l")
 
-   points(quadrature[, "time"], quadrature[, names(ele_data)[i]],
+   points(expected_data[, "time"], expected_data[, names(ele_data)[i]],
       col=ele_colors[[ names(ele_data)[i] ]],
       lty=2, type="l")
 
@@ -363,9 +394,9 @@ for( i in 1:length(ele_data) )
       lty=c(1,2),
       bg="white")
 
-   # If individual LaTeX documents or PNG graphics are
-   # to be created, close the current graphics device
-   if (output_type != "pdf")
+   # If individual LaTeX documents or PNG graphics are to be
+   # created, close the current graphics device
+   if (output_type == "png" || output_type == "latex")
    {
       dev.off()
    }
@@ -375,16 +406,16 @@ for( i in 1:length(ele_data) )
 # Plot total atoms #
 ####################
 
-# If individual PNG graphics are to be created,
-# open a PNG graphics device and set a few parameters
+# If individual PNG graphics are to be created, open a PNG
+# graphics device and set a few parameters
 if (output_type == "png")
 {
    png(file=paste(path_to_plots, "_total.png", sep=""))
    par(font.lab=2)
-} 
+}
 
-# If individual LaTeX documents are to be created, 
-# open a TikZ graphics device and set a few parameters
+# If individual LaTeX documents are to be created, open a
+# TikZ graphics device and set a few parameters
 if (output_type == "latex")
 {
    tikz(file=paste(path_to_plots, "_total.tex", sep=""), width=3, height=2.7)
@@ -399,7 +430,7 @@ plot(iter_data, total_data,
    ylim=c(0, max(total_data)),
    type="l")
 
-points(quadrature[, "time"], rowSums(quadrature[, colnames(quadrature) != "time"]),
+points(expected_data[, "time"], rowSums(expected_data[, colnames(expected_data) != "time"]),
    col=ele_colors[["total"]],
    lty=2, type="l")
 
@@ -409,9 +440,9 @@ legend("topright",
    lty=c(1,2),
    bg="white")
 
-# If individual LaTeX documents or PNG graphics are
-# to be created, close the current graphics device
-if (output_type != "pdf")
+# If individual LaTeX documents or PNG graphics are to be
+# created, close the current graphics device
+if (output_type == "png" || output_type == "latex")
 {
    dev.off()
 }
