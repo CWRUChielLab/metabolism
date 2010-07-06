@@ -13,22 +13,16 @@ Options::Options( int argc, char* argv[] )
 {
    // Set default values
    seed = time(NULL);
-   maxIters = 100000;
-#ifdef HAVE_QT
+   maxIters = 1000000;
    worldX = 250;
    worldY = 250;
    atomCount = 2000;
+#ifdef HAVE_QT
    gui = GUI_QT;
 #else
 #ifdef HAVE_NCURSES
-   worldX = 16;
-   worldY = 16;
-   atomCount = 64;
    gui = GUI_NCURSES;
 #else
-   worldX = 250;
-   worldY = 250;
-   atomCount = 2000;
    gui = GUI_OFF;
 #endif
 #endif
@@ -452,15 +446,7 @@ Options::printHelp()
    std::cout << "  Would run a 256x256 world for 100 iterations with 1 second pauses between" << std::endl;
    std::cout << "    each iteration."                                                         << std::endl;
    std::cout <<                                                                                  std::endl;
-#ifdef HAVE_QT
    std::cout << "-a, --atoms         Number of atoms in the world. Default: 2000"             << std::endl;
-#else
-#ifdef HAVE_NCURSES
-   std::cout << "-a, --atoms         Number of atoms in the world. Default: 64"               << std::endl;
-#else
-   std::cout << "-a, --atoms         Number of atoms in the world. Default: 2000"             << std::endl;
-#endif
-#endif
    std::cout << "-f, --files         Specify the names of the four output files."             << std::endl;
    std::cout << "                      Default: config.out census.out diffusion.out rand.out" << std::endl;
 #if defined(HAVE_QT) & defined(HAVE_NCURSES)
@@ -478,7 +464,7 @@ Options::printHelp()
 #endif
 #endif
    std::cout << "-h, --help          Display this information."                               << std::endl;
-   std::cout << "-i, --iters         Number of iterations. Default: 100000"                   << std::endl;
+   std::cout << "-i, --iters         Number of iterations. Default: 1000000"                  << std::endl;
    std::cout << "-l, --load          Specify the name of a config file to load settings"      << std::endl;
    std::cout << "                      from. Any other options specified will override"       << std::endl;
    std::cout << "                      loaded options."                                       << std::endl;
@@ -493,18 +479,8 @@ Options::printHelp()
    std::cout << "                      default."                                              << std::endl;
    std::cout << "-v, --version       Display version information."                            << std::endl;
    std::cout << "-V, --verbose       Write to screen detailed information for debugging."     << std::endl;
-#ifdef HAVE_QT
    std::cout << "-x, --width         Width of the world. Default: 250"                        << std::endl;
    std::cout << "-y, --height        Height of the world. Default: 250"                       << std::endl;
-#else
-#ifdef HAVE_NCURSES
-   std::cout << "-x, --width         Width of the world. Default: 16"                         << std::endl;
-   std::cout << "-y, --height        Height of the world. Default: 16"                        << std::endl;
-#else
-   std::cout << "-x, --width         Width of the world. Default: 250"                        << std::endl;
-   std::cout << "-y, --height        Height of the world. Default: 250"                       << std::endl;
-#endif
-#endif
    std::cout << "-z, --sleep         Number of milliseconds to sleep between iterations."     << std::endl;
    std::cout << "                      Default: 0"                                            << std::endl;
    std::cout << "---------------------------------------------------------------------------" << std::endl;
