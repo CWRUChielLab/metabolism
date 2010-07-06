@@ -49,6 +49,8 @@ Sim::initializeIO()
             printRxns( (std::ostream*)(NULL) );
             printw( "\n" );
             printInits( (std::ostream*)(NULL) );
+            printw( "\n" );
+            printExtincts( (std::ostream*)(NULL) );
             printw( "------\n" );
          }
 
@@ -68,6 +70,8 @@ Sim::initializeIO()
             printRxns( &std::cout );
             std::cout << std::endl;
             printInits( &std::cout );
+            std::cout << std::endl;
+            printExtincts( &std::cout );
             std::cout << "------" << std::endl;
          }
       }
@@ -293,6 +297,31 @@ Sim::loadChemistry()
             initsLoaded = true;
          }
 
+         // Read in extincts
+         if( keyword == "extinct" )
+         {
+            ElementVector eleVector;
+            std::string word;
+            int n;
+
+            o->loadFile >> n;
+            for( int i = 0; i < n; i++ )
+            {
+               o->loadFile >> word;
+               if( periodicTable[ word ] != NULL )
+               {
+                  eleVector.push_back( periodicTable[ word ] );
+               }
+               else
+               {
+                  std::cout << "Loading extinct: " << word << " is not a defined Element!" << std::endl;
+                  exit( EXIT_FAILURE );
+               }
+            }
+            extinctionTypes.push_back( eleVector );
+            extinctsLoaded = true;
+         }
+
          keyword = "";
       }
    }
@@ -376,6 +405,10 @@ Sim::writeConfig()
 
    // Write initialTypes to file
    printInits( &(o->configFile) );
+   o->configFile << std::endl;
+
+   // Write extinctionTypes to file
+   printExtincts( &(o->configFile) );
    o->configFile << std::endl;
 
    o->configFile.close();
@@ -801,6 +834,54 @@ Sim::printInits( std::ostream* out )
    else
    {
       *out << std::endl;
+   }
+}
+
+
+// Print the list of extincts to an output
+// steam, or print using ncurses if the stream
+// is NULL
+void
+Sim::printExtincts( std::ostream* out )
+{
+   for( std::list<ElementVector>::iterator i = extinctionTypes.begin(); i != extinctionTypes.end(); i++ )
+   {
+      ElementVector thisEleVector = *(i);
+      if( out == (std::ostream*)(NULL) )
+      {
+#ifdef HAVE_NCURSES
+         printw( "extinct %d ", thisEleVector.size() );
+#endif
+      }
+      else
+      {
+         *out << "extinct " << thisEleVector.size() << " ";
+      }
+
+      for( unsigned int j = 0; j < thisEleVector.size(); j++ )
+      {
+         if( out == (std::ostream*)(NULL) )
+         {
+#ifdef HAVE_NCURSES
+            printw( "%s ", thisEleVector[j]->getName().c_str() );
+#endif
+         }
+         else
+         {
+            *out << thisEleVector[j]->getName() << " ";
+         }
+      }
+
+      if( out == (std::ostream*)(NULL) )
+      {
+#ifdef HAVE_NCURSES
+         printw( "\n" );
+#endif
+      }
+      else
+      {
+         *out << std::endl;
+      }
    }
 }
 

@@ -120,7 +120,7 @@ Options::Options( int argc, char* argv[] )
             while( loadFile.good() )
             {
                loadFile >> keyword;
-               if( keyword == "version" || keyword == "ele" || keyword == "rxn" || keyword == "init" )
+               if( keyword == "version" || keyword == "ele" || keyword == "rxn" || keyword == "init" || keyword == "extinct" )
                {
                   loadFile.ignore(1024,'\n');
                }

@@ -22,4 +22,7 @@ rxn 0.08 GH-Inter -> *
 rxn 0.02 * -> Food
 
 init 8 Ant GH Food Food Food Food Food Food
+
+extinct 3 Ant Ant-Inter Ant-Store
+extinct 2 GH GH-Inter
  

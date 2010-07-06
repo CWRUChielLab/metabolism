@@ -9,3 +9,5 @@ rxn 0.01 ES -> Enzyme + Product
 
 init 4 Enzyme Substrate Substrate Substrate
 
+extinct 2 Substrate ES
+

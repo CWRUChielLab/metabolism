@@ -151,10 +151,11 @@ be specified and examples of valid values are:
    reactions off
 
 In addition to these (which are described in more detail in
---help), particle types and reactions can be specified using
-the keywords "ele", "rxn", and "init". Add a line beginning
-with "ele" for each particle type ("element") using the
-following format:
+--help), particle types, reactions, and conditions for
+terminating the simulation can be specified using the
+keywords "ele", "rxn", "init", and "extinct". Add a line
+beginning with "ele" for each particle type ("element")
+using the following format:
 
    ele name symbol color
 
@@ -212,11 +213,10 @@ listed using:
 
 with "prob"'s = 0.5, 0.01, and 0.01.
 
-Finally, although the number of particles placed in the
-lattice is set by a command line option, the initial types
-for the particles must be specified in the config file. Use
-the keyword "init" to start a list of initial particle
-types:
+Although the number of particles placed in the lattice is
+set by a command line option, the initial types for the
+particles must be specified in the config file. Use the
+keyword "init" to start a list of initial particle types:
 
    init n name [...]
 
@@ -234,13 +234,42 @@ For the Michaelis-Menten example, we could use:
 to create a 3:1 ratio of Substrate to Enzyme for the
 particles initially placed in the lattice.
 
+Finally, the user can optionally define special conditions
+under which the simulation should terminate early. A set of
+particle types can be specified using:
+
+   extinct n name [...]
+
+"n" is the number of types in the set, and "names"'s are the
+names of the particle types. If at any time during the
+simulation there exist no particles with types from this
+list, the simulation will end. More than one "extinct" line
+can be listed in a config file to specify alternative
+termination conditions. Types included in these lists must
+be defined earlier in the config file.
+
+For our example, the system will no longer undergo any
+reactions when all Substrate is depleted, and so we would
+not be interested in simulating beyond that point. Thus, we
+could use:
+
+   extinct 2 Substrate ES
+
+to force the simulation to end when there are zero Substrate
+and zero ES particles in the lattice.
+
 If a config file is not used, or if a config file is used
 that lacks any lines that begin with "ele", then the types
 "A", "B", "C", and "D" are defined by default. If the config
-file lacks any "rxn" lines, the reaction A + B -> C + D
-(prob = 0.5) is defined. If the config file has no line
-beginning with "init", then the particles will start with
-types A and B in roughly a 1:1 ratio.
+file lacks any "rxn" lines and the default particle types
+are used, the reaction A + B -> C + D (prob = 0.5) is
+defined. If the config file has no lines beginning with
+"init" and the default particle types are used, then the
+particles will start with types A and B in roughly a 1:1
+ratio. If the config file does not have any "extinct" lines
+and the default particle types are used, then the simulation
+will terminate when either all the A particles or all the B
+particles are depleted.
 
 ============================================================
 

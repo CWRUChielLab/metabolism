@@ -80,6 +80,7 @@ Sim::initializeEngine()
       elesLoaded = false;
       rxnsLoaded = false;
       initsLoaded = false;
+      extinctsLoaded = false;
       loadChemistry();
 
       // Open files after load file has been successfully read
@@ -100,7 +101,7 @@ Sim::initializeEngine()
       }
 
       // Set up default rxnTable if one was not loaded
-      if( !rxnsLoaded )
+      if( !elesLoaded && !rxnsLoaded )
       {
          Reaction* tempRxn;
          tempRxn = safeNew( Reaction( ev(2,"A","B"), ev(2,"C","D"), 0.5 ) );
@@ -108,9 +109,16 @@ Sim::initializeEngine()
       }
 
       // Set up default initialTypes if one was not loaded
-      if( !initsLoaded )
+      if( !elesLoaded && !initsLoaded )
       {
          initialTypes = ev(2,"A","B");
+      }
+
+      // Set up default extinctionTypes if one was not loaded
+      if( !elesLoaded && !extinctsLoaded )
+      {
+         extinctionTypes.push_back( ev(1,"A") );
+         extinctionTypes.push_back( ev(1,"B") );
       }
 
       // Initialize the random number generator
@@ -187,6 +195,23 @@ Sim::iterate()
       if( itersCompleted % 8 == 0 )
          writeCensus();
 
+      // Check to see if special conditions have
+      // been met for ending the simulation early
+      for( std::list<ElementVector>::iterator i = extinctionTypes.begin(); i != extinctionTypes.end(); i++ )
+      {
+         bool allExtinct = true;
+         ElementVector thisEleVector = *(i);
+         for( unsigned int j = 0; j < thisEleVector.size(); j++ )
+         {
+            allExtinct = (allExtinct && thisEleVector[j]->count == 0);
+         }
+         if( allExtinct )
+         {
+            end();
+            break;
+         }
+      }
+
       // Sleep the simulation
       if( o->sleep != 0 )
          usleep( o->sleep * 1000 );
@@ -233,9 +258,10 @@ Sim::cleanup()
          forceReportProgress();
       }
 
-      // Write the simulation parameters and diffusion data
-      // to file and clean up ncurses
+      // Write the simulation parameters, final census data,
+      // and diffusion data to file and clean up ncurses
       writeConfig();
+      writeCensus();
       writeDiffusion();
       if( o->gui == Options::GUI_NCURSES )
       {

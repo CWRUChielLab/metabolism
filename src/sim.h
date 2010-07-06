@@ -4,6 +4,7 @@
 #ifndef SIM_H
 #define SIM_H 
 
+#include <list>
 #include <map>
 #include <ostream>
 #include <stdint.h>
@@ -49,8 +50,10 @@ class Sim
       bool elesLoaded;
       bool rxnsLoaded;
       bool initsLoaded;
+      bool extinctsLoaded;
 
       ElementVector initialTypes;
+      std::list<ElementVector> extinctionTypes;
 
       uint8_t* claimed;
       unsigned int* positions;
@@ -89,6 +92,7 @@ class Sim
       void printEles( std::ostream* out );
       void printRxns( std::ostream* out );
       void printInits( std::ostream* out );
+      void printExtincts( std::ostream* out );
 };
 
 #endif /* SIM_H */
