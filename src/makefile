@@ -90,8 +90,9 @@ check: metabolism-minimal
 # data to assist with optimization
 profile: metabolism-debug
 	./$< --iters 50 --atoms 25000 -x 1000 -y 1000
-	gprof $< > profile.out
-	cat profile.out | less
+	@echo
+	gprof $< > gprof.out
+	cat gprof.out | less
 
 
 # Target for removing all files and directories created by

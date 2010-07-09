@@ -1,0 +1,11 @@
+ele Prey R teal
+ele Predator F darkorange
+
+rxn 0.1 Prey -> 2 Prey
+rxn 1.0 Prey + Predator -> 2 Predator
+rxn 0.6 Predator -> *
+
+init 2 Predator Prey
+
+extinct 1 Predator
+
