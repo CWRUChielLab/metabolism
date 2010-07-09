@@ -81,7 +81,7 @@ for (i in 1:length(config_ele))
    else
       ele_colors[[ ele_names[[i]] ]] = config_ele[[i]][[4]]
 }
-ele_colors[[ "total" ]] = colors[[ "black" ]]
+ele_colors[[ "default" ]] = colors[[ "black" ]]
 
 # Read in the list of Reactions, separate the reactants from
 # the products, and calculate the rate constants
@@ -262,15 +262,15 @@ if (output_type == "pdf")
    par(font.lab=2)
 }
 
-##################
-# Plot all atoms #
-##################
+#################################
+# Observed Density Trajectories #
+#################################
 
 # If individual PNG graphics are to be created, open a PNG
 # graphics device and set a few parameters
 if (output_type == "png")
 {
-   png(file=paste(path_to_plots, "_all.png", sep=""))
+   png(file=paste(path_to_plots, "_observed.png", sep=""))
    par(font.lab=2)
 }
 
@@ -278,16 +278,17 @@ if (output_type == "png")
 # TikZ graphics device and set a few parameters
 if (output_type == "latex")
 {
-   tikz(file=paste(path_to_plots, "_all.tex", sep=""), width=3, height=2.7)
+   tikz(file=paste(path_to_plots, "_observed.tex", sep=""), width=3, height=2.7)
    par(cex=0.7)
    par(font.main=1)
 }
 
 plot(iter_data, ele_data[[1]],
    col=ele_colors[[ names(ele_data)[1] ]],
-   main="Observed Chemical Density Trajectories",
-   xlab="Iterations", ylab="Density",
-   ylim=c(0, max(ele_data)),
+   main="Observed Density Trajectories",
+   xlab="Iterations",
+   ylab="Density",
+   ylim=c(0, max(ele_data, expected_data[, names(ele_data)])),
    type="l")
 for (i in 2:length(ele_data))
 {
@@ -308,9 +309,9 @@ if (output_type == "png" || output_type == "latex")
    dev.off()
 }
 
-##############################
-# Plot expected trajectories #
-##############################
+#################################
+# Expected Density Trajectories #
+#################################
 
 # If individual PNG graphics are to be created, open a PNG
 # graphics device and set a few parameters
@@ -331,9 +332,10 @@ if (output_type == "latex")
 
 plot(expected_data[, "time"], expected_data[, names(ele_data)[1]],
    col=ele_colors[[ names(ele_data)[1] ]],
-   main="Expected Chemical Density Trajectories",
-   xlab="Iterations", ylab="Density",
-   ylim=c(0, max(ele_data)),
+   main="Expected Density Trajectories",
+   xlab="Iterations",
+   ylab="Density",
+   ylim=c(0, max(ele_data, expected_data[, names(ele_data)])),
    type="l")
 for (i in 2:length(ele_data))
 {
@@ -354,9 +356,89 @@ if (output_type == "png" || output_type == "latex")
    dev.off()
 }
 
-#########################
-# Plot individual atoms #
-#########################
+###################################
+# Observed Density Phase Portrait #
+###################################
+
+if (length(ele_data) == 2)
+{
+   # If individual PNG graphics are to be created, open a PNG
+   # graphics device and set a few parameters
+   if (output_type == "png")
+   {
+      png(file=paste(path_to_plots, "_obs_phase.png", sep=""))
+      par(font.lab=2)
+   }
+
+   # If individual LaTeX documents are to be created, open a
+   # TikZ graphics device and set a few parameters
+   if (output_type == "latex")
+   {
+      tikz(file=paste(path_to_plots, "_obs_phase.tex", sep=""), width=3, height=2.7)
+      par(cex=0.7)
+      par(font.main=1)
+   }
+
+   plot(ele_data[[1]], ele_data[[2]],
+      col=ele_colors[[ "default" ]],
+      main="Observed Density Phase Portrait",
+      xlab=paste("Density of ", names(ele_data)[1], sep=""),
+      ylab=paste("Density of ", names(ele_data)[2], sep=""),
+      xlim=c(0, max(ele_data[[1]], expected_data[, names(ele_data)[1]])),
+      ylim=c(0, max(ele_data[[2]], expected_data[, names(ele_data)[2]])),
+      type="l")
+
+   # If individual LaTeX documents or PNG graphics are to be
+   # created, close the current graphics device
+   if (output_type == "png" || output_type == "latex")
+   {
+      dev.off()
+   }
+}
+
+###################################
+# Expected Density Phase Portrait #
+###################################
+
+if (length(ele_data) == 2)
+{
+   # If individual PNG graphics are to be created, open a PNG
+   # graphics device and set a few parameters
+   if (output_type == "png")
+   {
+      png(file=paste(path_to_plots, "_exp_phase.png", sep=""))
+      par(font.lab=2)
+   }
+
+   # If individual LaTeX documents are to be created, open a
+   # TikZ graphics device and set a few parameters
+   if (output_type == "latex")
+   {
+      tikz(file=paste(path_to_plots, "_exp_phase.tex", sep=""), width=3, height=2.7)
+      par(cex=0.7)
+      par(font.main=1)
+   }
+
+   plot(expected_data[, names(ele_data)[1]], expected_data[, names(ele_data)[2]],
+      col=ele_colors[[ "default" ]],
+      main="Expected Density Phase Portrait",
+      xlab=paste("Density of ", names(ele_data)[1], sep=""),
+      ylab=paste("Density of ", names(ele_data)[2], sep=""),
+      xlim=c(0, max(ele_data[[1]], expected_data[, names(ele_data)[1]])),
+      ylim=c(0, max(ele_data[[2]], expected_data[, names(ele_data)[2]])),
+      type="l")
+
+   # If individual LaTeX documents or PNG graphics are to be
+   # created, close the current graphics device
+   if (output_type == "png" || output_type == "latex")
+   {
+      dev.off()
+   }
+}
+
+###################################
+# Individual Density Trajectories #
+###################################
 
 for (i in 1:length(ele_data))
 {
@@ -380,7 +462,8 @@ for (i in 1:length(ele_data))
    plot(iter_data, ele_data[[i]],
       col=ele_colors[[ names(ele_data)[i] ]],
       main=paste("Density Trajectory of ", names(ele_data)[i], sep=""),
-      xlab="Iterations", ylab="Density",
+      xlab="Iterations",
+      ylab="Density",
       ylim=c(0, max(ele_data[[i]], expected_data[, names(ele_data)[i]])),
       type="l")
 
@@ -402,9 +485,9 @@ for (i in 1:length(ele_data))
    }
 }
 
-####################
-# Plot total atoms #
-####################
+##############################
+# Overall Density Trajectory #
+##############################
 
 # If individual PNG graphics are to be created, open a PNG
 # graphics device and set a few parameters
@@ -424,19 +507,20 @@ if (output_type == "latex")
 }
 
 plot(iter_data, total_data,
-   col=ele_colors[["total"]],
+   col=ele_colors[["default"]],
    main="Overall Density Trajectory",
-   xlab="Iterations", ylab="Density",
-   ylim=c(0, max(total_data)),
+   xlab="Iterations",
+   ylab="Density",
+   ylim=c(0, max(total_data, rowSums(expected_data[, names(ele_data)]))),
    type="l")
 
-points(expected_data[, "time"], rowSums(expected_data[, colnames(expected_data) != "time"]),
-   col=ele_colors[["total"]],
+points(expected_data[, "time"], rowSums(expected_data[, names(ele_data)]),
+   col=ele_colors[["default"]],
    lty=2, type="l")
 
 legend("topright",
    legend=c("Observed", "Expected"),
-   col=rep(ele_colors[["total"]], 2),
+   col=rep(ele_colors[["default"]], 2),
    lty=c(1,2),
    bg="white")
 

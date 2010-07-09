@@ -191,9 +191,7 @@ Sim::iterate()
          reportProgress();
 
       // Take a census of the atoms in the world
-      // occasionally
-      if( itersCompleted % 8 == 0 )
-         writeCensus();
+      writeCensus();
 
       // Check to see if special conditions have
       // been met for ending the simulation early
@@ -258,10 +256,9 @@ Sim::cleanup()
          forceReportProgress();
       }
 
-      // Write the simulation parameters, final census data,
-      // and diffusion data to file and clean up ncurses
+      // Write the simulation parameters and diffusion
+      // data to file and clean up ncurses
       writeConfig();
-      writeCensus();
       writeDiffusion();
       if( o->gui == Options::GUI_NCURSES )
       {
