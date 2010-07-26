@@ -77,7 +77,7 @@ gillespie = function(N, tmax, dt)
    repeat
    {
       # Calculate time to next reaction and increase t
-      h  = N$h(state)
+      h  = N$h(state, constants)
       h0 = sum(h)
       if (h0 < 1e-10)
          t = 1e99
@@ -106,7 +106,7 @@ gillespie = function(N, tmax, dt)
             return(list(t=tvec, x=census))
 
          # Check for extinction
-         if (any(sapply(lapply(lapply(extinct, eval, envir=new.env()), function(y) return(y==0)), all)))
+         if (haveExtinction(state))
          {
             tvec = tvec[1:i]
             census = census[1:i,]
