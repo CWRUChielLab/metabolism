@@ -123,6 +123,7 @@ gillespie = function(N, tmax, dt)
 # Create initial system state
 random_types = sample(init, size=atoms, replace=TRUE)
 N$M = summary(factor(random_types, levels=ele_names))
+names(N$M) = NULL
 
 # Run the Gillespie algorithm
 out = gillespie(N, tmax=iters, dt=1)

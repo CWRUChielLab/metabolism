@@ -69,6 +69,7 @@ source("../scripts/_parse_config.R")
 rate_data = read.table(path_to_census, header=TRUE, check.names=FALSE)
 iter_data = rate_data[["iter"]]
 ele_data = rate_data[names(rate_data) != "iter" & names(rate_data) != "total"]
+ele_data = ele_data[, unlist(ele_names)]
 total_data = rate_data[["total"]]
 
 # Define a function that returns the value of the rate laws
@@ -81,12 +82,10 @@ if (do_integration == "true")
    initial_values = unlist(ele_data[1,])
    rates = function(t, state, params)
             {
-               temp = t(N$Post-N$Pre) %*% N$h(state)
-               derivatives = as.vector(temp)
-               names(derivatives) = rownames(temp)
+               derivatives = as.vector(t(N$Post-N$Pre) %*% N$h(state, params))
                return(list(derivatives))
             }
-   expected_data = ode(initial_values, seq(0, iters, length.out=10000), rates)
+   expected_data = ode(initial_values, seq(0, iters, length.out=10000), rates, constants)
 } else {
    expected_data = ele_data
 }

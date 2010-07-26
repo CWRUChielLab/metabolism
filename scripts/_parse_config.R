@@ -74,7 +74,7 @@ haveExtinction = function(state)
 {
    for (i in 1:length(extinct))
    {
-      if (all(state[extinct[[i]]] == 0))
+      if (all(state[which(unlist(ele_names) %in% extinct[[i]])] == 0))
          return(TRUE)
    }
    return(FALSE)
@@ -85,8 +85,8 @@ haveExtinction = function(state)
 # the reaction hazards
 config_rxn = config[keywords == "rxn"]
 N = list()
-N$Pre  = matrix(0, nrow=length(config_rxn), ncol=length(config_ele), dimnames=list(NULL, unlist(ele_names)))
-N$Post = matrix(0, nrow=length(config_rxn), ncol=length(config_ele), dimnames=list(NULL, unlist(ele_names)))
+N$Pre  = matrix(0, nrow=length(config_rxn), ncol=length(config_ele))
+N$Post = matrix(0, nrow=length(config_rxn), ncol=length(config_ele))
 constants = vector(length=length(config_rxn))
 for (i in 1:length(config_rxn))
 {
@@ -103,13 +103,17 @@ for (i in 1:length(config_rxn))
       {
          if (config_rxn[[i]][[j]] == "1" || config_rxn[[i]][[j]] == "2")
          {
+            ele = config_rxn[[i]][[j+1]]
+            ele_index = which(unlist(ele_names) == ele)
             for (n in 1:as.integer(config_rxn[[i]][[j]]))
             {
-               N$Pre[i, config_rxn[[i]][[j+1]]] = N$Pre[i, config_rxn[[i]][[j+1]]] + 1
+               N$Pre[i, ele_index] = N$Pre[i, ele_index] + 1
             }
             j = j + 2
          } else {
-            N$Pre[i, config_rxn[[i]][[j]]] = N$Pre[i, config_rxn[[i]][[j]]] + 1
+            ele = config_rxn[[i]][[j]]
+            ele_index = which(unlist(ele_names) == ele)
+            N$Pre[i, ele_index] = N$Pre[i, ele_index] + 1
             j = j + 1
          }
       } else {
@@ -126,13 +130,17 @@ for (i in 1:length(config_rxn))
       {
          if (config_rxn[[i]][[j]] == "1" || config_rxn[[i]][[j]] == "2")
          {
+            ele = config_rxn[[i]][[j+1]]
+            ele_index = which(unlist(ele_names) == ele)
             for (n in 1:as.integer(config_rxn[[i]][[j]]))
             {
-               N$Post[i, config_rxn[[i]][[j+1]]] = N$Post[i, config_rxn[[i]][[j+1]]] + 1
+               N$Post[i, ele_index] = N$Post[i, ele_index] + 1
             }
             j = j + 2
          } else {
-            N$Post[i, config_rxn[[i]][[j]]] = N$Post[i, config_rxn[[i]][[j]]] + 1
+            ele = config_rxn[[i]][[j]]
+            ele_index = which(unlist(ele_names) == ele)
+            N$Post[i, ele_index] = N$Post[i, ele_index] + 1
             j = j + 1
          }
       } else {
