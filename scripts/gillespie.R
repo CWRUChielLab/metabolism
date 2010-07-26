@@ -92,7 +92,7 @@ gillespie = function(N, tmax, dt)
          targetTime = targetTime + dt
 
          # Report progress
-         if (i %% 200 == 0)
+         if (i %% 512 == 0)
          {
             print(paste("Step: ", i, " of ", maxSteps, " | ", (100*i)%/%maxSteps, "% complete", sep=""))
             print(state)
