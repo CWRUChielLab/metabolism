@@ -121,8 +121,8 @@ gillespie = function(N, tmax, dt)
 }
 
 # Create initial system state
-random_types = sample(init, atoms, replace=TRUE)
-N$M = sapply(unlist(ele_names), function(x) return(sum(random_types==x)))
+random_types = sample(init, size=atoms, replace=TRUE)
+N$M = summary(factor(random_types, levels=ele_names))
 
 # Run the Gillespie algorithm
 out = gillespie(N, tmax=iters, dt=1)
