@@ -2,20 +2,21 @@
 #
 # An implementation of the Gillespie algorithm
 #
-# Usage: ./gillespie.R output_type path_to_config path_to_plots
+# Usage: ./gillespie.R output_type path_to_config path_to_output seed
 #   output_type     the type of output that the R script should create; valid options
 #                      are "pdf", "png", and "latex"
 #   path_to_config  the path of the config.out file to be read
-#   path_to_plots   the path of the output that the R script will create without
-#                      the file extension
+#   path_to_output  the path of the output that the R script will create, such as
+#                      plots and text files, without the file extension
+#   seed            seed for the pseudorandom number generator
 
 # Import command line arguments
 Args = commandArgs()
-if (length(Args) > 8)
+if (length(Args) > 9)
 {
    sink(stderr())
    print("SIMULATION FAILED: Too many parameters!")
-   print("  Usage: ./gillespie.R output_type path_to_config path_to_plots")
+   print("  Usage: ./gillespie.R output_type path_to_config path_to_output seed")
    sink()
    q(save="no", status=1, runLast=FALSE)
 }
@@ -38,10 +39,18 @@ if (!is.na(Args[7]))
 
 if (!is.na(Args[8]))
 {
-   path_to_plots = as.character(Args[8])
+   path_to_output = as.character(Args[8])
 } else {
-   path_to_plots = "plots_gillespie"
+   path_to_output = "gillespie"
 }
+
+if (!is.na(Args[9]))
+{
+   seed = as.integer(Args[9])
+} else {
+   seed = as.integer(runif(1)*2^31)
+}
+set.seed(seed)
 
 # Import experimental parameters, parse Elements and
 # Reactions, calculate reaction hazards, and build a
@@ -101,6 +110,11 @@ gillespie = function(N, tmax, dt)
          tvec[i] = targetTime
          census[i,] = state
 
+         # Write census data to file
+         cat(paste(targetTime, " ", sep=""), file=output_file, append=TRUE)
+         cat(state, file=output_file, append=TRUE)
+         cat(paste(" ", sum(state), "\n", sep=""), file=output_file, append=TRUE)
+
          # Check for running out of time
          if (i > maxSteps)
             return(list(t=tvec, x=census))
@@ -125,6 +139,24 @@ random_types = sample(init, size=atoms, replace=TRUE)
 N$M = summary(factor(random_types, levels=ele_names))
 names(N$M) = NULL
 
+# Dump seed and petri net to file
+output_file = paste(path_to_output, "_config.out", sep="")
+write(paste("seed =", seed), file=output_file)
+write("\nN$Pre",    file=output_file, append=TRUE)
+write.table(N$Pre,  file=output_file, append=TRUE, row.names=FALSE, col.names=FALSE)
+write("\nN$Post",   file=output_file, append=TRUE)
+write.table(N$Post, file=output_file, append=TRUE, row.names=FALSE, col.names=FALSE)
+write("\nN$h",      file=output_file, append=TRUE)
+sink(file=output_file, append=TRUE)
+print(N$h)
+sink()
+
+# Write the census file header
+output_file = paste(path_to_output, "_census.out", sep="")
+cat("iter ", file=output_file)
+cat(unlist(ele_names), file=output_file, append=TRUE)
+cat(" total\n", file=output_file, append=TRUE)
+
 # Run the Gillespie algorithm
 out = gillespie(N, tmax=iters, dt=1)
 
@@ -139,7 +171,7 @@ if (output_type == "latex")
 # graphics device and set a few parameters
 if (output_type == "pdf")
 {
-   pdf(file=paste(path_to_plots, ".pdf", sep=""), family="Palatino")
+   pdf(file=paste(path_to_output, "_plots.pdf", sep=""), family="Palatino")
    par(font.lab=2)
 }
 
@@ -151,7 +183,7 @@ if (output_type == "pdf")
 # graphics device and set a few parameters
 if (output_type == "png")
 {
-   png(file=paste(path_to_plots, "_observed.png", sep=""))
+   png(file=paste(path_to_output, "_plots_observed.png", sep=""))
    par(font.lab=2)
 }
 
@@ -159,7 +191,7 @@ if (output_type == "png")
 # TikZ graphics device and set a few parameters
 if (output_type == "latex")
 {
-   tikz(file=paste(path_to_plots, "_observed.tex", sep=""), width=3, height=2.7)
+   tikz(file=paste(path_to_output, "_plots_observed.tex", sep=""), width=3, height=2.7)
    par(cex=0.7)
    par(font.main=1)
 }
