@@ -77,7 +77,7 @@ gillespie = function(N, tmax, dt)
    repeat
    {
       # Calculate time to next reaction and increase t
-      h  = N$h(state, constants)
+      h  = N$h(state)
       h0 = sum(h)
       if (h0 < 1e-10)
          t = 1e99

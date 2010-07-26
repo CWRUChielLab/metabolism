@@ -189,15 +189,22 @@ for (i in 1:length(config_rxn))
 }
 
 # Define a function for calculating the reaction hazard
-# given the state of the system and the stochastic rate
-# constants
-N$h = function(state, c)
+# given the state of the system
+hazard_def = "function(state)\n{\n\treturn(c("
+for (i in 1:length(config_rxn))
 {
-   hazards = vector(length=length(c))
-   for (i in 1:length(c))
+   hazard_def = paste(hazard_def, constants[i], sep="")
+   for (j in 1:length(config_ele))
    {
-      hazards[i] = c[i] * prod(state^N$Pre[i,])
+      if (N$Pre[i,j] == 1)
+         hazard_def = paste(hazard_def, "*state[", j, "]", sep="")
+      else if (N$Pre[i,j] > 1)
+         hazard_def = paste(hazard_def, "*state[", j, "]^", N$Pre[i,j], sep="")
    }
-   return(hazards)
+   if (i < nrow(N$Pre))
+      hazard_def = paste(hazard_def, ",\n\t\t", sep="")
+   else
+      hazard_def = paste(hazard_def, "))\n}", sep="")
 }
+N$h = eval(parse(text=hazard_def))
 
