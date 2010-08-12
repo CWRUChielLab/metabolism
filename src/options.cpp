@@ -81,10 +81,10 @@ Options::Options( int argc, char* argv[] )
    // assigning the second and third parameters passed to
    // --files with c=1.
 #if defined(HAVE_QT) | defined(HAVE_NCURSES)
-   const char* options_string = "-a:f:ghi:l:prs:SvVx:y:z:";
+   const char* options_string = "-a:f:ghi:l:p::rs:SvVx:y:z:";
 #else
    // -g option is not available when no gui is compiled
-   const char* options_string = "-a:f:hi:l:prs:SvVx:y:z:";
+   const char* options_string = "-a:f:hi:l:p::rs:SvVx:y:z:";
 #endif
 
    int option_index = 0, c;
@@ -322,7 +322,14 @@ Options::Options( int argc, char* argv[] )
          case 'l':
             break;
          case 'p':
-            progress = false;
+            // When running the application on a Mac through Finder or "open"
+            // in Terminal, an extra option is added that looks something like
+            // "-psn_0_58333".  This is the process serial number.  We don't
+            // have any use for it yet.  If optarg is nonzero (indicating a
+            // value is present), then ignore it.  Otherwise, turn on
+            // profiling.
+            if(!optarg)
+               progress = false;
             break;
          case 'r':
             doRxns = false;
