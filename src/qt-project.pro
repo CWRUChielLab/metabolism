@@ -35,8 +35,8 @@ unix:!macx {
 }
 
 macx {
-   INCLUDEPATH += /usr/local/qwt-5.1.1/include
-   QMAKE_LIBDIR += /usr/local/qwt-5.1.1/lib
+   INCLUDEPATH += /usr/local/qwt-5.2.1/include
+   QMAKE_LIBDIR += /usr/local/qwt-5.2.1/lib
    LIBS += -lqwt
    #ICON = img/nernst.icns
 
