@@ -46,9 +46,6 @@ Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowF
    // in order of descending slot computational complexity
    connect( button, SIGNAL( clicked() ), viewer, SLOT( startPaint() ) );
    connect( button, SIGNAL( clicked() ), this, SLOT( runSim() ) );
-   connect( this, SIGNAL( iterDone() ), this, SLOT( updateButton() ) );
-   connect( this, SIGNAL( iterDone() ), plot, SLOT( update() ) );
-   connect( this, SIGNAL( iterDone() ), viewer, SLOT( updateGL() ) );
 }
 
 
@@ -80,11 +77,13 @@ Window::runSim()
 
       while( sim->iterate() )
       {
+         // Update gui components
+         updateButton();
+         plot->update();
+         viewer->updateGL();
+
          // Check for Qt signals and events
          QCoreApplication::processEvents();
-
-         // Signal that an iteration has completed
-         emit iterDone();
       }
 
       running = false;

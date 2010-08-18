@@ -326,8 +326,8 @@ Options::Options( int argc, char* argv[] )
             // in Terminal, an extra option is added that looks something like
             // "-psn_0_58333".  This is the process serial number.  We don't
             // have any use for it yet.  If optarg is nonzero (indicating a
-            // value is present), then ignore it.  Otherwise, turn on
-            // profiling.
+            // value is present), then ignore it.  Otherwise, turn on the
+            // progress bar.
             if(!optarg)
                progress = false;
             break;
