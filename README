@@ -26,6 +26,12 @@ This project uses the following:
       Instructions'). Available at
       http://qt.nokia.com/.
 
+   Qwt
+      A Qt library for creating plots. Required for building
+      with Qt. Qwt may require being built statically.
+      Available at
+      http://qwt.sourceforge.net/.
+
    ncurses
       An API for building text user interfaces. Used by
       default but not required (see 'Compilation
@@ -41,13 +47,18 @@ This project uses the following:
    deSolve
       General solvers for R for initial value problems of
       differential equations. Required by some scripts for
-      analysis. Available at
+      analysis. The package can be installed in R using:
+         install.packages("deSolve")
+      The package is also available at
       http://cran.r-project.org/web/packages/deSolve/.
 
    tikzDevice
       LaTeX graphics for R. Optional parameter 'outputtype'
       or 'uselatex' for each R script allows LaTeX documents
-      to be built instead of PDFs or PNGs. Available at
+      to be built instead of PDFs or PNGs. The package can
+      be installed in R using:
+         install.packages("tikzDevice")
+      The package is also available at
       http://cran.r-project.org/web/packages/tikzDevice/.
 
 
@@ -63,7 +74,8 @@ Execute the following for a standard compilation:
    cd metabolism/src
    make
 
-The program created is called "metabolism".
+The program created is called "metabolism" (or
+"metabolism.app" on Mac).
 
 By default, Qt and ncurses are linked to the program. If
 developer's libraries are not available, the program can be
@@ -81,9 +93,14 @@ targets are:
 An Example Simulation and Analysis
 ============================================================
 
-Once compiled, try running:
+Once compiled, try running the following from the
+metabolism/src directory:
 
    ./metabolism --gui-off --load ../load/mm.load --iters 2000 
+
+or on Mac:
+
+   metabolism.app/Contents/MacOS/metabolism --gui-off --load ../load/mm.load --iters 2000
 
 This will run a quick simulation of the Michaelis-Menten
 enzyme kinetics system. Data is output to the files
@@ -108,6 +125,12 @@ be "mixed" or "stirred" to maximize the rate of collisions
 between reactants. Now try:
 
    ./metabolism --gui-off --load ../load/mm.load --iters 2000 --shuffle
+   ../scripts/rate_plot.R pdf config.out census.out plots-shuffle
+   evince plots-shuffle.pdf
+
+or on Mac:
+
+   metabolism.app/Contents/MacOS/metabolism --gui-off --load ../load/mm.load --iters 2000 --shuffle
    ../scripts/rate_plot.R pdf config.out census.out plots-shuffle
    evince plots-shuffle.pdf
 
