@@ -100,7 +100,7 @@ metabolism/src directory:
 
 or on Mac:
 
-   metabolism.app/Contents/MacOS/metabolism --gui-off --load ../load/mm.load --iters 2000
+   open metabolism.app --args --gui-off --load ../load/mm.load --iters 2000
 
 This will run a quick simulation of the Michaelis-Menten
 enzyme kinetics system. Data is output to the files
@@ -130,7 +130,7 @@ between reactants. Now try:
 
 or on Mac:
 
-   metabolism.app/Contents/MacOS/metabolism --gui-off --load ../load/mm.load --iters 2000 --shuffle
+   open metabolism.app --args --gui-off --load ../load/mm.load --iters 2000 --shuffle
    ../scripts/rate_plot.R pdf config.out census.out plots-shuffle
    evince plots-shuffle.pdf
 
