@@ -118,9 +118,10 @@ Window::shouldSave()
 
 // Prompt the user for a directory in which to
 // copy the temporary files as permanent files;
-// returns true if all copies were successful and
+// returns true if all copies were successful or
+// if the user changed his or her mind and
 // false otherwise; temporary files are deleted
-// only if copying is successful
+// if the function returns true
 bool
 Window::saveFiles()
 {
@@ -146,6 +147,10 @@ Window::saveFiles()
             return false;
             break;
          case QMessageBox::Discard:
+            configFile.remove();
+            censusFile.remove();
+            diffusionFile.remove();
+            randFile.remove();
             return true;
             break;
          default:
@@ -195,6 +200,10 @@ Window::saveFiles()
                return false;
                break;
             case QMessageBox::Discard:
+               configFile.remove();
+               censusFile.remove();
+               diffusionFile.remove();
+               randFile.remove();
                return true;
                break;
             default:
