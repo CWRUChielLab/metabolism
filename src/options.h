@@ -31,11 +31,15 @@ class Options
       int sleep;
       bool verbose;
       bool progress;
-      std::ifstream loadFile;
+      std::string configFilePath;
+      std::string censusFilePath;
+      std::string diffusionFilePath;
+      std::string randFilePath;
       std::ofstream configFile;
       std::ofstream censusFile;
       std::ofstream diffusionFile;
       std::ofstream randFile;
+      std::ifstream loadFile;
 
       // Options attribute values
       enum

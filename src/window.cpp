@@ -3,6 +3,8 @@
 
 #ifdef HAVE_QT
 
+#include <cassert>
+#include <QDir>
 #include "safecalls.h"
 #include "window.h"
 using namespace SafeCalls;
@@ -17,6 +19,7 @@ Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowF
    sim = initSim;
 
    running = false;
+   closing = false;
 
    // Set up GUI components
    viewer = safeNew( Viewer( o, sim, this ) );
@@ -55,7 +58,151 @@ void
 Window::closeEvent( QCloseEvent* event )
 {
    sim->end();
-   QWidget::closeEvent( event );
+   closing = true;
+
+   if( running )
+   {
+      event->ignore();
+   }
+   else
+   {
+      // Prompt the user asking if temporary files
+      // should be saved in a permanent location; if the
+      // user choses to save the files, prompt for a
+      // directory repeatedly until the files are copied
+      // successfully
+      if( shouldSave() )
+         while( !saveFiles() ) {}
+      event->accept();
+   }
+}
+
+
+// Prompt the user asking if temporary files
+// should be saved in a permanent location;
+// returns true if the user chose to save and
+// false otherwise; temporary files are deleted
+// if save is not chosen
+bool
+Window::shouldSave()
+{
+   // Grab the temporary files
+   QFile configFile( o->configFilePath.c_str() );
+   QFile censusFile( o->censusFilePath.c_str() );
+   QFile diffusionFile( o->diffusionFilePath.c_str() );
+   QFile randFile( o->randFilePath.c_str() );
+
+   int choice = QMessageBox::question( this, "Save simulation output?",
+      "Would you like to save the output for this simulation?",
+      QMessageBox::Save | QMessageBox::Discard,
+      QMessageBox::Save );
+
+   switch( choice )
+   {
+      case QMessageBox::Save:
+         return true;
+         break;
+      case QMessageBox::Discard:
+         configFile.remove();
+         censusFile.remove();
+         diffusionFile.remove();
+         randFile.remove();
+         return false;
+         break;
+      default:
+         assert(0);
+         break;
+   }
+}
+
+
+// Prompt the user for a directory in which to
+// copy the temporary files as permanent files;
+// returns true if all copies were successful and
+// false otherwise; temporary files are deleted
+// only if copying is successful
+bool
+Window::saveFiles()
+{
+   // Grab the temporary files
+   QFile configFile( o->configFilePath.c_str() );
+   QFile censusFile( o->censusFilePath.c_str() );
+   QFile diffusionFile( o->diffusionFilePath.c_str() );
+   QFile randFile( o->randFilePath.c_str() );
+
+   // Prompt the user for a directory
+   QString dirPath = QFileDialog::getExistingDirectory( this, "Select a directory" );
+
+   if( dirPath == NULL )
+   {
+      int choice = QMessageBox::warning( this, "Cancel save?",
+         "Are you sure you do not want to save the simulation output?",
+         QMessageBox::Save | QMessageBox::Discard,
+         QMessageBox::Save );
+
+      switch( choice )
+      {
+         case QMessageBox::Save:
+            return false;
+            break;
+         case QMessageBox::Discard:
+            return true;
+            break;
+         default:
+            assert(0);
+            break;
+      }
+   }
+   else
+   {
+      // Delete any files in the target directory with the target
+      // names so that copying can proceed
+      QFile::remove( QDir( dirPath ).filePath( "config.out" ) );
+      QFile::remove( QDir( dirPath ).filePath( "census.out" ) );
+      QFile::remove( QDir( dirPath ).filePath( "diffusion.out" ) );
+      QFile::remove( QDir( dirPath ).filePath( "rand.out" ) );
+
+      // Copy the temporary files to the chosen directory; remove the
+      // temporary files and return true if all copy steps are successful,
+      // otherwise remove any files that were successfully copied and
+      // return false
+      if( configFile.copy( QDir( dirPath ).filePath( "config.out" ) ) &&
+          censusFile.copy( QDir( dirPath ).filePath( "census.out" ) ) &&
+          diffusionFile.copy( QDir( dirPath ).filePath( "diffusion.out" ) ) &&
+          randFile.copy( QDir( dirPath ).filePath( "rand.out" ) ) )
+      {
+         configFile.remove();
+         censusFile.remove();
+         diffusionFile.remove();
+         randFile.remove();
+         return true;
+      }
+      else
+      {
+         QFile::remove( QDir( dirPath ).filePath( "config.out" ) );
+         QFile::remove( QDir( dirPath ).filePath( "census.out" ) );
+         QFile::remove( QDir( dirPath ).filePath( "diffusion.out" ) );
+         QFile::remove( QDir( dirPath ).filePath( "rand.out" ) );
+
+         int choice = QMessageBox::warning( this, "Problem encountered!",
+            "There was a problem writing to the directory you selected. Perhaps you don't have permission to write to this directory. Would you like to try saving the simulation output in a different directory?",
+            QMessageBox::Save | QMessageBox::Discard,
+            QMessageBox::Save );
+
+         switch( choice )
+         {
+            case QMessageBox::Save:
+               return false;
+               break;
+            case QMessageBox::Discard:
+               return true;
+               break;
+            default:
+               assert(0);
+               break;
+         }
+      }
+   }
 }
 
 
@@ -87,6 +234,8 @@ Window::runSim()
       }
 
       running = false;
+      if( closing )
+         close();
    }
 }
 

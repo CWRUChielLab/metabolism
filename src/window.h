@@ -34,11 +34,15 @@ class Window : public QMainWindow
       Options* o;
       Sim* sim;
       bool running;
+      bool closing;
 
       // GUI components
       Viewer* viewer;
       Plot* plot;
       QPushButton* button;
+
+      bool shouldSave();
+      bool saveFiles();
 };
 
 #endif /* HAVE_QT */

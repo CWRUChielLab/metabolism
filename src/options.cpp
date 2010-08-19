@@ -3,6 +3,9 @@
 
 #include <cassert>
 #include <cstdlib> // exit
+#ifdef HAVE_QT
+#include <QDir>
+#endif
 #include "options.h"
 #include "safecalls.h"
 using namespace SafeCalls;
@@ -31,6 +34,10 @@ Options::Options( int argc, char* argv[] )
    sleep = 0;
    verbose = false;
    progress = true;
+   configFilePath = "config.out";
+   censusFilePath = "census.out";
+   diffusionFilePath = "diffusion.out";
+   randFilePath = "rand.out";
 
    // Options that take only long-opt form should be indexed here.
    // In order to not clash with single-letter options, start from
@@ -251,34 +258,16 @@ Options::Options( int argc, char* argv[] )
             switch( files_read_in_so_far )
             {
                case 1:
-                  censusFile.open( optarg );
-                  if( censusFile.fail() )
-                  {
-                     std::cout << "options: unable to open file \"" << optarg << "\"!" << std::endl;
-                     exit( EXIT_FAILURE );
-                  } else {
-                     files_read_in_so_far++;
-                  }
+                  censusFilePath = optarg;
+                  files_read_in_so_far++;
                   break;
                case 2:
-                  diffusionFile.open( optarg );
-                  if( diffusionFile.fail() )
-                  {
-                     std::cout << "options: unable to open file \"" << optarg << "\"!" << std::endl;
-                     exit( EXIT_FAILURE );
-                  } else {
-                     files_read_in_so_far++;
-                  }
+                  diffusionFilePath = optarg;
+                  files_read_in_so_far++;
                   break;
                case 3:
-                  randFile.open( optarg );
-                  if( randFile.fail() )
-                  {
-                     std::cout << "options: unable to open file \"" << optarg << "\"!" << std::endl;
-                     exit( EXIT_FAILURE );
-                  } else {
-                     files_read_in_so_far++;
-                  }
+                  randFilePath = optarg;
+                  files_read_in_so_far++;
                   break;
                default:
                   if( files_read_in_so_far >= 4 )
@@ -298,14 +287,8 @@ Options::Options( int argc, char* argv[] )
             // The first parameter read in for --files will
             // have c='f'. All others will have c=1.
             assert( files_read_in_so_far == 0 );
-            configFile.open( optarg );
-            if( configFile.fail() )
-            {
-               std::cout << "options: unable to open file \"" << optarg << "\"!" << std::endl;
-               exit( EXIT_FAILURE );
-            } else {
-               files_read_in_so_far++;
-            }
+            configFilePath = optarg;
+            files_read_in_so_far++;
             break;
 #if defined(HAVE_QT) | defined(HAVE_NCURSES)
          case 'g':
@@ -379,42 +362,42 @@ Options::Options( int argc, char* argv[] )
 void
 Options::openFiles()
 {
-   // Assign default file names for files not specified
-   if( !configFile.is_open() )
+   // Ignore default file names or file names read in as
+   // arguments if the Qt gui is being used
+#ifdef HAVE_QT
+   if( gui == GUI_QT )
    {
-      configFile.open( "config.out" );
-      if( configFile.fail() )
-      {
-            std::cout << "openFiles: unable to open file \"config.out\"!" << std::endl;
-            exit( EXIT_FAILURE );
-      }
+      configFilePath = QDir::temp().filePath( "metabolism.config.out" ).toStdString();
+      censusFilePath = QDir::temp().filePath( "metabolism.census.out" ).toStdString();
+      diffusionFilePath = QDir::temp().filePath( "metabolism.diffusion.out" ).toStdString();
+      randFilePath = QDir::temp().filePath( "metabolism.rand.out" ).toStdString();
    }
-   if( !censusFile.is_open() )
+#endif
+
+   // Open the files for writing
+   configFile.open( configFilePath.c_str() );
+   if( configFile.fail() )
    {
-      censusFile.open( "census.out" );
-      if( censusFile.fail() )
-      {
-            std::cout << "openFiles: unable to open file \"census.out\"!" << std::endl;
-            exit( EXIT_FAILURE );
-      }
+         std::cout << "openFiles: unable to open file \"" << configFilePath << "\"!" << std::endl;
+         exit( EXIT_FAILURE );
    }
-   if( !diffusionFile.is_open() )
+   censusFile.open( censusFilePath.c_str() );
+   if( censusFile.fail() )
    {
-      diffusionFile.open( "diffusion.out" );
-      if( diffusionFile.fail() )
-      {
-            std::cout << "openFiles: unable to open file \"diffusion.out\"!" << std::endl;
-            exit( EXIT_FAILURE );
-      }
+         std::cout << "openFiles: unable to open file \"" << censusFilePath << "\"!" << std::endl;
+         exit( EXIT_FAILURE );
    }
-   if( !randFile.is_open() )
+   diffusionFile.open( diffusionFilePath.c_str() );
+   if( diffusionFile.fail() )
    {
-      randFile.open( "rand.out" );
-      if( randFile.fail() )
-      {
-            std::cout << "openFiles: unable to open file \"rand.out\"!" << std::endl;
-            exit( EXIT_FAILURE );
-      }
+         std::cout << "openFiles: unable to open file \"" << diffusionFilePath << "\"!" << std::endl;
+         exit( EXIT_FAILURE );
+   }
+   randFile.open( randFilePath.c_str() );
+   if( randFile.fail() )
+   {
+         std::cout << "openFiles: unable to open file \"" << randFilePath << "\"!" << std::endl;
+         exit( EXIT_FAILURE );
    }
 }
 
@@ -454,8 +437,14 @@ Options::printHelp()
    std::cout << "    each iteration."                                                         << std::endl;
    std::cout <<                                                                                  std::endl;
    std::cout << "-a, --atoms         Number of atoms in the world. Default: 2000"             << std::endl;
+#ifdef HAVE_QT
+   std::cout << "-f, --files         Specify the names of the four output files. Ignored if"  << std::endl;
+   std::cout << "                      the Qt GUI is used."                                   << std::endl;
+   std::cout << "                      Default: config.out census.out diffusion.out rand.out" << std::endl;
+#else
    std::cout << "-f, --files         Specify the names of the four output files."             << std::endl;
    std::cout << "                      Default: config.out census.out diffusion.out rand.out" << std::endl;
+#endif
 #if defined(HAVE_QT) & defined(HAVE_NCURSES)
    std::cout << "-g, --gui-off       Disable the Qt GUI or use the ncurses text-based GUI"    << std::endl;
    std::cout << "    --gui-ncurses     instead."                                              << std::endl;

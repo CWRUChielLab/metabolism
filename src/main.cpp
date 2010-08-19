@@ -29,7 +29,7 @@ handleExit( int sig )
 
 
 int
-main ( int argc, char* argv[] )
+main( int argc, char* argv[] )
 {
 #ifdef HAVE_QT
    // Create the core Qt controller application
