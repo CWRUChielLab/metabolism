@@ -82,7 +82,7 @@ if (do_integration == "true")
    initial_values = unlist(ele_data[1,])
    rates = function(t, state, params)
             {
-               derivatives = as.vector(t(N$Post-N$Pre) %*% N$h(state, params))
+               derivatives = as.vector(t(N$Post-N$Pre) %*% N$h(state))
                return(list(derivatives))
             }
    expected_data = ode(initial_values, seq(0, iters, length.out=10000), rates, constants)
