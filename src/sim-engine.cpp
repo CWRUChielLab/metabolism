@@ -7,7 +7,7 @@
 #include <cstdarg> // variable arguments handling
 #include <cstring> // memset
 #include <fstream>
-#include <SFMT.h>
+#include <SFMT/SFMT.h>
 #ifdef BLR_USEMAC
 #include <sys/malloc.h> // aligned memory retrieval on Mac
 #endif

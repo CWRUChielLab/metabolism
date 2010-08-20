@@ -1,6 +1,7 @@
 /* sim-io.cpp
  */
 
+#include <boost/iostreams/stream.hpp>
 #include <cassert>
 #include <cstdlib> // exit
 #include <fstream>
@@ -12,6 +13,28 @@
 #include "safecalls.h"
 #include "sim.h"
 using namespace SafeCalls;
+
+
+#ifdef HAVE_NCURSES
+// Define a sink device for sending input to the
+// ncurses function addnstr() which writes to the
+// screen (the constructor requires something be
+// passed as an argument)
+class ncurses_stream : public boost::iostreams::sink
+{
+   public:
+      ncurses_stream(int) {};
+      std::streamsize write( const char* s, std::streamsize n )
+      {
+         addnstr( s, n );
+         return n;
+      }
+};
+
+// Declare and initialize a stream using the
+// ncurses sink device
+boost::iostreams::stream<ncurses_stream> screen(0);
+#endif
 
 
 // Start writing data to files, set up ncurses
@@ -42,16 +65,16 @@ Sim::initializeIO()
          // Print extra information about the simulation
          if( o->verbose )
          {
-            printw( "Press Ctrl-c to quit.\n" );
-            printw( "------\n" );
-            printEles( (std::ostream*)(NULL) );
-            printw( "\n" );
-            printRxns( (std::ostream*)(NULL) );
-            printw( "\n" );
-            printInits( (std::ostream*)(NULL) );
-            printw( "\n" );
-            printExtincts( (std::ostream*)(NULL) );
-            printw( "------\n" );
+            screen << "Press Ctrl-c to quit." << std::endl;
+            screen << "------" << std::endl;
+            printEles( &screen );
+            screen << std::endl;
+            printRxns( &screen );
+            screen << std::endl;
+            printInits( &screen );
+            screen << std::endl;
+            printExtincts( &screen );
+            screen << "------" << std::endl;
          }
 
          scrX = 0;
@@ -469,14 +492,12 @@ Sim::reportProgress()
       if( o->gui == Options::GUI_NCURSES )
       {
 #ifdef HAVE_NCURSES
-         printw( "Iteration: %d of %d | %d%% complete\n",
-            itersCompleted,
-            o->maxIters,
-            (int)( 100 * (double)itersCompleted / (double)o->maxIters ) );
+         screen << "Iteration: " << itersCompleted << " of " << o->maxIters << " | ";
+         screen << (int)( 100 * (double)itersCompleted / (double)o->maxIters ) << "\% complete" << std::endl;
          refresh();
 #endif
       } else {
-         std::cout << "                                                                       \r" << std::flush;
+         std::cout << "                                                                          \r" << std::flush;
          std::cout << "Iteration: " << itersCompleted << " of " << o->maxIters << " | ";
          std::cout << (int)( 100 * (double)itersCompleted / (double)o->maxIters ) << "\% complete\r" << std::flush;
       }
@@ -504,33 +525,33 @@ Sim::printWorld()
 
    // Print top border
    for( int x = -1; x < o->worldX + 1; x++ )
-      printw( ". " );
-   printw( "\n" );
+      screen << ". ";
+   screen << std::endl;
 
    // Print with origin at bottom left
    for( int y = o->worldY - 1; y >= 0; y-- )
    {
       // Print left border
-      printw( ". " );
+      screen << ". ";
 
       // Print contents of world
       for( int x = 0; x < o->worldX; x++ )
       {
          if( world[ getWorldIndex(x,y) ] != NULL )
-            printw( "%c ", world[ getWorldIndex(x,y) ]->getType()->getSymbol() );
+            screen << world[ getWorldIndex(x,y) ]->getType()->getSymbol() << " ";
          else
-            printw( "  " );
+            screen << "  ";
       }
       
       // Print right border
-      printw( ". " );
-      printw( "\n" );
+      screen << ". ";
+      screen << std::endl;
    }
 
    // Print bottom border
    for( int x = -1; x < o->worldX + 1; x++ )
-      printw( ". " );
-   printw( "\n\n" );
+      screen << ". ";
+   screen << std::endl << std::endl;
 
    refresh();
 #endif
@@ -538,37 +559,26 @@ Sim::printWorld()
 
 
 // Print the list of Elements to an output
-// steam, or print using ncurses if the stream
-// is NULL
+// stream
+template <typename OutputStream>
 void
-Sim::printEles( std::ostream* out )
+Sim::printEles( OutputStream* out )
 {
    // Loop through the periodicTable, printing each Element
    for( ElementMap::iterator i = periodicTable.begin(); i != periodicTable.end(); i++ )
-   {
+   {  
       Element* thisEle = i->second;
       if( thisEle->getName() != "Solvent" )
-      {
-         if( out == (std::ostream*)(NULL) )
-         {
-#ifdef HAVE_NCURSES
-            printw( "ele %s %c %s\n", thisEle->getName().c_str(), thisEle->getSymbol(), thisEle->getColor().c_str() );
-#endif
-         }
-         else
-         {
-            *out <<  "ele " << thisEle->getName() << " " << thisEle->getSymbol() << " " << thisEle->getColor() << std::endl;
-         }
-      }
+         *out <<  "ele " << thisEle->getName() << " " << thisEle->getSymbol() << " " << thisEle->getColor() << std::endl;
    }
 }
 
 
 // Print the list of Reactions to an output
-// steam, or print using ncurses if the stream
-// is NULL
+// stream
+template <typename OutputStream>
 void
-Sim::printRxns( std::ostream* out )
+Sim::printRxns( OutputStream* out )
 {
    // Loop through the rxnTable, printing each Reaction
    for( ReactionMap::iterator i = rxnTable.begin(); i != rxnTable.end(); i++ )
@@ -590,16 +600,7 @@ Sim::printRxns( std::ostream* out )
       }
 
       // Print the "rxn" keyword and the probability
-      if( out == (std::ostream*)(NULL) )
-      {
-#ifdef HAVE_NCURSES
-         printw( "rxn %f ", thisRxn->getProb() );
-#endif
-      }
-      else
-      {
-         *out << "rxn " << thisRxn->getProb() << " ";
-      }
+      *out << "rxn " << thisRxn->getProb() << " ";
 
       // Print the reactants, grouping copies of one type together
       // with stoichiometric coefficients
@@ -607,16 +608,7 @@ Sim::printRxns( std::ostream* out )
       std::string name;
       if( reactantCount.empty() )
       {
-         if( out == (std::ostream*)(NULL) )
-         {
-#ifdef HAVE_NCURSES
-            printw( "*" );
-#endif
-         }
-         else
-         {
-            *out << "*";
-         }
+         *out << "*";
       }
       else
       {
@@ -627,90 +619,28 @@ Sim::printRxns( std::ostream* out )
             if( coefficient == 1 )
             {
                if( j == reactantCount.begin() )
-               {
-                  if( out == (std::ostream*)(NULL) )
-                  {
-#ifdef HAVE_NCURSES
-                     printw( "%s", name.c_str() );
-#endif
-                  }
-                  else
-                  {
-                     *out << name;
-                  }
-               }
+                  *out << name;
                else
-               {
-                  if( out == (std::ostream*)(NULL) )
-                  {
-#ifdef HAVE_NCURSES
-                     printw( " + %s", name.c_str() );
-#endif
-                  }
-                  else
-                  {
-                     *out << " + " << name;
-                  }
-               }
+                  *out << " + " << name;
             }
             else
             {
                if( j == reactantCount.begin() )
-               {
-                  if( out == (std::ostream*)(NULL) )
-                  {
-#ifdef HAVE_NCURSES
-                     printw( "%d %s", coefficient, name.c_str() );
-#endif
-                  }
-                  else
-                  {
-                     *out << coefficient << " " << name;
-                  }
-               }
+                  *out << coefficient << " " << name;
                else
-               {
-                  if( out == (std::ostream*)(NULL) )
-                  {
-#ifdef HAVE_NCURSES
-                     printw( " + %d %s", coefficient, name.c_str() );
-#endif
-                  }
-                  else
-                  {
-                     *out << " + " << coefficient << " " << name;
-                  }
-               }
+                  *out << " + " << coefficient << " " << name;
             }
          }
       }
 
       // Print the reaction arrow, separating reactants from products
-      if( out == (std::ostream*)(NULL) )
-      {
-#ifdef HAVE_NCURSES
-         printw( " -> " );
-#endif
-      }
-      else
-      {
-         *out << " -> ";
-      }
+      *out << " -> ";
 
       // Print the products, grouping copies of one type together
       // with stoichiometric coefficients
       if( productCount.empty() )
       {
-         if( out == (std::ostream*)(NULL) )
-         {
-#ifdef HAVE_NCURSES
-            printw( "*" );
-#endif
-         }
-         else
-         {
-            *out << "*";
-         }
+         *out << "*";
       }
       else
       {
@@ -721,167 +651,56 @@ Sim::printRxns( std::ostream* out )
             if( coefficient == 1 )
             {
                if( j == productCount.begin() )
-               {
-                  if( out == (std::ostream*)(NULL) )
-                  {
-#ifdef HAVE_NCURSES
-                     printw( "%s", name.c_str() );
-#endif
-                  }
-                  else
-                  {
-                     *out << name;
-                  }
-               }
+                  *out << name;
                else
-               {
-                  if( out == (std::ostream*)(NULL) )
-                  {
-#ifdef HAVE_NCURSES
-                     printw(" + %s", name.c_str() );
-#endif
-                  }
-                  else
-                  {
-                     *out << " + " << name;
-                  }
-               }
+                  *out << " + " << name;
             }
             else
             {
                if( j == productCount.begin() )
-               {
-                  if( out == (std::ostream*)(NULL) )
-                  {
-#ifdef HAVE_NCURSES
-                     printw( "%d %s", coefficient, name.c_str() );
-#endif
-                  }
-                  else
-                  {
-                     *out << coefficient << " " << name;
-                  }
-               }
+                  *out << coefficient << " " << name;
                else
-               {
-                  if( out == (std::ostream*)(NULL) )
-                  {
-#ifdef HAVE_NCURSES
-                     printw( " + %d %s", coefficient, name.c_str() );
-#endif
-                  }
-                  else
-                  {
-                     *out << " + " << coefficient << " " << name;
-                  }
-               }
+                  *out << " + " << coefficient << " " << name;
             }
          }
       }
 
       // End the line
-      if( out == (std::ostream*)(NULL) )
-      {
-#ifdef HAVE_NCURSES
-         printw( "\n" );
-#endif
-      }
-      else
-      {
-         *out << std::endl;
-      }
-   }
-}
-
-
-// Print the list of inits to an output
-// steam, or print using ncurses if the stream
-// is NULL
-void
-Sim::printInits( std::ostream* out )
-{
-   if( out == (std::ostream*)(NULL) )
-   {
-#ifdef HAVE_NCURSES
-      printw( "init %d ", initialTypes.size() );
-#endif
-   }
-   else
-   {
-      *out << "init " << initialTypes.size() << " ";
-   }
-
-   for( unsigned int i = 0; i < initialTypes.size(); i++ )
-   {
-      if( out == (std::ostream*)(NULL) )
-      {
-#ifdef HAVE_NCURSES
-         printw( "%s ", initialTypes[i]->getName().c_str() );
-#endif
-      }
-      else
-      {
-         *out << initialTypes[i]->getName() << " ";
-      }
-   }
-
-   if( out == (std::ostream*)(NULL) )
-   {
-#ifdef HAVE_NCURSES
-      printw( "\n" );
-#endif
-   }
-   else
-   {
       *out << std::endl;
    }
 }
 
 
-// Print the list of extincts to an output
-// steam, or print using ncurses if the stream
-// is NULL
+// Print the list of inits to an output
+// stream
+template <typename OutputStream>
 void
-Sim::printExtincts( std::ostream* out )
+Sim::printInits( OutputStream* out )
+{
+   *out << "init " << initialTypes.size() << " ";
+
+   for( unsigned int i = 0; i < initialTypes.size(); i++ )
+      *out << initialTypes[i]->getName() << " ";
+
+   *out << std::endl;
+}
+
+
+// Print the list of extincts to an output
+// stream
+template <typename OutputStream>
+void
+Sim::printExtincts( OutputStream* out )
 {
    for( std::list<ElementVector>::iterator i = extinctionTypes.begin(); i != extinctionTypes.end(); i++ )
    {
       ElementVector thisEleVector = *(i);
-      if( out == (std::ostream*)(NULL) )
-      {
-#ifdef HAVE_NCURSES
-         printw( "extinct %d ", thisEleVector.size() );
-#endif
-      }
-      else
-      {
-         *out << "extinct " << thisEleVector.size() << " ";
-      }
+      *out << "extinct " << thisEleVector.size() << " ";
 
       for( unsigned int j = 0; j < thisEleVector.size(); j++ )
-      {
-         if( out == (std::ostream*)(NULL) )
-         {
-#ifdef HAVE_NCURSES
-            printw( "%s ", thisEleVector[j]->getName().c_str() );
-#endif
-         }
-         else
-         {
-            *out << thisEleVector[j]->getName() << " ";
-         }
-      }
+         *out << thisEleVector[j]->getName() << " ";
 
-      if( out == (std::ostream*)(NULL) )
-      {
-#ifdef HAVE_NCURSES
-         printw( "\n" );
-#endif
-      }
-      else
-      {
-         *out << std::endl;
-      }
+      *out << std::endl;
    }
 }
 

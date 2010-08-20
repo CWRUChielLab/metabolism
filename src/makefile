@@ -152,7 +152,7 @@ GIT_TAG := $(shell git describe --tags)
 DEFINES = MEXP=132049
 FLAGS   = -pipe -O3 -Wall -W
 LIBS    =
-INCPATH = -I. -I../SFMT
+INCPATH = ..
 
 
 # Determine details about the system and define OS-specific
@@ -215,6 +215,7 @@ qt-makefile: $(QT_PROJECT) $(SOURCES) $(QT_SOURCES) $(HEADERS) $(QT_HEADERS)
 	qmake -o $@ -spec $(SPEC) \
 		"TARGET=metabolism" \
 		"DEFINES+=$(DEFINES)" \
+		"INCLUDEPATH+=$(INCPATH)" \
 		"LIBS+=$(LIBS)" \
 		"MACTARGET=$(MACTARGET)" \
 		"OBJECTS_DIR=$(OBJDIR)" \
@@ -225,6 +226,7 @@ qt-makefile-no-ncurses: $(QT_PROJECT) $(SOURCES) $(QT_SOURCES) $(HEADERS) $(QT_H
 	qmake -o $@ -spec $(SPEC) \
 		"TARGET=metabolism-qt" \
 		"DEFINES+=$(DEFINES)" \
+		"INCLUDEPATH+=$(INCPATH)" \
 		"LIBS+=$(LIBS)" \
 		"MACTARGET=$(MACTARGET)" \
 		"OBJECTS_DIR=$(OBJDIR)" \
@@ -236,7 +238,7 @@ qt-makefile-no-ncurses: $(QT_PROJECT) $(SOURCES) $(QT_SOURCES) $(HEADERS) $(QT_H
 # Define the generic rule for building .o object files from
 # .cpp source files for Qt-independent executables
 $(OBJDIR)/%.o: %.cpp
-	g++ -c $(FLAGS) $(addprefix -D, $(DEFINES)) $(INCPATH) -o $@ $<
+	g++ -c $(FLAGS) $(addprefix -D, $(DEFINES)) $(addprefix -I, $(INCPATH)) -o $@ $<
 
 
 # Specify dependencies for all object files and include a
@@ -278,7 +280,7 @@ $(OBJDIR)/SFMT.o: ../SFMT/SFMT.c ../SFMT/SFMT.h \
 		../SFMT/SFMT-params216091.h \
 		../SFMT/SFMT-alti.h \
 		../SFMT/SFMT-sse2.h
-	gcc -c -msse2 $(FLAGS) $(addprefix -D, $(DEFINES)) $(INCPATH) -o $@ $<
+	gcc -c -msse2 $(FLAGS) $(addprefix -D, $(DEFINES)) $(addprefix -I, $(INCPATH)) -o $@ $<
 
 $(OBJDIR)/sim-engine.o: sim-engine.cpp sim.h \
 		atom.h \
