@@ -100,7 +100,7 @@ metabolism/src directory:
 
 or on Mac:
 
-   open metabolism.app --args --gui-off --load ../load/mm.load --iters 2000
+   metabolism.app/Contents/MacOS/metabolism --gui-off --load ../load/mm.load --iters 2000
 
 This will run a quick simulation of the Michaelis-Menten
 enzyme kinetics system. Data is output to the files
@@ -115,6 +115,10 @@ chemical species concentration against time. View the PDF:
 
    evince plots.pdf
 
+or on Mac:
+
+   open plots.pdf
+
 Both observed (simulated) and expected trajectories are
 plotted for all chemical species. Expected trajectories are
 found through numerical integration of the rate laws. Notice
@@ -125,14 +129,14 @@ be "mixed" or "stirred" to maximize the rate of collisions
 between reactants. Now try:
 
    ./metabolism --gui-off --load ../load/mm.load --iters 2000 --shuffle
-   ../scripts/rate_plot.R pdf config.out census.out plots-shuffle
+   ../scripts/rate_plot.R pdf true config.out census.out plots-shuffle
    evince plots-shuffle.pdf
 
 or on Mac:
 
-   open metabolism.app --args --gui-off --load ../load/mm.load --iters 2000 --shuffle
-   ../scripts/rate_plot.R pdf config.out census.out plots-shuffle
-   evince plots-shuffle.pdf
+   metabolism.app/Contents/MacOS/metabolism --gui-off --load ../load/mm.load --iters 2000 --shuffle
+   ../scripts/rate_plot.R pdf true config.out census.out plots-shuffle
+   open plots-shuffle.pdf
 
 (The extra parameters passed to the script are explained
 in the comments header of the file.) This will run the same
