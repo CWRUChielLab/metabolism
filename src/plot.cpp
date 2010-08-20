@@ -23,7 +23,7 @@ Plot::Plot( Options* initOptions, Sim* initSim, QWidget* parent )
    setAxisTitle( 2, "Time (iters)" );
 
    // Create and initialize the array of x-coordinate values
-   iterData = safeNew( double [ o->maxIters ] );
+   iterData = safeNew( double [ o->maxIters + 1 ] );
    iterData[ sim->getItersCompleted() ] = sim->getItersCompleted();
 
    for( ElementMap::iterator i = sim->periodicTable.begin(); i != sim->periodicTable.end(); i++ )
@@ -33,13 +33,13 @@ Plot::Plot( Options* initOptions, Sim* initSim, QWidget* parent )
       {
          // Create and initialize the array of y-coordinate
          // values for this Element
-         density[ ele->getName() ] = safeNew( double [ o->maxIters ] );
+         density[ ele->getName() ] = safeNew( double [ o->maxIters + 1 ] );
          density[ ele->getName() ][ sim->getItersCompleted() ] = (double)ele->count / (double)(o->worldX * o->worldY);
 
          // Create and initialize the curve for this Element
          curves[ ele->getName() ] = safeNew( QwtPlotCurve( ele->getName().c_str() ) );
          curves[ ele->getName() ]->setPen( QColor( ele->getColor().c_str() ) );
-         curves[ ele->getName() ]->setData( iterData, density[ ele->getName() ], sim->getItersCompleted() );
+         curves[ ele->getName() ]->setData( iterData, density[ ele->getName() ], sim->getItersCompleted() + 1 );
          curves[ ele->getName() ]->attach( this );
       }
    }
@@ -63,7 +63,7 @@ Plot::update()
          density[ ele->getName() ][ sim->getItersCompleted() ] = (double)ele->count / (double)(o->worldX * o->worldY);
 
          // Update the curve for this Element
-         curves[ ele->getName() ]->setData( iterData, density[ ele->getName() ], sim->getItersCompleted() );
+         curves[ ele->getName() ]->setData( iterData, density[ ele->getName() ], sim->getItersCompleted() + 1 );
       }
    }
 
