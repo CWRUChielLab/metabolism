@@ -3,7 +3,7 @@
 
 #ifdef HAVE_QT
 
-#include <cassert>
+#include <cstdlib> // exit
 #include <QDir>
 #include "safecalls.h"
 #include "window.h"
@@ -142,7 +142,8 @@ Window::shouldSave()
          return false;
          break;
       default:
-         assert(0);
+         std::cout << "shouldSave: Unknown dialog return value!" << std::endl;
+         exit( EXIT_FAILURE );
          break;
    }
 }
@@ -180,7 +181,8 @@ Window::saveFiles()
             return true;
             break;
          default:
-            assert(0);
+            std::cout << "saveFiles: Unknown dialog return value!" << std::endl;
+            exit( EXIT_FAILURE );
             break;
       }
    }
@@ -216,7 +218,7 @@ Window::saveFiles()
          QFile::remove( QDir( dirPath ).filePath( "rand.out" ) );
 
          int choice = QMessageBox::warning( this, "Problem encountered!",
-            "There was a problem writing to the directory you selected. Perhaps you don't have permission to write to this directory. Would you like to try saving the simulation output in a different directory?",
+            "There was a problem writing to the directory you selected. Perhaps you don't have permission to write to that directory. Would you like to try saving the simulation output in a different directory?",
             QMessageBox::Save | QMessageBox::Discard,
             QMessageBox::Save );
 
@@ -233,11 +235,14 @@ Window::saveFiles()
                return true;
                break;
             default:
-               assert(0);
+               std::cout << "saveFiles: Unknown dialog return value!" << std::endl;
+               exit( EXIT_FAILURE );
                break;
          }
       }
    }
+   std::cout << "saveFiles: Control reached end of non-void function (Mac warning)!" << std::endl;
+   return false;
 }
 
 
