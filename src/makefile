@@ -113,6 +113,7 @@ else
 # List source code files used, separating Qt-dependent files
 # from Qt-independent files
 HEADERS    = atom.h \
+				 boost-devices.h \
 			 	 element.h \
 			 	 options.h \
 			 	 reaction.h \
@@ -252,6 +253,7 @@ $(OBJDIR)/main.o: main.cpp \
 		atom.h \
 		element.h \
 		options.h \
+		plot.h \
 		reaction.h \
 		safecalls.h \
 		sim.h \
@@ -259,6 +261,7 @@ $(OBJDIR)/main.o: main.cpp \
 		window.h
 
 $(OBJDIR)/options.o: options.cpp options.h \
+		boost-devices.h \
 		safecalls.h
 
 $(OBJDIR)/reaction.o: reaction.cpp reaction.h \
@@ -291,6 +294,7 @@ $(OBJDIR)/sim-engine.o: sim-engine.cpp sim.h \
 
 $(OBJDIR)/sim-io.o: sim-io.cpp sim.h \
 		atom.h \
+		boost-devices.h \
 		element.h \
 		options.h \
 		reaction.h \

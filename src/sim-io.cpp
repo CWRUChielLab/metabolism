@@ -1,7 +1,6 @@
 /* sim-io.cpp
  */
 
-#include <boost/iostreams/stream.hpp>
 #include <cassert>
 #include <cstdlib> // exit
 #include <fstream>
@@ -10,27 +9,13 @@
 #ifdef HAVE_NCURSES
 #include <ncurses.h>
 #endif
+#include "boost-devices.h"
 #include "safecalls.h"
 #include "sim.h"
 using namespace SafeCalls;
 
 
 #ifdef HAVE_NCURSES
-// Define a sink device for sending input to the
-// ncurses function addnstr() which writes to the
-// screen (the constructor requires something be
-// passed as an argument)
-class ncurses_stream : public boost::iostreams::sink
-{
-   public:
-      ncurses_stream(int) {};
-      std::streamsize write( const char* s, std::streamsize n )
-      {
-         addnstr( s, n );
-         return n;
-      }
-};
-
 // Declare and initialize a stream using the
 // ncurses sink device
 boost::iostreams::stream<ncurses_stream> screen(0);
@@ -351,17 +336,44 @@ Sim::loadChemistry()
 }
 
 
+// Write to file all experimental parameters
+void
+Sim::writeConfig()
+{
+   // Write parameters to file
+   *(o->out[ Options::FILE_CONFIG ]) << "version "   << GIT_TAG << std::endl;
+   *(o->out[ Options::FILE_CONFIG ]) << "seed "      << o->seed << std::endl;
+   *(o->out[ Options::FILE_CONFIG ]) << "iters "     << itersCompleted << std::endl;
+   *(o->out[ Options::FILE_CONFIG ]) << "x "         << o->worldX << std::endl;
+   *(o->out[ Options::FILE_CONFIG ]) << "y "         << o->worldY << std::endl;
+   *(o->out[ Options::FILE_CONFIG ]) << "atoms "     << o->atomCount << std::endl;
+   *(o->out[ Options::FILE_CONFIG ]) << "reactions " << (o->doRxns ? "on" : "off") << std::endl;
+   *(o->out[ Options::FILE_CONFIG ]) << "shuffle "   << (o->doShuffle ? "on" : "off") << std::endl;
+   *(o->out[ Options::FILE_CONFIG ]) << std::endl;
+
+   // Write Elements to file
+   printEles( o->out[ Options::FILE_CONFIG ] );
+   *(o->out[ Options::FILE_CONFIG ]) << std::endl;
+
+   // Write Reactions to file
+   printRxns( o->out[ Options::FILE_CONFIG ] );
+   *(o->out[ Options::FILE_CONFIG ]) << std::endl;
+
+   // Write initialTypes to file
+   printInits( o->out[ Options::FILE_CONFIG ] );
+   *(o->out[ Options::FILE_CONFIG ]) << std::endl;
+
+   // Write extinctionTypes to file
+   printExtincts( o->out[ Options::FILE_CONFIG ] );
+   *(o->out[ Options::FILE_CONFIG ]) << std::endl;
+}
+
+
 // Records important information about the state
 // of the world and writes it to file
 void
 Sim::writeCensus()
 {
-   if( !o->censusFile.is_open() )
-   {
-      std::cout << "writeCensus: file not open!" << std::endl;
-      exit( EXIT_FAILURE );
-   }
-
    int colwidth = 12;
    int totalAtoms = 0;
 
@@ -370,71 +382,30 @@ Sim::writeCensus()
    {
       initialized = true;
 
-      o->censusFile.flags(std::ios::left);
-      o->censusFile << std::setw(colwidth) << "iter";
+      o->out[ Options::FILE_CENSUS ]->flags(std::ios::left);
+      *(o->out[ Options::FILE_CENSUS ]) << std::setw(colwidth) << "iter";
       for( ElementMap::iterator i = periodicTable.begin(); i != periodicTable.end(); i++ )
       {
          Element* ele = i->second;
          if( ele != periodicTable[ "Solvent" ] )
          {
-            o->censusFile << std::setw(colwidth) << ele->getName();
+            *(o->out[ Options::FILE_CENSUS ]) << std::setw(colwidth) << ele->getName().c_str();
          }
       }
-      o->censusFile << std::setw(colwidth) << "total" << std::endl;
+      *(o->out[ Options::FILE_CENSUS ]) << std::setw(colwidth) << "total" << std::endl;
    }
 
-   o->censusFile << std::setw(colwidth) << itersCompleted;
+   *(o->out[ Options::FILE_CENSUS ]) << std::setw(colwidth) << itersCompleted;
    for( ElementMap::iterator i = periodicTable.begin(); i != periodicTable.end(); i++ )
    {
       Element* ele = i->second;
       if( ele != periodicTable[ "Solvent" ] )
       {
-         o->censusFile << std::setw(colwidth) << ele->count;
+         *(o->out[ Options::FILE_CENSUS ]) << std::setw(colwidth) << ele->count;
       }
       totalAtoms += ele->count;
    }
-   o->censusFile << std::setw(colwidth) << totalAtoms << std::endl;
-}
-
-
-// Write to file all experimental parameters
-void
-Sim::writeConfig()
-{
-   if( !o->configFile.is_open() )
-   {
-      std::cout << "writeConfig: file not open!" << std::endl;
-      exit( EXIT_FAILURE );
-   }
-
-   // Write parameters to file
-   o->configFile << "version "   << GIT_TAG << std::endl;
-   o->configFile << "seed "      << o->seed << std::endl;
-   o->configFile << "iters "     << itersCompleted << std::endl;
-   o->configFile << "x "         << o->worldX << std::endl;
-   o->configFile << "y "         << o->worldY << std::endl;
-   o->configFile << "atoms "     << o->atomCount << std::endl;
-   o->configFile << "reactions " << (o->doRxns ? "on" : "off") << std::endl;
-   o->configFile << "shuffle "   << (o->doShuffle ? "on" : "off") << std::endl;
-   o->configFile << std::endl;
-
-   // Write Elements to file
-   printEles( &(o->configFile) );
-   o->configFile << std::endl;
-
-   // Write Reactions to file
-   printRxns( &(o->configFile) );
-   o->configFile << std::endl;
-
-   // Write initialTypes to file
-   printInits( &(o->configFile) );
-   o->configFile << std::endl;
-
-   // Write extinctionTypes to file
-   printExtincts( &(o->configFile) );
-   o->configFile << std::endl;
-
-   o->configFile.close();
+   *(o->out[ Options::FILE_CENSUS ]) << std::setw(colwidth) << totalAtoms << std::endl;
 }
 
 
@@ -444,16 +415,10 @@ Sim::writeConfig()
 void
 Sim::writeDiffusion()
 {
-   if( !o->diffusionFile.is_open() )
-   {
-      std::cout << "writeDiffusion: file not open!" << std::endl;
-      exit( EXIT_FAILURE );
-   }
-
    int colwidth = 12;
 
-   o->diffusionFile.flags(std::ios::left);
-   o->diffusionFile << std::setw(colwidth) <<
+   o->out[ Options::FILE_DIFFUSION ]->flags(std::ios::left);
+   *(o->out[ Options::FILE_DIFFUSION ]) << std::setw(colwidth) <<
       "type" << std::setw(colwidth) <<
       "dx_actual" << std::setw(colwidth) <<
       "dy_actual" << std::setw(colwidth) <<
@@ -467,8 +432,8 @@ Sim::writeDiffusion()
          if( world[ getWorldIndex(x,y) ] != NULL )
          {
             Atom* thisAtom = world[ getWorldIndex(x,y) ];
-            o->diffusionFile << std::setw(colwidth) <<
-               thisAtom->getType()->getName() << std::setw(colwidth) <<
+            *(o->out[ Options::FILE_DIFFUSION ]) << std::setw(colwidth) <<
+               thisAtom->getType()->getName().c_str() << std::setw(colwidth) <<
                thisAtom->dx_actual << std::setw(colwidth) <<
                thisAtom->dy_actual << std::setw(colwidth) <<
                thisAtom->dx_ideal << std::setw(colwidth) <<
@@ -477,7 +442,6 @@ Sim::writeDiffusion()
          }
       }
    }
-   o->diffusionFile.close();
 }
 
 
@@ -560,25 +524,23 @@ Sim::printWorld()
 
 // Print the list of Elements to an output
 // stream
-template <typename OutputStream>
 void
-Sim::printEles( OutputStream* out )
+Sim::printEles( std::ostream* out )
 {
    // Loop through the periodicTable, printing each Element
    for( ElementMap::iterator i = periodicTable.begin(); i != periodicTable.end(); i++ )
    {  
       Element* thisEle = i->second;
       if( thisEle->getName() != "Solvent" )
-         *out <<  "ele " << thisEle->getName() << " " << thisEle->getSymbol() << " " << thisEle->getColor() << std::endl;
+         *out <<  "ele " << thisEle->getName().c_str() << " " << thisEle->getSymbol() << " " << thisEle->getColor().c_str() << std::endl;
    }
 }
 
 
 // Print the list of Reactions to an output
 // stream
-template <typename OutputStream>
 void
-Sim::printRxns( OutputStream* out )
+Sim::printRxns( std::ostream* out )
 {
    // Loop through the rxnTable, printing each Reaction
    for( ReactionMap::iterator i = rxnTable.begin(); i != rxnTable.end(); i++ )
@@ -619,16 +581,16 @@ Sim::printRxns( OutputStream* out )
             if( coefficient == 1 )
             {
                if( j == reactantCount.begin() )
-                  *out << name;
+                  *out << name.c_str();
                else
-                  *out << " + " << name;
+                  *out << " + " << name.c_str();
             }
             else
             {
                if( j == reactantCount.begin() )
-                  *out << coefficient << " " << name;
+                  *out << coefficient << " " << name.c_str();
                else
-                  *out << " + " << coefficient << " " << name;
+                  *out << " + " << coefficient << " " << name.c_str();
             }
          }
       }
@@ -651,16 +613,16 @@ Sim::printRxns( OutputStream* out )
             if( coefficient == 1 )
             {
                if( j == productCount.begin() )
-                  *out << name;
+                  *out << name.c_str();
                else
-                  *out << " + " << name;
+                  *out << " + " << name.c_str();
             }
             else
             {
                if( j == productCount.begin() )
-                  *out << coefficient << " " << name;
+                  *out << coefficient << " " << name.c_str();
                else
-                  *out << " + " << coefficient << " " << name;
+                  *out << " + " << coefficient << " " << name.c_str();
             }
          }
       }
@@ -673,14 +635,13 @@ Sim::printRxns( OutputStream* out )
 
 // Print the list of inits to an output
 // stream
-template <typename OutputStream>
 void
-Sim::printInits( OutputStream* out )
+Sim::printInits( std::ostream* out )
 {
    *out << "init " << initialTypes.size() << " ";
 
    for( unsigned int i = 0; i < initialTypes.size(); i++ )
-      *out << initialTypes[i]->getName() << " ";
+      *out << initialTypes[i]->getName().c_str() << " ";
 
    *out << std::endl;
 }
@@ -688,9 +649,8 @@ Sim::printInits( OutputStream* out )
 
 // Print the list of extincts to an output
 // stream
-template <typename OutputStream>
 void
-Sim::printExtincts( OutputStream* out )
+Sim::printExtincts( std::ostream* out )
 {
    for( std::list<ElementVector>::iterator i = extinctionTypes.begin(); i != extinctionTypes.end(); i++ )
    {
@@ -698,7 +658,7 @@ Sim::printExtincts( OutputStream* out )
       *out << "extinct " << thisEleVector.size() << " ";
 
       for( unsigned int j = 0; j < thisEleVector.size(); j++ )
-         *out << thisEleVector[j]->getName() << " ";
+         *out << thisEleVector[j]->getName().c_str() << " ";
 
       *out << std::endl;
    }

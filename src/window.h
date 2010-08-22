@@ -33,13 +33,19 @@ class Window : public QMainWindow
       // GUI attributes
       Options* o;
       Sim* sim;
-      bool running;
-      bool closing;
+      bool started;
+      bool paused;
+      bool finished;
+      bool quitting;
 
       // GUI components
       Viewer* viewer;
       Plot* plot;
-      QPushButton* button;
+
+      QStackedLayout* stackedBtnLayout;
+      QPushButton* startBtn;
+      QPushButton* pauseBtn;
+      QPushButton* continueBtn;
 
       bool shouldSave();
       bool saveFiles();

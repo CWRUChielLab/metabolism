@@ -264,6 +264,9 @@ Sim::cleanup()
       {
          killncurses();
       }
+
+      // Close the output files
+      o->closeFiles();
    }
 }
 
@@ -382,17 +385,10 @@ Sim::generateRandNums()
    {
       firstTime = false;
 
-      if( !o->randFile.is_open() )
-      {
-         std::cout << "generateRandNums: file not open!" << std::endl;
-         exit( EXIT_FAILURE );
-      }
-
       for( int i = 0; i < 10; i++ )
       {
-         o->randFile << randNums[i] << std::endl;
+         *(o->out[ Options::FILE_RAND ]) << randNums[i] << std::endl;
       }
-      o->randFile.close();
    }
 }
 

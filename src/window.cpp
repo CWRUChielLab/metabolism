@@ -18,13 +18,19 @@ Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowF
    o = initOptions;
    sim = initSim;
 
-   running = false;
-   closing = false;
+   // Initialize program state flags
+   started = false;
+   paused = false;
+   finished = false;
+   quitting = false;
 
    // Set up GUI components
    viewer = safeNew( Viewer( o, sim, this ) );
    plot = safeNew( Plot( o, sim, this ) );
-   button = safeNew( QPushButton( "Click to start" ) );
+
+   startBtn = safeNew( QPushButton( "&Start" ) );
+   pauseBtn = safeNew( QPushButton( "&Pause" ) );
+   continueBtn = safeNew( QPushButton( "&Continue" ) );
 
    // Set up GUI layout
    QFrame* frame = safeNew( QFrame() );
@@ -35,9 +41,15 @@ Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowF
    frameLayout->addWidget( viewer );
    frameLayout->addWidget( plot );
 
+   stackedBtnLayout = safeNew( QStackedLayout() );
+   stackedBtnLayout->addWidget( startBtn );
+   stackedBtnLayout->addWidget( pauseBtn );
+   stackedBtnLayout->addWidget( continueBtn );
+   stackedBtnLayout->setCurrentWidget( startBtn );
+
    QVBoxLayout* mainLayout = safeNew( QVBoxLayout() );
    mainLayout->addWidget( frame );
-   mainLayout->addWidget( button );
+   mainLayout->addLayout( stackedBtnLayout );
 
    QWidget* mainWidget = safeNew( QWidget() );
    mainWidget->setLayout( mainLayout );
@@ -47,8 +59,34 @@ Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowF
 
    // Connections with the same signal should be declared
    // in order of descending slot computational complexity
-   connect( button, SIGNAL( clicked() ), viewer, SLOT( startPaint() ) );
-   connect( button, SIGNAL( clicked() ), this, SLOT( runSim() ) );
+   connect( startBtn, SIGNAL( clicked() ), viewer, SLOT( startPaint() ) );
+   connect( startBtn, SIGNAL( clicked() ), this, SLOT( runSim() ) );
+}
+
+
+// The primary loop for running the simulation
+void
+Window::runSim()
+{
+   started = true;
+
+   if( !finished )
+   {
+      while( sim->iterate() )
+      {
+         // Update gui components
+         updateButton();
+         plot->update();
+         viewer->updateGL();
+
+         // Check for Qt signals and events
+         QCoreApplication::processEvents();
+      }
+
+      finished = true;
+      if( quitting )
+         close();
+   }
 }
 
 
@@ -58,13 +96,9 @@ void
 Window::closeEvent( QCloseEvent* event )
 {
    sim->end();
-   closing = true;
+   quitting = true;
 
-   if( running )
-   {
-      event->ignore();
-   }
-   else
+   if( !started || finished )
    {
       // Prompt the user asking if temporary files
       // should be saved in a permanent location; if the
@@ -74,6 +108,10 @@ Window::closeEvent( QCloseEvent* event )
       if( shouldSave() )
          while( !saveFiles() ) {}
       event->accept();
+   }
+   else
+   {
+      event->ignore();
    }
 }
 
@@ -86,12 +124,6 @@ Window::closeEvent( QCloseEvent* event )
 bool
 Window::shouldSave()
 {
-   // Grab the temporary files
-   QFile configFile( o->configFilePath.c_str() );
-   QFile censusFile( o->censusFilePath.c_str() );
-   QFile diffusionFile( o->diffusionFilePath.c_str() );
-   QFile randFile( o->randFilePath.c_str() );
-
    int choice = QMessageBox::question( this, "Save simulation output?",
       "Would you like to save the output for this simulation?",
       QMessageBox::Save | QMessageBox::Discard,
@@ -103,10 +135,10 @@ Window::shouldSave()
          return true;
          break;
       case QMessageBox::Discard:
-         configFile.remove();
-         censusFile.remove();
-         diffusionFile.remove();
-         randFile.remove();
+         o->tempFiles[ Options::FILE_CONFIG ]->remove();
+         o->tempFiles[ Options::FILE_CENSUS ]->remove();
+         o->tempFiles[ Options::FILE_DIFFUSION ]->remove();
+         o->tempFiles[ Options::FILE_RAND ]->remove();
          return false;
          break;
       default:
@@ -125,12 +157,6 @@ Window::shouldSave()
 bool
 Window::saveFiles()
 {
-   // Grab the temporary files
-   QFile configFile( o->configFilePath.c_str() );
-   QFile censusFile( o->censusFilePath.c_str() );
-   QFile diffusionFile( o->diffusionFilePath.c_str() );
-   QFile randFile( o->randFilePath.c_str() );
-
    // Prompt the user for a directory
    QString dirPath = QFileDialog::getExistingDirectory( this, "Select a directory" );
 
@@ -147,10 +173,10 @@ Window::saveFiles()
             return false;
             break;
          case QMessageBox::Discard:
-            configFile.remove();
-            censusFile.remove();
-            diffusionFile.remove();
-            randFile.remove();
+            o->tempFiles[ Options::FILE_CONFIG ]->remove();
+            o->tempFiles[ Options::FILE_CENSUS ]->remove();
+            o->tempFiles[ Options::FILE_DIFFUSION ]->remove();
+            o->tempFiles[ Options::FILE_RAND ]->remove();
             return true;
             break;
          default:
@@ -171,15 +197,15 @@ Window::saveFiles()
       // temporary files and return true if all copy steps are successful,
       // otherwise remove any files that were successfully copied and
       // return false
-      if( configFile.copy( QDir( dirPath ).filePath( "config.out" ) ) &&
-          censusFile.copy( QDir( dirPath ).filePath( "census.out" ) ) &&
-          diffusionFile.copy( QDir( dirPath ).filePath( "diffusion.out" ) ) &&
-          randFile.copy( QDir( dirPath ).filePath( "rand.out" ) ) )
+      if( o->tempFiles[ Options::FILE_CONFIG ]->copy( QDir( dirPath ).filePath( "config.out" ) ) &&
+          o->tempFiles[ Options::FILE_CENSUS ]->copy( QDir( dirPath ).filePath( "census.out" ) ) &&
+          o->tempFiles[ Options::FILE_DIFFUSION ]->copy( QDir( dirPath ).filePath( "diffusion.out" ) ) &&
+          o->tempFiles[ Options::FILE_RAND ]->copy( QDir( dirPath ).filePath( "rand.out" ) ) )
       {
-         configFile.remove();
-         censusFile.remove();
-         diffusionFile.remove();
-         randFile.remove();
+         o->tempFiles[ Options::FILE_CONFIG ]->remove();
+         o->tempFiles[ Options::FILE_CENSUS ]->remove();
+         o->tempFiles[ Options::FILE_DIFFUSION ]->remove();
+         o->tempFiles[ Options::FILE_RAND ]->remove();
          return true;
       }
       else
@@ -200,10 +226,10 @@ Window::saveFiles()
                return false;
                break;
             case QMessageBox::Discard:
-               configFile.remove();
-               censusFile.remove();
-               diffusionFile.remove();
-               randFile.remove();
+               o->tempFiles[ Options::FILE_CONFIG ]->remove();
+               o->tempFiles[ Options::FILE_CENSUS ]->remove();
+               o->tempFiles[ Options::FILE_DIFFUSION ]->remove();
+               o->tempFiles[ Options::FILE_RAND ]->remove();
                return true;
                break;
             default:
@@ -215,37 +241,10 @@ Window::saveFiles()
 }
 
 
-// Update the pushbutton to display the progress
 void
 Window::updateButton()
 {
-   button->setText( QString::number( sim->getItersCompleted() ) );
-}
-
-
-// The primary loop for running the simulation
-void
-Window::runSim()
-{
-   if( !running )
-   {
-      running = true;
-
-      while( sim->iterate() )
-      {
-         // Update gui components
-         updateButton();
-         plot->update();
-         viewer->updateGL();
-
-         // Check for Qt signals and events
-         QCoreApplication::processEvents();
-      }
-
-      running = false;
-      if( closing )
-         close();
-   }
+   stackedBtnLayout->setCurrentWidget( pauseBtn );
 }
 
 #endif /* HAVE_QT */

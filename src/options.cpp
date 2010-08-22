@@ -6,6 +6,7 @@
 #ifdef HAVE_QT
 #include <QDir>
 #endif
+#include "boost-devices.h"
 #include "options.h"
 #include "safecalls.h"
 using namespace SafeCalls;
@@ -34,10 +35,18 @@ Options::Options( int argc, char* argv[] )
    sleep = 0;
    verbose = false;
    progress = true;
-   configFilePath = "config.out";
-   censusFilePath = "census.out";
-   diffusionFilePath = "diffusion.out";
-   randFilePath = "rand.out";
+
+   filePaths = std::vector<std::string>( N_FILES );
+   out = std::vector<std::ostream*>( N_FILES );
+   closableFiles = std::vector<std::ofstream*>( N_FILES );
+#ifdef HAVE_QT
+   tempFiles = std::vector<QTemporaryFile*>( N_FILES );
+#endif
+
+   filePaths[ FILE_CONFIG ] = "config.out";
+   filePaths[ FILE_CENSUS ] = "census.out";
+   filePaths[ FILE_DIFFUSION ] = "diffusion.out";
+   filePaths[ FILE_RAND ] = "rand.out";
 
    // Options that take only long-opt form should be indexed here.
    // In order to not clash with single-letter options, start from
@@ -258,15 +267,15 @@ Options::Options( int argc, char* argv[] )
             switch( files_read_in_so_far )
             {
                case 1:
-                  censusFilePath = optarg;
+                  filePaths[ FILE_CENSUS ] = optarg;
                   files_read_in_so_far++;
                   break;
                case 2:
-                  diffusionFilePath = optarg;
+                  filePaths[ FILE_DIFFUSION ] = optarg;
                   files_read_in_so_far++;
                   break;
                case 3:
-                  randFilePath = optarg;
+                  filePaths[ FILE_RAND ] = optarg;
                   files_read_in_so_far++;
                   break;
                default:
@@ -287,7 +296,7 @@ Options::Options( int argc, char* argv[] )
             // The first parameter read in for --files will
             // have c='f'. All others will have c=1.
             assert( files_read_in_so_far == 0 );
-            configFilePath = optarg;
+            filePaths[ FILE_CONFIG ] = optarg;
             files_read_in_so_far++;
             break;
 #if defined(HAVE_QT) | defined(HAVE_NCURSES)
@@ -359,45 +368,102 @@ Options::Options( int argc, char* argv[] )
 }
 
 
+// Prepares output files for writing. Because
+// boost::iostreams::stream objects with attached
+// sink devices inherit from std::ostream instead
+// of std::ofstream, the stream pointers common to
+// both Qt and non-Qt builds (out[ FILE_CONFIG ], etc.)
+// must be std::ostream pointers. For non-Qt
+// builds, file manipulation functionality is lost
+// with this more generalized pointer type, and so
+// pointers to the original std::ofstream objects
+// (closableFiles[ FILE_CONFIG ], etc.) must be maintained
+// for the files to be closed.
 void
 Options::openFiles()
 {
    // Ignore default file names or file names read in as
    // arguments if the Qt gui is being used
-#ifdef HAVE_QT
    if( gui == GUI_QT )
    {
-      configFilePath = QDir::temp().filePath( "metabolism.config.out" ).toStdString();
-      censusFilePath = QDir::temp().filePath( "metabolism.census.out" ).toStdString();
-      diffusionFilePath = QDir::temp().filePath( "metabolism.diffusion.out" ).toStdString();
-      randFilePath = QDir::temp().filePath( "metabolism.rand.out" ).toStdString();
-   }
-#endif
+#ifdef HAVE_QT
+      filePaths[ FILE_CONFIG ]    = "";
+      filePaths[ FILE_CENSUS ]    = "";
+      filePaths[ FILE_DIFFUSION ] = "";
+      filePaths[ FILE_RAND ]      = "";
 
-   // Open the files for writing
-   configFile.open( configFilePath.c_str() );
-   if( configFile.fail() )
-   {
-         std::cout << "openFiles: unable to open file \"" << configFilePath << "\"!" << std::endl;
-         exit( EXIT_FAILURE );
+      tempFiles[ FILE_CONFIG ]    = new QTemporaryFile();
+      tempFiles[ FILE_CENSUS ]    = new QTemporaryFile();
+      tempFiles[ FILE_DIFFUSION ] = new QTemporaryFile();
+      tempFiles[ FILE_RAND ]      = new QTemporaryFile();
+
+      tempFiles[ FILE_CONFIG ]->open(); 
+      tempFiles[ FILE_CENSUS ]->open(); 
+      tempFiles[ FILE_DIFFUSION ]->open(); 
+      tempFiles[ FILE_RAND ]->open(); 
+
+      out[ FILE_CONFIG ]    = new boost::iostreams::stream<QFile_ostream>( tempFiles[ FILE_CONFIG ] );
+      out[ FILE_CENSUS ]    = new boost::iostreams::stream<QFile_ostream>( tempFiles[ FILE_CENSUS ] );
+      out[ FILE_DIFFUSION ] = new boost::iostreams::stream<QFile_ostream>( tempFiles[ FILE_DIFFUSION ] );
+      out[ FILE_RAND ]      = new boost::iostreams::stream<QFile_ostream>( tempFiles[ FILE_RAND ] );
+#endif
    }
-   censusFile.open( censusFilePath.c_str() );
-   if( censusFile.fail() )
+   else
    {
-         std::cout << "openFiles: unable to open file \"" << censusFilePath << "\"!" << std::endl;
-         exit( EXIT_FAILURE );
+      // Open the files for writing
+      closableFiles[ FILE_CONFIG ] = new std::ofstream( filePaths[ FILE_CONFIG ].c_str() );
+      out[ FILE_CONFIG ] = (std::ostream*)closableFiles[ FILE_CONFIG ];
+      if( out[ FILE_CONFIG ]->fail() )
+      {
+            std::cout << "openFiles: unable to open file \"" << filePaths[ FILE_CONFIG ] << "\"!" << std::endl;
+            exit( EXIT_FAILURE );
+      }
+
+      closableFiles[ FILE_CENSUS ] = new std::ofstream( filePaths[ FILE_CENSUS ].c_str() );
+      out[ FILE_CENSUS ] = (std::ostream*)closableFiles[ FILE_CENSUS ];
+      if( out[ FILE_CENSUS ]->fail() )
+      {
+            std::cout << "openFiles: unable to open file \"" << filePaths[ FILE_CENSUS ] << "\"!" << std::endl;
+            exit( EXIT_FAILURE );
+      }
+
+      closableFiles[ FILE_DIFFUSION ] = new std::ofstream( filePaths[ FILE_DIFFUSION ].c_str() );
+      out[ FILE_DIFFUSION ] = (std::ostream*)closableFiles[ FILE_DIFFUSION ];
+      if( out[ FILE_DIFFUSION ]->fail() )
+      {
+            std::cout << "openFiles: unable to open file \"" << filePaths[ FILE_DIFFUSION ] << "\"!" << std::endl;
+            exit( EXIT_FAILURE );
+      }
+
+      closableFiles[ FILE_RAND ] = new std::ofstream( filePaths[ FILE_RAND ].c_str() );
+      out[ FILE_RAND ] = (std::ostream*)closableFiles[ FILE_RAND ];
+      if( out[ FILE_RAND ]->fail() )
+      {
+            std::cout << "openFiles: unable to open file \"" << filePaths[ FILE_RAND ] << "\"!" << std::endl;
+            exit( EXIT_FAILURE );
+      }
    }
-   diffusionFile.open( diffusionFilePath.c_str() );
-   if( diffusionFile.fail() )
+}
+
+
+void
+Options::closeFiles()
+{
+   if( gui == GUI_QT )
    {
-         std::cout << "openFiles: unable to open file \"" << diffusionFilePath << "\"!" << std::endl;
-         exit( EXIT_FAILURE );
+#ifdef HAVE_QT
+      tempFiles[ FILE_CONFIG ]->close();
+      tempFiles[ FILE_CENSUS ]->close();
+      tempFiles[ FILE_DIFFUSION ]->close();
+      tempFiles[ FILE_RAND ]->close();
+#endif
    }
-   randFile.open( randFilePath.c_str() );
-   if( randFile.fail() )
+   else
    {
-         std::cout << "openFiles: unable to open file \"" << randFilePath << "\"!" << std::endl;
-         exit( EXIT_FAILURE );
+      closableFiles[ FILE_CONFIG ]->close();
+      closableFiles[ FILE_CENSUS ]->close();
+      closableFiles[ FILE_DIFFUSION ]->close();
+      closableFiles[ FILE_RAND ]->close();
    }
 }
 

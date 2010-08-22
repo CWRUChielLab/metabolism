@@ -89,10 +89,10 @@ class Sim
       void loadChemistry();
       void writeConfig();
       void writeDiffusion();
-      template <typename OutputStream> void printEles( OutputStream* out );
-      template <typename OutputStream> void printRxns( OutputStream* out );
-      template <typename OutputStream> void printInits( OutputStream* out );
-      template <typename OutputStream> void printExtincts( OutputStream* out );
+      void printEles( std::ostream* out );
+      void printRxns( std::ostream* out );
+      void printInits( std::ostream* out );
+      void printExtincts( std::ostream* out );
 };
 
 #endif /* SIM_H */
