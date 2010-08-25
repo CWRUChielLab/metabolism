@@ -18,7 +18,7 @@ using namespace SafeCalls;
 #ifdef HAVE_NCURSES
 // Declare and initialize a stream using the
 // ncurses sink device
-boost::iostreams::stream<ncurses_stream> screen(0);
+boost::iostreams::stream<ncurses_ostream> screen(0);
 #endif
 
 

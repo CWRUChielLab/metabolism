@@ -161,32 +161,7 @@ Window::saveFiles()
    // Prompt the user for a directory
    QString dirPath = QFileDialog::getExistingDirectory( this, "Select a directory" );
 
-   if( dirPath == NULL )
-   {
-      int choice = QMessageBox::warning( this, "Cancel save?",
-         "Are you sure you do not want to save the simulation output?",
-         QMessageBox::Save | QMessageBox::Discard,
-         QMessageBox::Save );
-
-      switch( choice )
-      {
-         case QMessageBox::Save:
-            return false;
-            break;
-         case QMessageBox::Discard:
-            o->tempFiles[ Options::FILE_CONFIG ]->remove();
-            o->tempFiles[ Options::FILE_CENSUS ]->remove();
-            o->tempFiles[ Options::FILE_DIFFUSION ]->remove();
-            o->tempFiles[ Options::FILE_RAND ]->remove();
-            return true;
-            break;
-         default:
-            std::cout << "saveFiles: Unknown dialog return value!" << std::endl;
-            exit( EXIT_FAILURE );
-            break;
-      }
-   }
-   else
+   if( dirPath != NULL )
    {
       // Delete any files in the target directory with the target
       // names so that copying can proceed
@@ -196,9 +171,9 @@ Window::saveFiles()
       QFile::remove( QDir( dirPath ).filePath( "rand.out" ) );
 
       // Copy the temporary files to the chosen directory; remove the
-      // temporary files and return true if all copy steps are successful,
+      // temporary files and return true if all copy steps are successful;
       // otherwise remove any files that were successfully copied and
-      // return false
+      // prompt for another attempt
       if( o->tempFiles[ Options::FILE_CONFIG ]->copy( QDir( dirPath ).filePath( "config.out" ) ) &&
           o->tempFiles[ Options::FILE_CENSUS ]->copy( QDir( dirPath ).filePath( "census.out" ) ) &&
           o->tempFiles[ Options::FILE_DIFFUSION ]->copy( QDir( dirPath ).filePath( "diffusion.out" ) ) &&
@@ -239,6 +214,31 @@ Window::saveFiles()
                exit( EXIT_FAILURE );
                break;
          }
+      }
+   }
+   else
+   {
+      int choice = QMessageBox::warning( this, "Cancel save?",
+         "Are you sure you do not want to save the simulation output?",
+         QMessageBox::Save | QMessageBox::Discard,
+         QMessageBox::Save );
+
+      switch( choice )
+      {
+         case QMessageBox::Save:
+            return false;
+            break;
+         case QMessageBox::Discard:
+            o->tempFiles[ Options::FILE_CONFIG ]->remove();
+            o->tempFiles[ Options::FILE_CENSUS ]->remove();
+            o->tempFiles[ Options::FILE_DIFFUSION ]->remove();
+            o->tempFiles[ Options::FILE_RAND ]->remove();
+            return true;
+            break;
+         default:
+            std::cout << "saveFiles: Unknown dialog return value!" << std::endl;
+            exit( EXIT_FAILURE );
+            break;
       }
    }
    std::cout << "saveFiles: Control reached end of non-void function (Mac warning)!" << std::endl;

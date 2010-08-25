@@ -20,7 +20,6 @@ class Options
 
       // Options output methods
       void openFiles();
-      void closeFiles();
       void printVersion();
       void printHelp();
 
@@ -41,7 +40,6 @@ class Options
 
       std::vector<std::string> filePaths;
       std::vector<std::ostream*> out;
-      std::vector<std::ofstream*> closableFiles;
 #ifdef HAVE_QT
       std::vector<QTemporaryFile*> tempFiles;
 #endif

@@ -265,8 +265,11 @@ Sim::cleanup()
          killncurses();
       }
 
-      // Close the output files
-      o->closeFiles();
+      // Close the output streams
+      delete o->out[ Options::FILE_CONFIG ];
+      delete o->out[ Options::FILE_CENSUS ];
+      delete o->out[ Options::FILE_DIFFUSION ];
+      delete o->out[ Options::FILE_RAND ];
    }
 }
 

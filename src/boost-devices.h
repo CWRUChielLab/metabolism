@@ -21,10 +21,10 @@
 // ncurses function addnstr() which writes to the
 // screen (the constructor requires something be
 // passed as an argument)
-class ncurses_stream : public boost::iostreams::sink
+class ncurses_ostream : public boost::iostreams::sink
 {
    public:
-      ncurses_stream(int) {}
+      ncurses_ostream(int) {}
       std::streamsize write( const char* s, std::streamsize n )
       {
          addnstr( s, n );
@@ -42,9 +42,9 @@ class ncurses_stream : public boost::iostreams::sink
 class QFile_ostream : public boost::iostreams::sink
 {
    public:
-      QFile_ostream( QFile* file )
+      QFile_ostream( QFile* f )
       {
-         out = new QTextStream( file );
+         out = new QTextStream( f );
       }
       std::streamsize write( const char* s, std::streamsize n )
       {
