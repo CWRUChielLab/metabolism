@@ -114,16 +114,30 @@ Sim::loadChemistry()
          // Read in Elements
          if( keyword == "ele")
          {
+            std::string word;
             std::string name;
             char symbol;
             std::string color;
             double startConc;
+            int set;
 
             o->loadFile >> name >> symbol >> color >> startConc;
             tempEle = safeNew( Element( name, symbol, color, startConc ) );
-            reservePositionSet( tempEle );
             periodicTable[ name ] = tempEle;
             elesLoaded = true;
+            while( o->loadFile.peek() == ' ' )
+            {
+               word = o->loadFile.get();
+            }
+            if( o->loadFile.peek() != '\n' )
+            {
+               o->loadFile >> set;
+               reservePositionSet( tempEle, set );
+            }
+            else
+            {
+               reservePositionSet( tempEle );
+            }
          }
 
          // Read in Reactions
@@ -496,7 +510,7 @@ Sim::printEles( std::ostream* out )
    {  
       Element* thisEle = i->second;
       if( thisEle->getName() != "Solvent" )
-         *out <<  "ele " << thisEle->getName().c_str() << " " << thisEle->getSymbol() << " " << thisEle->getColor().c_str() << " " << thisEle->getStartConc() << std::endl;
+         *out <<  "ele " << thisEle->getName().c_str() << " " << thisEle->getSymbol() << " " << thisEle->getColor().c_str() << " " << thisEle->getStartConc() << " " << positionSets[ thisEle->getName() ] << std::endl;
    }
 }
 

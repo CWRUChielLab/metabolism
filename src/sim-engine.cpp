@@ -452,6 +452,25 @@ Sim::reservePositionSet( Element* ele )
 }
 
 
+// Reserves one of the available sets of lattice
+// positions to the passed Element
+void
+Sim::reservePositionSet( Element* ele, int set )
+{
+   if( !positionSetReserved[ set ] )
+   {
+      positionSets[ ele->getName() ] = set;
+      positionSetReserved[ set ] = true;
+      return;
+   }
+   else
+   {
+      std::cout << "reservePositionSet: set " << set << " already reserved!" << std::endl;
+      exit( EXIT_FAILURE );
+   }
+}
+
+
 // Assign atoms new positions in the world
 // randomly to simulate mixing
 void

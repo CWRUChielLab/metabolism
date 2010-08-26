@@ -208,10 +208,10 @@ Michaelis-Menten enzyme kinetics system consists of three
 reactions: E + S -> ES, ES -> E + S, and ES -> E + P. The
 particle types for this system could be defined using:
 
-   ele ES C darkorange 0.0
    ele Enzyme E yellow 0.1
-   ele Product P hotpink 0.0
    ele Substrate S teal 0.3
+   ele ES C darkorange 0.0
+   ele Product P hotpink 0.0
 
 (The starting concentrations were chosen arbitarily, and the
 concentration for Substrate is 3 times the concentration for

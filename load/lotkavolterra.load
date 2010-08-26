@@ -1,5 +1,5 @@
-ele Predator F darkorange 0.15
 ele Prey R teal 0.15
+ele Predator F darkorange 0.15
 
 rxn 0.1 Prey -> 2 Prey
 rxn 1.0 Prey + Predator -> 2 Predator

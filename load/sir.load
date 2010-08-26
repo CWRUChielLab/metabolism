@@ -1,6 +1,6 @@
+ele Susceptible S teal 0.30
 ele Infectious I hotpink 0.01
 ele Recovered R darkorange 0.00
-ele Susceptible S teal 0.30
 
 rxn 0.8 Susceptible + Infectious -> 2 Infectious
 rxn 0.05 Infectious -> Recovered

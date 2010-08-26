@@ -76,6 +76,7 @@ class Sim
       void generateRandNums();
       void shufflePositions();
       void reservePositionSet( Element* ele );
+      void reservePositionSet( Element* ele, int set );
       void shuffleWorld();
 
       void moveAtoms();
