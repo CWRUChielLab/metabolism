@@ -1,7 +1,7 @@
-ele ES C darkorange 0.000
-ele Enzyme E yellow 0.064
-ele Product P hotpink 0.000
-ele Substrate S teal 0.192
+ele ES C darkorange 0.0
+ele Enzyme E yellow 0.1
+ele Product P hotpink 0.0
+ele Substrate S teal 0.3
 
 rxn 0.50 Enzyme + Substrate -> ES
 rxn 0.01 ES -> Enzyme + Substrate

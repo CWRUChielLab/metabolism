@@ -7,9 +7,9 @@ reactions on
 shuffle on
 
 ele ES C darkorange 0
-ele Enzyme E yellow 0.064
+ele Enzyme E yellow 0.1
 ele Product P hotpink 0
-ele Substrate S teal 0.192
+ele Substrate S teal 0.3
 
 rxn 0.01 ES -> Enzyme + Substrate
 rxn 0.01 ES -> Enzyme + Product

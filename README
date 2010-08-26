@@ -28,8 +28,7 @@ This project uses the following:
 
    Qwt
       A Qt library for creating plots. Required for building
-      with Qt. Qwt may require being built statically.
-      Available at
+      with Qt. Available at
       http://qwt.sourceforge.net/.
 
    ncurses
@@ -37,6 +36,12 @@ This project uses the following:
       default but not required (see 'Compilation
       Instructions'). Available at
       http://www.gnu.org/software/ncurses/.
+
+   Boost Iostreams Library
+      Provides a framework for defining streams, stream
+      buffers and i/o filters. Required for building with
+      Qt or ncurses. Available at
+      http://www.boost.org/.
 
    R
       Statistical computing software. Scripts provided for
@@ -151,9 +156,9 @@ Using the Simulation Platform
 
 All command line options are available via --help and can be
 used to specify simulation parameters such as the size of
-the lattice or the number of particles. By default, the
-program produces a configuration file named config.out which
-records the simulation parameters. config files can be
+the lattice or the duration of the simulation. By default,
+the program produces a configuration file named config.out
+which records the simulation parameters. config files can be
 loaded to run exact reproductions of simulations using
 --load.
 
@@ -169,7 +174,6 @@ specify using the format:
 with separate lines for each parameter. Parameters that can
 be specified and examples of valid values are:
 
-   atoms 99
    iters 5000
    seed 1234567890
    x 2000
@@ -180,32 +184,39 @@ be specified and examples of valid values are:
 In addition to these (which are described in more detail in
 --help), particle types, reactions, and conditions for
 terminating the simulation can be specified using the
-keywords "ele", "rxn", "init", and "extinct". Add a line
-beginning with "ele" for each particle type ("element")
-using the following format:
+keywords "ele", "rxn", and "extinct". Add a line beginning
+with "ele" for each particle type ("element") using the
+following format:
 
-   ele name symbol color
+   ele name symbol color conc
 
-"name" is a string that names the particle type, "symbol" is
+"name" is a string that names the particle type. "symbol" is
 a single character that is used to represent particles of
-that type in the ncurses text interface, and "color" is a
-string that names the color that will be used by the Qt gui
-to distinguish particles of that type. The following colors
+that type in the ncurses text interface. "color" is a string
+that names the color that will be used by the Qt gui to
+distinguish particles of that type. The following colors
 are used by the default settings and are distinguishable by
 users with and without color deficient vision: "teal",
 "hotpink", "darkorange", and "yellow". All valid color names
 can be found at
 http://www.w3.org/TR/SVG/types.html#ColorKeywords.
+Finally, "conc" is a real valued number between 0 and 1 that
+represents the starting concentration for the particle type.
 
 An example will help clarify how to build a config file. The
 Michaelis-Menten enzyme kinetics system consists of three
 reactions: E + S -> ES, ES -> E + S, and ES -> E + P. The
 particle types for this system could be defined using:
 
-   ele Enzyme E yellow
-   ele Substrate S teal
-   ele ES C darkorange
-   ele Product P hotpink
+   ele ES C darkorange 0.0
+   ele Enzyme E yellow 0.1
+   ele Product P hotpink 0.0
+   ele Substrate S teal 0.3
+
+(The starting concentrations were chosen arbitarily, and the
+concentration for Substrate is 3 times the concentration for
+Enzyme; no ES or Product will be initially present in the
+lattice.)
 
 When specifying reactions, each unique reaction should
 receive its own line beginning with "rxn". Up to two
@@ -240,27 +251,6 @@ listed using:
 
 with "prob"'s = 0.5, 0.01, and 0.01.
 
-Although the number of particles placed in the lattice is
-set by a command line option, the initial types for the
-particles must be specified in the config file. Use the
-keyword "init" to start a list of initial particle types:
-
-   init n name [...]
-
-"n" is the number of types in the list, and "name"'s are the
-names of the particle types. The type for each particle when
-it is created at the start of the simulation will be chosen
-at random from this list. If "n" is "0", then no particles
-will be placed in the lattice. Types included in this list
-must be defined earlier in the config file.
-
-For the Michaelis-Menten example, we could use:
-
-   init 4 Enzyme Substrate Substrate Substrate
-
-to create a 3:1 ratio of Substrate to Enzyme for the
-particles initially placed in the lattice.
-
 Finally, the user can optionally define special conditions
 under which the simulation should terminate early. A set of
 particle types can be specified using:
@@ -276,9 +266,9 @@ termination conditions. Types included in these lists must
 be defined earlier in the config file.
 
 For our example, the system will no longer undergo any
-reactions when all Substrate is depleted, and so we would
-not be interested in simulating beyond that point. Thus, we
-could use:
+reactions when all Substrate and ES is depleted, and so we
+would not be interested in simulating beyond that point.
+Thus, we could use:
 
    extinct 2 Substrate ES
 
@@ -290,13 +280,10 @@ that lacks any lines that begin with "ele", then the types
 "A", "B", "C", and "D" are defined by default. If the config
 file lacks any "rxn" lines and the default particle types
 are used, the reaction A + B -> C + D (prob = 0.5) is
-defined. If the config file has no lines beginning with
-"init" and the default particle types are used, then the
-particles will start with types A and B in roughly a 1:1
-ratio. If the config file does not have any "extinct" lines
-and the default particle types are used, then the simulation
-will terminate when either all the A particles or all the B
-particles are depleted.
+defined. If the config file does not have any "extinct"
+lines and the default particle types are used, then the
+simulation will terminate when either all the A particles or
+all the B particles are depleted.
 
 ============================================================
 
