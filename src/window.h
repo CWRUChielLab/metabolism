@@ -33,10 +33,10 @@ class Window : public QMainWindow
       // GUI attributes
       Options* o;
       Sim* sim;
-      bool started;
-      bool paused;
-      bool finished;
-      bool quitting;
+      bool simStarted;
+      bool simPaused;
+      bool simCompleted;
+      bool quitRequested;
 
       // GUI components
       Viewer* viewer;
@@ -47,8 +47,7 @@ class Window : public QMainWindow
       QPushButton* pauseBtn;
       QPushButton* continueBtn;
 
-      bool shouldSave();
-      bool saveFiles();
+      void save();
 };
 
 #endif /* HAVE_QT */
