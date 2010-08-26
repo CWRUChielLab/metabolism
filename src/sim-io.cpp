@@ -56,8 +56,6 @@ Sim::initializeIO()
             screen << std::endl;
             printRxns( &screen );
             screen << std::endl;
-            printInits( &screen );
-            screen << std::endl;
             printExtincts( &screen );
             screen << "------" << std::endl;
          }
@@ -76,8 +74,6 @@ Sim::initializeIO()
             printEles( &std::cout );
             std::cout << std::endl;
             printRxns( &std::cout );
-            std::cout << std::endl;
-            printInits( &std::cout );
             std::cout << std::endl;
             printExtincts( &std::cout );
             std::cout << "------" << std::endl;
@@ -121,9 +117,11 @@ Sim::loadChemistry()
             std::string name;
             char symbol;
             std::string color;
+            double startConc;
 
-            o->loadFile >> name >> symbol >> color;
-            tempEle = safeNew( Element( name, symbol, color ) );
+            o->loadFile >> name >> symbol >> color >> startConc;
+            tempEle = safeNew( Element( name, symbol, color, startConc ) );
+            reservePositionSet( tempEle );
             periodicTable[ name ] = tempEle;
             elesLoaded = true;
          }
@@ -276,35 +274,6 @@ Sim::loadChemistry()
             }
          }
 
-         // Read in inits
-         if( keyword == "init" )
-         {
-            std::string word;
-            int n;
-
-            o->loadFile >> n;
-            for( int i = 0; i < n; i++ )
-            {
-               o->loadFile >> word;
-               if( periodicTable[ word ] != NULL )
-               {
-                  initialTypes.push_back( periodicTable[ word ] );
-               }
-               else
-               {
-                  std::cout << "Loading init: " << word << " is not a defined Element!" << std::endl;
-                  exit( EXIT_FAILURE );
-               }
-            }
-            if( initsLoaded )
-            {
-               std::cout << "Loading init: only one init keyword is permitted!" << std::endl;
-               exit( EXIT_FAILURE );
-            }
-
-            initsLoaded = true;
-         }
-
          // Read in extincts
          if( keyword == "extinct" )
          {
@@ -346,7 +315,6 @@ Sim::writeConfig()
    *(o->out[ Options::FILE_CONFIG ]) << "iters "     << itersCompleted << std::endl;
    *(o->out[ Options::FILE_CONFIG ]) << "x "         << o->worldX << std::endl;
    *(o->out[ Options::FILE_CONFIG ]) << "y "         << o->worldY << std::endl;
-   *(o->out[ Options::FILE_CONFIG ]) << "atoms "     << o->atomCount << std::endl;
    *(o->out[ Options::FILE_CONFIG ]) << "reactions " << (o->doRxns ? "on" : "off") << std::endl;
    *(o->out[ Options::FILE_CONFIG ]) << "shuffle "   << (o->doShuffle ? "on" : "off") << std::endl;
    *(o->out[ Options::FILE_CONFIG ]) << std::endl;
@@ -357,10 +325,6 @@ Sim::writeConfig()
 
    // Write Reactions to file
    printRxns( o->out[ Options::FILE_CONFIG ] );
-   *(o->out[ Options::FILE_CONFIG ]) << std::endl;
-
-   // Write initialTypes to file
-   printInits( o->out[ Options::FILE_CONFIG ] );
    *(o->out[ Options::FILE_CONFIG ]) << std::endl;
 
    // Write extinctionTypes to file
@@ -532,7 +496,7 @@ Sim::printEles( std::ostream* out )
    {  
       Element* thisEle = i->second;
       if( thisEle->getName() != "Solvent" )
-         *out <<  "ele " << thisEle->getName().c_str() << " " << thisEle->getSymbol() << " " << thisEle->getColor().c_str() << std::endl;
+         *out <<  "ele " << thisEle->getName().c_str() << " " << thisEle->getSymbol() << " " << thisEle->getColor().c_str() << " " << thisEle->getStartConc() << std::endl;
    }
 }
 
@@ -630,20 +594,6 @@ Sim::printRxns( std::ostream* out )
       // End the line
       *out << std::endl;
    }
-}
-
-
-// Print the list of inits to an output
-// stream
-void
-Sim::printInits( std::ostream* out )
-{
-   *out << "init " << initialTypes.size() << " ";
-
-   for( unsigned int i = 0; i < initialTypes.size(); i++ )
-      *out << initialTypes[i]->getName().c_str() << " ";
-
-   *out << std::endl;
 }
 
 

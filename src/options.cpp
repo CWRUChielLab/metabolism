@@ -20,7 +20,6 @@ Options::Options( int argc, char* argv[] )
    maxIters = 1000000;
    worldX = 250;
    worldY = 250;
-   atomCount = 2000;
 #ifdef HAVE_QT
    gui = GUI_QT;
 #else
@@ -62,7 +61,6 @@ Options::Options( int argc, char* argv[] )
    struct option long_options[] =
    {
    // { "long_option_name", "no_argument(0), required_argument(1), optional_argument(2)", NULL, retval }
-      { "atoms",        required_argument, NULL, 'a' },
       { "files",        required_argument, NULL, 'f' },
 #if defined(HAVE_QT) | defined(HAVE_NCURSES)
       { "gui-off",      no_argument,       NULL, 'g' },
@@ -96,10 +94,10 @@ Options::Options( int argc, char* argv[] )
    // assigning the second and third parameters passed to
    // --files with c=1.
 #if defined(HAVE_QT) | defined(HAVE_NCURSES)
-   const char* options_string = "-a:f:ghi:l:p::rs:SvVx:y:z:";
+   const char* options_string = "-f:ghi:l:p::rs:SvVx:y:z:";
 #else
    // -g option is not available when no gui is compiled
-   const char* options_string = "-a:f:hi:l:p::rs:SvVx:y:z:";
+   const char* options_string = "-f:hi:l:p::rs:SvVx:y:z:";
 #endif
 
    int option_index = 0, c;
@@ -129,97 +127,90 @@ Options::Options( int argc, char* argv[] )
             while( loadFile.good() )
             {
                loadFile >> keyword;
-               if( keyword == "version" || keyword == "ele" || keyword == "rxn" || keyword == "init" || keyword == "extinct" )
+               if( keyword == "version" || keyword == "ele" || keyword == "rxn" || keyword == "extinct" )
                {
                   loadFile.ignore(1024,'\n');
                }
                else
                {
-                  if( keyword == "atoms" )
+                  if( keyword == "iters" )
                   {
-                     loadFile >> atomCount;
+                     loadFile >> maxIters;
                   }
                   else
                   {
-                     if( keyword == "iters" )
+                     if( keyword == "reactions" )
                      {
-                        loadFile >> maxIters;
-                     }
-                     else
-                     {
-                        if( keyword == "reactions" )
+                        onOrOff = "";
+                        loadFile >> onOrOff;
+                        if( onOrOff == "on" )
                         {
-                           onOrOff = "";
-                           loadFile >> onOrOff;
-                           if( onOrOff == "on" )
-                           {
-                              doRxns = true;
-                           }
-                           else
-                           {
-                              if( onOrOff == "off" )
-                              {
-                                 doRxns = false;
-                              }
-                              else
-                              {
-                                 std::cout << "Load settings: \"reactions\" must have value \"on\" or \"off\"!" << std::endl;
-                                 exit( EXIT_FAILURE );
-                              }
-                           }
+                           doRxns = true;
                         }
                         else
                         {
-                           if( keyword == "seed" )
+                           if( onOrOff == "off" )
                            {
-                              loadFile >> seed;
+                              doRxns = false;
                            }
                            else
                            {
-                              if( keyword == "shuffle" )
+                              std::cout << "Load settings: \"reactions\" must have value \"on\" or \"off\"!" << std::endl;
+                              exit( EXIT_FAILURE );
+                           }
+                        }
+                     }
+                     else
+                     {
+                        if( keyword == "seed" )
+                        {
+                           loadFile >> seed;
+                        }
+                        else
+                        {
+                           if( keyword == "shuffle" )
+                           {
+                              onOrOff = "";
+                              loadFile >> onOrOff;
+                              if( onOrOff == "on" )
                               {
-                                 onOrOff = "";
-                                 loadFile >> onOrOff;
-                                 if( onOrOff == "on" )
-                                 {
-                                    doShuffle = true;
-                                 }
-                                 else
-                                 {
-                                    if( onOrOff == "off" )
-                                    {
-                                       doShuffle = false;
-                                    }
-                                    else
-                                    {
-                                       std::cout << "Load settings: \"shuffle\" must have value \"on\" or \"off\"!" << std::endl;
-                                       exit( EXIT_FAILURE );
-                                    }
-                                 }
+                                 doShuffle = true;
                               }
                               else
                               {
-                                 if( keyword == "x" )
+                                 if( onOrOff == "off" )
                                  {
-                                    loadFile >> worldX;
+                                    doShuffle = false;
                                  }
                                  else
                                  {
-                                    if( keyword == "y" )
+                                    std::cout << "Load settings: \"shuffle\" must have value \"on\" or \"off\"!" << std::endl;
+                                    exit( EXIT_FAILURE );
+                                 }
+                              }
+                           }
+                           else
+                           {
+                              if( keyword == "x" )
+                              {
+                                 loadFile >> worldX;
+                              }
+                              else
+                              {
+                                 if( keyword == "y" )
+                                 {
+                                    loadFile >> worldY;
+                                 }
+                                 else
+                                 {
+                                    if( keyword == "" )
                                     {
-                                       loadFile >> worldY;
+                                       break;
                                     }
                                     else
                                     {
-                                       if( keyword == "" )
-                                       {
-                                          break;
-                                       }
-                                       else
-                                       {
-                                          std::cout << "Load settings: Unrecognized keyword \"" << keyword << "\"!" << std::endl;
-                                          exit( EXIT_FAILURE );
-                                       }
+                                       std::cout << "Load settings: Unrecognized keyword \"" << keyword << "\"!" << std::endl;
+                                       exit( EXIT_FAILURE );
                                     }
                                  }
                               }
@@ -287,9 +278,6 @@ Options::Options( int argc, char* argv[] )
                   }
                   break;
             }
-            break;
-         case 'a':
-            atomCount = safeStrtol( optarg );
             break;
          case 'f':
             // The first parameter read in for --files will
@@ -471,7 +459,6 @@ Options::printHelp()
    std::cout << "  Would run a 256x256 world for 100 iterations with 1 second pauses between" << std::endl;
    std::cout << "    each iteration."                                                         << std::endl;
    std::cout <<                                                                                  std::endl;
-   std::cout << "-a, --atoms         Number of atoms in the world. Default: 2000"             << std::endl;
 #ifdef HAVE_QT
    std::cout << "-f, --files         Specify the names of the four output files. Ignored if"  << std::endl;
    std::cout << "                      the Qt GUI is used."                                   << std::endl;

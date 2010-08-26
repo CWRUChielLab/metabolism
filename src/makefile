@@ -70,7 +70,7 @@ CHECK_RAND      = ../check/rand.check.out
 # algorithm or data dumping procedures has been changed such
 # that one would expect it to affect the results
 bless: metabolism
-	./$< --gui-off --load $(CHECK_LOAD) --iters 100 -x 128 -y 128 --atoms 500 --seed 42 --shuffle \
+	./$< --gui-off --load $(CHECK_LOAD) --iters 100 -x 128 -y 128 --seed 42 --shuffle \
 		--files $(CHECK_CONFIG) $(CHECK_CENSUS) $(CHECK_DIFFUSION) $(CHECK_RAND)
 
 
@@ -89,7 +89,7 @@ check: metabolism-minimal
 # Target for running a simulation and analyzing profiling
 # data to assist with optimization
 profile: metabolism-debug
-	./$< --iters 50 --atoms 25000 -x 1000 -y 1000
+	./$< --iters 50 -x 1000 -y 1000
 	@echo
 	gprof $< > gprof.out
 	cat gprof.out | less

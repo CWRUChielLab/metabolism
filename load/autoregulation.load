@@ -1,12 +1,11 @@
 x 64
 y 64
-atoms 2
 
-ele Gene G green
-ele mRNA r darkorange
-ele Protein P hotpink
-ele Dimer D red
-ele Repressed g blue
+ele Dimer D red 0.00
+ele Gene G green 0.004
+ele Protein P hotpink 0.00
+ele Repressed g blue 0.00
+ele mRNA r darkorange 0.00
 
 rxn 0.05 Gene -> Gene + mRNA
 rxn 0.05 mRNA -> mRNA + Protein
@@ -19,6 +18,4 @@ rxn 0.10 Dimer -> 2 Protein
 
 rxn 0.01 mRNA -> *
 rxn 0.03 Protein -> *
-
-init 1 Gene
 

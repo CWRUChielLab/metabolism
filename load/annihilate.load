@@ -1,9 +1,7 @@
-ele A A teal
-ele B B darkorange
+ele A A teal 1.0
+ele B B darkorange 1.0
 
 rxn 1.0 A + B -> *
-
-init 2 A B 
 
 extinct 1 A
 extinct 1 B

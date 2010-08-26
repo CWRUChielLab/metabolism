@@ -44,6 +44,12 @@ Sim::initializeEngine()
       world = safeNew( Atom*[ o->worldX * o->worldY ] );
       claimed = safeNew( uint8_t[ o->worldX * o->worldY ] );
       positions = safeNew( unsigned int[ o->worldX * o->worldY ] );
+      for( unsigned int i = 0; i < MAX_ELES_NOT_INCLUDING_SOLVENT; i++ )
+         maxPositions[ i ] = (o->worldX * o->worldY) / MAX_ELES_NOT_INCLUDING_SOLVENT;
+      for( unsigned int i = 0; i < (o->worldX * o->worldY) % MAX_ELES_NOT_INCLUDING_SOLVENT; i++ )
+         maxPositions[ i ]++;
+      for( unsigned int i = 0; i < MAX_ELES_NOT_INCLUDING_SOLVENT; i++ )
+         positionSetReserved[ i ] = false;
 
       dirdx = new int[8];
       dirdx[0] = 0;  // N
@@ -73,13 +79,12 @@ Sim::initializeEngine()
 
       // Create Solvent Element
       Element* tempEle;
-      tempEle = safeNew( Element( "Solvent", '*', "white" ) );
+      tempEle = safeNew( Element( "Solvent", '*', "white", 0.0 ) );
       periodicTable[ "Solvent" ] = tempEle;
 
-      // Load periodicTable, rxnTable, and initialType if available
+      // Load periodicTable, rxnTable, and extinctionTypes if available
       elesLoaded = false;
       rxnsLoaded = false;
-      initsLoaded = false;
       extinctsLoaded = false;
       loadChemistry();
 
@@ -90,13 +95,20 @@ Sim::initializeEngine()
       // Set up default periodicTable if one was not loaded
       if( !elesLoaded )
       {
-         tempEle = safeNew( Element( "A", 'A', "teal" ) );
+         tempEle = safeNew( Element( "A", 'A', "teal", 0.25 ) );
+         reservePositionSet( tempEle );
          periodicTable[ tempEle->getName() ] = tempEle;
-         tempEle = safeNew( Element( "B", 'B', "hotpink" ) );
+
+         tempEle = safeNew( Element( "B", 'B', "hotpink", 0.24 ) );
+         reservePositionSet( tempEle );
          periodicTable[ tempEle->getName() ] = tempEle;
-         tempEle = safeNew( Element( "C", 'C', "darkorange" ) );
+
+         tempEle = safeNew( Element( "C", 'C', "darkorange", 0.02 ) );
+         reservePositionSet( tempEle );
          periodicTable[ tempEle->getName() ] = tempEle;
-         tempEle = safeNew( Element( "D", 'D', "yellow" ) );
+
+         tempEle = safeNew( Element( "D", 'D', "yellow", 0.01 ) );
+         reservePositionSet( tempEle );
          periodicTable[ tempEle->getName() ] = tempEle;
       }
 
@@ -106,12 +118,6 @@ Sim::initializeEngine()
          Reaction* tempRxn;
          tempRxn = safeNew( Reaction( ev(2,"A","B"), ev(2,"C","D"), 0.5 ) );
          rxnTable.insert( std::pair<int,Reaction*>( tempRxn->getKey(), tempRxn ) );
-      }
-
-      // Set up default initialTypes if one was not loaded
-      if( !elesLoaded && !initsLoaded )
-      {
-         initialTypes = ev(2,"A","B");
       }
 
       // Set up default extinctionTypes if one was not loaded
@@ -132,24 +138,23 @@ Sim::initializeEngine()
       // Fill the array of random numbers
       generateRandNums();
 
-      // Initialize the world with random atoms
+      // Initialize the world with Atoms
       Atom* tempAtom;
       int x, y;
-      o->atomCount = std::min( o->atomCount, o->worldX * o->worldY );
-      if( initialTypes.size() > 0 )
+      for( ElementMap::iterator i = periodicTable.begin(); i != periodicTable.end(); i++ )
       {
-         for( int i = 0; i < o->atomCount; i++ )
+         Element* thisEle = i->second;
+         unsigned int nAtoms = (unsigned int)((double)thisEle->getStartConc() * (double)maxPositions[ positionSets[ thisEle->getName() ] ] + 0.5);
+         unsigned int setStart = 0;
+         for( int i = 0; i < positionSets[ thisEle->getName() ]; i++ )
+            setStart += maxPositions[ i ];
+         for( unsigned int j = setStart; j < setStart + nAtoms; j++ )
          {
-            x = positions[i] % o->worldX;
-            y = positions[i] / o->worldX;
-            tempEle = initialTypes[ randNums[i] % initialTypes.size() ];
-            tempAtom = safeNew( Atom( tempEle, x, y ) );
+            x = positions[j] % o->worldX;
+            y = positions[j] / o->worldX;
+            tempAtom = safeNew( Atom( thisEle, x, y ) );
             world[ getWorldIndex(x,y) ] = tempAtom;
          }
-      }
-      else
-      {
-         o->atomCount = 0;
       }
    }
 }
@@ -424,6 +429,26 @@ Sim::shufflePositions()
       positions[i] = positions[rand];
       positions[rand] = temp;
    }
+}
+
+
+// Reserves one of the available sets of lattice
+// positions to the passed Element
+void
+Sim::reservePositionSet( Element* ele )
+{
+   unsigned int i;
+   for( i = 0; i < MAX_ELES_NOT_INCLUDING_SOLVENT; i++ )
+   {
+      if( !positionSetReserved[ i ] )
+      {
+         positionSets[ ele->getName() ] = i;
+         positionSetReserved[ i ] = true;
+         return;
+      }
+   }
+   std::cout << "reservePositionSet: limit of " << MAX_ELES_NOT_INCLUDING_SOLVENT << " Elements exceeded!" << std::endl;
+   exit( EXIT_FAILURE );
 }
 
 

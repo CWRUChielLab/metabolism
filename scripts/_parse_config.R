@@ -29,15 +29,12 @@ config = readLines(path_to_config)
 config = strsplit(config[config != ""], " ")
 keywords = sapply(config, head, n=1)
 iters = as.integer(unlist(config[keywords == "iters"])[2])
-atoms = as.integer(unlist(config[keywords == "atoms"])[2])
 x = as.integer(unlist(config[keywords == "x"])[2])
 y = as.integer(unlist(config[keywords == "y"])[2])
 
 # Use defaults if parameters were absent
 if (length(iters) != 1)
    iters = 1000000
-if (length(atoms) != 1)
-   atoms = 2000
 if (length(x) != 1)
    x = 250
 if (length(y) != 1)
@@ -57,15 +54,6 @@ for (i in 1:length(config_ele))
       ele_colors[[ ele_names[[i]] ]] = config_ele[[i]][[4]]
 }
 ele_colors[[ "default" ]] = colors[[ "black" ]]
-
-# Read in the list of init's
-config_init = unlist(config[keywords == "init"])
-if (config_init[2] == "0")
-{
-   init = vector(length=0)
-} else {
-   init = config_init[3:length(config_init)]
-}
 
 # Read in the list of extinct's
 config_extinct = config[keywords == "extinct"]

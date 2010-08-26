@@ -28,7 +28,6 @@ class Options
       int maxIters;
       int worldX;
       int worldY;
-      int atomCount;
       int gui;
       bool doRxns;
       bool doShuffle;

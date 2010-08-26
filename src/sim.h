@@ -46,17 +46,19 @@ class Sim
       Options* o;
       int itersCompleted;
       static const unsigned int MAX_RXNS_PER_SET_OF_REACTANTS = 2;
+      static const unsigned int MAX_ELES_NOT_INCLUDING_SOLVENT = 8;
 
       bool elesLoaded;
       bool rxnsLoaded;
-      bool initsLoaded;
       bool extinctsLoaded;
 
-      ElementVector initialTypes;
       std::list<ElementVector> extinctionTypes;
 
       uint8_t* claimed;
       unsigned int* positions;
+      int maxPositions[ MAX_ELES_NOT_INCLUDING_SOLVENT ];
+      bool positionSetReserved[ MAX_ELES_NOT_INCLUDING_SOLVENT ];
+      StringCounter positionSets;
 
       // I/O attributes
       int scrX;
@@ -73,6 +75,7 @@ class Sim
       void initRNG( int initSeed );
       void generateRandNums();
       void shufflePositions();
+      void reservePositionSet( Element* ele );
       void shuffleWorld();
 
       void moveAtoms();
@@ -91,7 +94,6 @@ class Sim
       void writeDiffusion();
       void printEles( std::ostream* out );
       void printRxns( std::ostream* out );
-      void printInits( std::ostream* out );
       void printExtincts( std::ostream* out );
 };
 
