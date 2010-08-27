@@ -3,10 +3,6 @@
 
 #include <cassert>
 #include <cstdlib> // exit
-#ifdef HAVE_QT
-#include <QDir>
-#endif
-#include "boost-devices.h"
 #include "options.h"
 #include "safecalls.h"
 using namespace SafeCalls;
@@ -36,11 +32,6 @@ Options::Options( int argc, char* argv[] )
    progress = true;
 
    filePaths = std::vector<std::string>( N_FILES );
-   out = std::vector<std::ostream*>( N_FILES );
-#ifdef HAVE_QT
-   tempFiles = std::vector<QTemporaryFile*>( N_FILES );
-#endif
-
    filePaths[ FILE_CONFIG ] = "config.out";
    filePaths[ FILE_CENSUS ] = "census.out";
    filePaths[ FILE_DIFFUSION ] = "diffusion.out";
@@ -351,76 +342,6 @@ Options::Options( int argc, char* argv[] )
             exit( EXIT_FAILURE );
             break;
       }
-   }
-}
-
-
-// Prepares output streams for writing
-void
-Options::openFiles()
-{
-   // Ignore default file names or file names read-in as
-   // arguments if the Qt gui is being used
-   if( gui == GUI_QT )
-   {
-#ifdef HAVE_QT
-      tempFiles[ FILE_CONFIG ]    = new QTemporaryFile( QDir::temp().filePath( "metabolism.config.XXXXXX" ) );
-      tempFiles[ FILE_CENSUS ]    = new QTemporaryFile( QDir::temp().filePath( "metabolism.census.XXXXXX" ) );
-      tempFiles[ FILE_DIFFUSION ] = new QTemporaryFile( QDir::temp().filePath( "metabolism.diffusion.XXXXXX" ) );
-      tempFiles[ FILE_RAND ]      = new QTemporaryFile( QDir::temp().filePath( "metabolism.rand.XXXXXX" ) );
-
-      if( tempFiles[ FILE_CONFIG ]->open() &&
-          tempFiles[ FILE_CENSUS ]->open() &&
-          tempFiles[ FILE_DIFFUSION ]->open() &&
-          tempFiles[ FILE_RAND ]->open() )
-      {
-         filePaths[ FILE_CONFIG ]    = tempFiles[ FILE_CONFIG ]->fileName().toStdString();
-         filePaths[ FILE_CENSUS ]    = tempFiles[ FILE_CENSUS ]->fileName().toStdString();
-         filePaths[ FILE_DIFFUSION ] = tempFiles[ FILE_DIFFUSION ]->fileName().toStdString();
-         filePaths[ FILE_RAND ]      = tempFiles[ FILE_RAND ]->fileName().toStdString();
-      }
-      else
-      {
-         std::cout << "opeFiles: unable to open temporary files in \"" << QDir::tempPath().toStdString() << "\"!" << std::endl;
-         exit( EXIT_FAILURE );
-      }
-
-      // Open the Boost streams for writing indirectly to temporary files
-      out[ FILE_CONFIG ]    = new boost::iostreams::stream<QFile_ostream>( tempFiles[ FILE_CONFIG ] );
-      out[ FILE_CENSUS ]    = new boost::iostreams::stream<QFile_ostream>( tempFiles[ FILE_CENSUS ] );
-      out[ FILE_DIFFUSION ] = new boost::iostreams::stream<QFile_ostream>( tempFiles[ FILE_DIFFUSION ] );
-      out[ FILE_RAND ]      = new boost::iostreams::stream<QFile_ostream>( tempFiles[ FILE_RAND ] );
-#endif
-   }
-   else
-   {
-      // Open the ofstreams for writing directly to permanent files
-      out[ FILE_CONFIG ]    = new std::ofstream( filePaths[ FILE_CONFIG ].c_str() );
-      out[ FILE_CENSUS ]    = new std::ofstream( filePaths[ FILE_CENSUS ].c_str() );
-      out[ FILE_DIFFUSION ] = new std::ofstream( filePaths[ FILE_DIFFUSION ].c_str() );
-      out[ FILE_RAND ]      = new std::ofstream( filePaths[ FILE_RAND ].c_str() );
-   }
-
-   // Check that the streams opened properly
-   if( out[ FILE_CONFIG ]->fail() )
-   {
-         std::cout << "openFiles: unable to open file \"" << filePaths[ FILE_CONFIG ] << "\"!" << std::endl;
-         exit( EXIT_FAILURE );
-   }
-   if( out[ FILE_CENSUS ]->fail() )
-   {
-         std::cout << "openFiles: unable to open file \"" << filePaths[ FILE_CENSUS ] << "\"!" << std::endl;
-         exit( EXIT_FAILURE );
-   }
-   if( out[ FILE_DIFFUSION ]->fail() )
-   {
-         std::cout << "openFiles: unable to open file \"" << filePaths[ FILE_DIFFUSION ] << "\"!" << std::endl;
-         exit( EXIT_FAILURE );
-   }
-   if( out[ FILE_RAND ]->fail() )
-   {
-         std::cout << "openFiles: unable to open file \"" << filePaths[ FILE_RAND ] << "\"!" << std::endl;
-         exit( EXIT_FAILURE );
    }
 }
 

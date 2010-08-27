@@ -102,10 +102,10 @@ Window::closeEvent( QCloseEvent* event )
    if( !simStarted )
    {
       // Remove the temporary files permanently
-      o->tempFiles[ Options::FILE_CONFIG ]->remove();
-      o->tempFiles[ Options::FILE_CENSUS ]->remove();
-      o->tempFiles[ Options::FILE_DIFFUSION ]->remove();
-      o->tempFiles[ Options::FILE_RAND ]->remove();
+      sim->tempFiles[ Options::FILE_CONFIG ]->remove();
+      sim->tempFiles[ Options::FILE_CENSUS ]->remove();
+      sim->tempFiles[ Options::FILE_DIFFUSION ]->remove();
+      sim->tempFiles[ Options::FILE_RAND ]->remove();
 
       // Allow the application to close
       event->accept();
@@ -193,17 +193,17 @@ Window::save()
                QFile::remove( QDir( savePath ).filePath( "rand.out" ) );
 
                // Copy the temporary files to the chosen directory
-               if( o->tempFiles[ Options::FILE_CONFIG ]->copy( QDir( savePath ).filePath( "config.out" ) ) &&
-                   o->tempFiles[ Options::FILE_CENSUS ]->copy( QDir( savePath ).filePath( "census.out" ) ) &&
-                   o->tempFiles[ Options::FILE_DIFFUSION ]->copy( QDir( savePath ).filePath( "diffusion.out" ) ) &&
-                   o->tempFiles[ Options::FILE_RAND ]->copy( QDir( savePath ).filePath( "rand.out" ) ) )
+               if( sim->tempFiles[ Options::FILE_CONFIG ]->copy( QDir( savePath ).filePath( "config.out" ) ) &&
+                   sim->tempFiles[ Options::FILE_CENSUS ]->copy( QDir( savePath ).filePath( "census.out" ) ) &&
+                   sim->tempFiles[ Options::FILE_DIFFUSION ]->copy( QDir( savePath ).filePath( "diffusion.out" ) ) &&
+                   sim->tempFiles[ Options::FILE_RAND ]->copy( QDir( savePath ).filePath( "rand.out" ) ) )
                {
                   // If all copy steps were successful, remove the temporary
                   // files and return
-                  o->tempFiles[ Options::FILE_CONFIG ]->remove();
-                  o->tempFiles[ Options::FILE_CENSUS ]->remove();
-                  o->tempFiles[ Options::FILE_DIFFUSION ]->remove();
-                  o->tempFiles[ Options::FILE_RAND ]->remove();
+                  sim->tempFiles[ Options::FILE_CONFIG ]->remove();
+                  sim->tempFiles[ Options::FILE_CENSUS ]->remove();
+                  sim->tempFiles[ Options::FILE_DIFFUSION ]->remove();
+                  sim->tempFiles[ Options::FILE_RAND ]->remove();
                   return;
                }
                else
@@ -239,10 +239,10 @@ Window::save()
             sim->cleanup();
 
             // Remove the temporary files permanently
-            o->tempFiles[ Options::FILE_CONFIG ]->remove();
-            o->tempFiles[ Options::FILE_CENSUS ]->remove();
-            o->tempFiles[ Options::FILE_DIFFUSION ]->remove();
-            o->tempFiles[ Options::FILE_RAND ]->remove();
+            sim->tempFiles[ Options::FILE_CONFIG ]->remove();
+            sim->tempFiles[ Options::FILE_CENSUS ]->remove();
+            sim->tempFiles[ Options::FILE_DIFFUSION ]->remove();
+            sim->tempFiles[ Options::FILE_RAND ]->remove();
             return;
             break;
 

@@ -88,10 +88,6 @@ Sim::initializeEngine()
       extinctsLoaded = false;
       loadChemistry();
 
-      // Open files after load file has been successfully read
-      // in case the load file is also the default config file
-      o->openFiles();
-
       // Set up default periodicTable if one was not loaded
       if( !elesLoaded )
       {
@@ -126,6 +122,12 @@ Sim::initializeEngine()
          extinctionTypes.push_back( ev(1,"A") );
          extinctionTypes.push_back( ev(1,"B") );
       }
+
+      // Open files after load file has been successfully read
+      // in case the load file is also the config output file
+      // and before RNG activity (since generateRandNums dumps
+      // some numbers to file)
+      openFiles();
 
       // Initialize the random number generator
       initRNG( o->seed );
@@ -258,10 +260,10 @@ Sim::cleanup()
          killncurses();
 
       // Close the output streams
-      delete o->out[ Options::FILE_CONFIG ];
-      delete o->out[ Options::FILE_CENSUS ];
-      delete o->out[ Options::FILE_DIFFUSION ];
-      delete o->out[ Options::FILE_RAND ];
+      delete out[ Options::FILE_CONFIG ];
+      delete out[ Options::FILE_CENSUS ];
+      delete out[ Options::FILE_DIFFUSION ];
+      delete out[ Options::FILE_RAND ];
    }
 }
 
@@ -382,7 +384,7 @@ Sim::generateRandNums()
 
       for( int i = 0; i < 10; i++ )
       {
-         *(o->out[ Options::FILE_RAND ]) << randNums[i] << std::endl;
+         *(out[ Options::FILE_RAND ]) << randNums[i] << std::endl;
       }
    }
 }

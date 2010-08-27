@@ -1,6 +1,9 @@
 /* sim-io.cpp
  */
 
+#ifdef HAVE_QT
+#include <QDir>
+#endif
 #include <cassert>
 #include <cstdlib> // exit
 #include <fstream>
@@ -33,7 +36,7 @@ Sim::initializeIO()
    {
       initialized = true;
 
-      // Open the census file and take an initial survey
+      // Take an initial census
       writeCensus();
 
       // Set the time for the most recent progress report
@@ -79,6 +82,81 @@ Sim::initializeIO()
             std::cout << "------" << std::endl;
          }
       }
+   }
+}
+
+
+// Prepares output streams for writing
+void
+Sim::openFiles()
+{
+   out = std::vector<std::ostream*>( Options::N_FILES );
+#ifdef HAVE_QT
+   tempFiles = std::vector<QTemporaryFile*>( Options::N_FILES );
+#endif
+
+   // Ignore default file names or file names read-in as
+   // arguments if the Qt gui is being used
+   if( o->gui == Options::GUI_QT )
+   {
+#ifdef HAVE_QT
+      tempFiles[ Options::FILE_CONFIG ]    = new QTemporaryFile( QDir::temp().filePath( "metabolism.config.XXXXXX" ) );
+      tempFiles[ Options::FILE_CENSUS ]    = new QTemporaryFile( QDir::temp().filePath( "metabolism.census.XXXXXX" ) );
+      tempFiles[ Options::FILE_DIFFUSION ] = new QTemporaryFile( QDir::temp().filePath( "metabolism.diffusion.XXXXXX" ) );
+      tempFiles[ Options::FILE_RAND ]      = new QTemporaryFile( QDir::temp().filePath( "metabolism.rand.XXXXXX" ) );
+
+      if( tempFiles[ Options::FILE_CONFIG ]->open() &&
+          tempFiles[ Options::FILE_CENSUS ]->open() &&
+          tempFiles[ Options::FILE_DIFFUSION ]->open() &&
+          tempFiles[ Options::FILE_RAND ]->open() )
+      {
+         o->filePaths[ Options::FILE_CONFIG ]    = tempFiles[ Options::FILE_CONFIG ]->fileName().toStdString();
+         o->filePaths[ Options::FILE_CENSUS ]    = tempFiles[ Options::FILE_CENSUS ]->fileName().toStdString();
+         o->filePaths[ Options::FILE_DIFFUSION ] = tempFiles[ Options::FILE_DIFFUSION ]->fileName().toStdString();
+         o->filePaths[ Options::FILE_RAND ]      = tempFiles[ Options::FILE_RAND ]->fileName().toStdString();
+      }
+      else
+      {
+         std::cout << "openFiles: unable to open temporary files in \"" << QDir::tempPath().toStdString() << "\"!" << std::endl;
+         exit( EXIT_FAILURE );
+      }
+
+      // Open the Boost streams for writing indirectly to temporary files
+      out[ Options::FILE_CONFIG ]    = new boost::iostreams::stream<QFile_ostream>( tempFiles[ Options::FILE_CONFIG ] );
+      out[ Options::FILE_CENSUS ]    = new boost::iostreams::stream<QFile_ostream>( tempFiles[ Options::FILE_CENSUS ] );
+      out[ Options::FILE_DIFFUSION ] = new boost::iostreams::stream<QFile_ostream>( tempFiles[ Options::FILE_DIFFUSION ] );
+      out[ Options::FILE_RAND ]      = new boost::iostreams::stream<QFile_ostream>( tempFiles[ Options::FILE_RAND ] );
+#endif
+   }
+   else
+   {
+      // Open the ofstreams for writing directly to permanent files
+      out[ Options::FILE_CONFIG ]    = new std::ofstream( o->filePaths[ Options::FILE_CONFIG ].c_str() );
+      out[ Options::FILE_CENSUS ]    = new std::ofstream( o->filePaths[ Options::FILE_CENSUS ].c_str() );
+      out[ Options::FILE_DIFFUSION ] = new std::ofstream( o->filePaths[ Options::FILE_DIFFUSION ].c_str() );
+      out[ Options::FILE_RAND ]      = new std::ofstream( o->filePaths[ Options::FILE_RAND ].c_str() );
+   }
+
+   // Check that the streams opened properly
+   if( out[ Options::FILE_CONFIG ]->fail() )
+   {
+         std::cout << "openFiles: unable to open file \"" << o->filePaths[ Options::FILE_CONFIG ] << "\"!" << std::endl;
+         exit( EXIT_FAILURE );
+   }
+   if( out[ Options::FILE_CENSUS ]->fail() )
+   {
+         std::cout << "openFiles: unable to open file \"" << o->filePaths[ Options::FILE_CENSUS ] << "\"!" << std::endl;
+         exit( EXIT_FAILURE );
+   }
+   if( out[ Options::FILE_DIFFUSION ]->fail() )
+   {
+         std::cout << "openFiles: unable to open file \"" << o->filePaths[ Options::FILE_DIFFUSION ] << "\"!" << std::endl;
+         exit( EXIT_FAILURE );
+   }
+   if( out[ Options::FILE_RAND ]->fail() )
+   {
+         std::cout << "openFiles: unable to open file \"" << o->filePaths[ Options::FILE_RAND ] << "\"!" << std::endl;
+         exit( EXIT_FAILURE );
    }
 }
 
@@ -324,26 +402,26 @@ void
 Sim::writeConfig()
 {
    // Write parameters to file
-   *(o->out[ Options::FILE_CONFIG ]) << "version "   << GIT_TAG << std::endl;
-   *(o->out[ Options::FILE_CONFIG ]) << "seed "      << o->seed << std::endl;
-   *(o->out[ Options::FILE_CONFIG ]) << "iters "     << itersCompleted << std::endl;
-   *(o->out[ Options::FILE_CONFIG ]) << "x "         << o->worldX << std::endl;
-   *(o->out[ Options::FILE_CONFIG ]) << "y "         << o->worldY << std::endl;
-   *(o->out[ Options::FILE_CONFIG ]) << "reactions " << (o->doRxns ? "on" : "off") << std::endl;
-   *(o->out[ Options::FILE_CONFIG ]) << "shuffle "   << (o->doShuffle ? "on" : "off") << std::endl;
-   *(o->out[ Options::FILE_CONFIG ]) << std::endl;
+   *(out[ Options::FILE_CONFIG ]) << "version "   << GIT_TAG << std::endl;
+   *(out[ Options::FILE_CONFIG ]) << "seed "      << o->seed << std::endl;
+   *(out[ Options::FILE_CONFIG ]) << "iters "     << itersCompleted << std::endl;
+   *(out[ Options::FILE_CONFIG ]) << "x "         << o->worldX << std::endl;
+   *(out[ Options::FILE_CONFIG ]) << "y "         << o->worldY << std::endl;
+   *(out[ Options::FILE_CONFIG ]) << "reactions " << (o->doRxns ? "on" : "off") << std::endl;
+   *(out[ Options::FILE_CONFIG ]) << "shuffle "   << (o->doShuffle ? "on" : "off") << std::endl;
+   *(out[ Options::FILE_CONFIG ]) << std::endl;
 
    // Write Elements to file
-   printEles( o->out[ Options::FILE_CONFIG ] );
-   *(o->out[ Options::FILE_CONFIG ]) << std::endl;
+   printEles( out[ Options::FILE_CONFIG ] );
+   *(out[ Options::FILE_CONFIG ]) << std::endl;
 
    // Write Reactions to file
-   printRxns( o->out[ Options::FILE_CONFIG ] );
-   *(o->out[ Options::FILE_CONFIG ]) << std::endl;
+   printRxns( out[ Options::FILE_CONFIG ] );
+   *(out[ Options::FILE_CONFIG ]) << std::endl;
 
    // Write extinctionTypes to file
-   printExtincts( o->out[ Options::FILE_CONFIG ] );
-   *(o->out[ Options::FILE_CONFIG ]) << std::endl;
+   printExtincts( out[ Options::FILE_CONFIG ] );
+   *(out[ Options::FILE_CONFIG ]) << std::endl;
 }
 
 
@@ -360,30 +438,30 @@ Sim::writeCensus()
    {
       initialized = true;
 
-      o->out[ Options::FILE_CENSUS ]->flags(std::ios::left);
-      *(o->out[ Options::FILE_CENSUS ]) << std::setw(colwidth) << "iter";
+      out[ Options::FILE_CENSUS ]->flags(std::ios::left);
+      *(out[ Options::FILE_CENSUS ]) << std::setw(colwidth) << "iter";
       for( ElementMap::iterator i = periodicTable.begin(); i != periodicTable.end(); i++ )
       {
          Element* ele = i->second;
          if( ele != periodicTable[ "Solvent" ] )
          {
-            *(o->out[ Options::FILE_CENSUS ]) << std::setw(colwidth) << ele->getName().c_str();
+            *(out[ Options::FILE_CENSUS ]) << std::setw(colwidth) << ele->getName().c_str();
          }
       }
-      *(o->out[ Options::FILE_CENSUS ]) << std::setw(colwidth) << "total" << std::endl;
+      *(out[ Options::FILE_CENSUS ]) << std::setw(colwidth) << "total" << std::endl;
    }
 
-   *(o->out[ Options::FILE_CENSUS ]) << std::setw(colwidth) << itersCompleted;
+   *(out[ Options::FILE_CENSUS ]) << std::setw(colwidth) << itersCompleted;
    for( ElementMap::iterator i = periodicTable.begin(); i != periodicTable.end(); i++ )
    {
       Element* ele = i->second;
       if( ele != periodicTable[ "Solvent" ] )
       {
-         *(o->out[ Options::FILE_CENSUS ]) << std::setw(colwidth) << ele->count;
+         *(out[ Options::FILE_CENSUS ]) << std::setw(colwidth) << ele->count;
       }
       totalAtoms += ele->count;
    }
-   *(o->out[ Options::FILE_CENSUS ]) << std::setw(colwidth) << totalAtoms << std::endl;
+   *(out[ Options::FILE_CENSUS ]) << std::setw(colwidth) << totalAtoms << std::endl;
 }
 
 
@@ -395,8 +473,8 @@ Sim::writeDiffusion()
 {
    int colwidth = 12;
 
-   o->out[ Options::FILE_DIFFUSION ]->flags(std::ios::left);
-   *(o->out[ Options::FILE_DIFFUSION ]) << std::setw(colwidth) <<
+   out[ Options::FILE_DIFFUSION ]->flags(std::ios::left);
+   *(out[ Options::FILE_DIFFUSION ]) << std::setw(colwidth) <<
       "type" << std::setw(colwidth) <<
       "dx_actual" << std::setw(colwidth) <<
       "dy_actual" << std::setw(colwidth) <<
@@ -410,7 +488,7 @@ Sim::writeDiffusion()
          if( world[ getWorldIndex(x,y) ] != NULL )
          {
             Atom* thisAtom = world[ getWorldIndex(x,y) ];
-            *(o->out[ Options::FILE_DIFFUSION ]) << std::setw(colwidth) <<
+            *(out[ Options::FILE_DIFFUSION ]) << std::setw(colwidth) <<
                thisAtom->getType()->getName().c_str() << std::setw(colwidth) <<
                thisAtom->dx_actual << std::setw(colwidth) <<
                thisAtom->dy_actual << std::setw(colwidth) <<

@@ -4,6 +4,9 @@
 #ifndef SIM_H
 #define SIM_H 
 
+#ifdef HAVE_QT
+#include <QTemporaryFile>
+#endif
 #include <list>
 #include <map>
 #include <ostream>
@@ -42,6 +45,12 @@ class Sim
       ElementMap periodicTable;
       ReactionMap rxnTable;
       int getWorldIndex( int x, int y );
+
+      // File management
+      std::vector<std::ostream*> out;
+#ifdef HAVE_QT
+      std::vector<QTemporaryFile*> tempFiles;
+#endif
 
    private:
       // Sim attributes
@@ -90,6 +99,7 @@ class Sim
 
       // Private I/O methods
       void initializeIO();
+      void openFiles();
       void killncurses();
       void loadChemistry();
       void writeConfig();

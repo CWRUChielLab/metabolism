@@ -4,9 +4,6 @@
 #ifndef OPTIONS_H
 #define OPTIONS_H
 
-#ifdef HAVE_QT
-#include <QTemporaryFile>
-#endif
 #include <fstream>
 #include <getopt.h>
 #include <string>
@@ -19,7 +16,6 @@ class Options
       Options( int argc, char* argv[] );
 
       // Options output methods
-      void openFiles();
       void printVersion();
       void printHelp();
 
@@ -34,14 +30,9 @@ class Options
       int sleep;
       bool verbose;
       bool progress;
+      std::vector<std::string> filePaths;
 
       std::ifstream loadFile;
-
-      std::vector<std::string> filePaths;
-      std::vector<std::ostream*> out;
-#ifdef HAVE_QT
-      std::vector<QTemporaryFile*> tempFiles;
-#endif
 
       // Options attribute values
       enum
