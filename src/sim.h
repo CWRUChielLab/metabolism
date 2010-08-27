@@ -28,11 +28,13 @@ class Sim
       // Public engine methods
       bool iterate();
       void end();
+      void cleanup();
       int getItersCompleted();
 
       // Public I/O methods
       void reportProgress();
-      void forceReportProgress();
+      void forceProgressReport();
+      void finishProgressReport();
       void writeCensus();
       void printWorld();
 
@@ -71,7 +73,6 @@ class Sim
 
       // Private engine methods
       void initializeEngine();
-      void cleanup();
       void initRNG( int initSeed );
       void generateRandNums();
       void shufflePositions();

@@ -23,7 +23,7 @@ class Window : public QMainWindow
       void closeEvent( QCloseEvent* event );
 
    public slots:
-      void updateButton();
+      void execStackedBtn();
       void runSim();
 
    signals:
@@ -35,7 +35,6 @@ class Window : public QMainWindow
       Sim* sim;
       bool simStarted;
       bool simPaused;
-      bool simCompleted;
       bool quitRequested;
 
       // GUI components
@@ -45,7 +44,7 @@ class Window : public QMainWindow
       QStackedLayout* stackedBtnLayout;
       QPushButton* startBtn;
       QPushButton* pauseBtn;
-      QPushButton* continueBtn;
+      QPushButton* resumeBtn;
 
       void save();
 };

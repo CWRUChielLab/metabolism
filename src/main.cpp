@@ -24,13 +24,14 @@ handleExit( int sig )
 {
    sig = 0;  // silence the compiler
    sim->end();
-   std::cout << std::endl;
 }
 
 
 int
 main( int argc, char* argv[] )
 {
+   int retval = 0;
+
 #ifdef HAVE_QT
    // Create the core Qt controller application
    QCoreApplication *app;
@@ -50,7 +51,7 @@ main( int argc, char* argv[] )
       app = new QApplication( argc, argv );
       Window* gui = safeNew( Window( o, sim ) );
       gui->show();
-      return app->exec();
+      retval = app->exec();
 #endif
    } else {
       while( sim->iterate() )
@@ -64,7 +65,18 @@ main( int argc, char* argv[] )
          }
       }
 
-      return 0;
+      // Finish collecting data and clean up
+      sim->cleanup();
+
+      retval = 0;
    }
+
+   // Update the progress indicator to accurately
+   // display how many iterations were completed
+   // when the simulation ended and break the line
+   if( o->progress )
+      sim->finishProgressReport();
+
+   return retval;
 }
 

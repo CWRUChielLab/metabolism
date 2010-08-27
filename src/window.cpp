@@ -21,7 +21,6 @@ Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowF
    // Initialize program state flags
    simStarted = false;
    simPaused = false;
-   simCompleted = false;
    quitRequested = false;
 
    // Set up GUI components
@@ -30,7 +29,7 @@ Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowF
 
    startBtn = safeNew( QPushButton( "&Start" ) );
    pauseBtn = safeNew( QPushButton( "&Pause" ) );
-   continueBtn = safeNew( QPushButton( "&Continue" ) );
+   resumeBtn = safeNew( QPushButton( "&Resume" ) );
 
    // Set up GUI layout
    QFrame* frame = safeNew( QFrame() );
@@ -44,7 +43,7 @@ Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowF
    stackedBtnLayout = safeNew( QStackedLayout() );
    stackedBtnLayout->addWidget( startBtn );
    stackedBtnLayout->addWidget( pauseBtn );
-   stackedBtnLayout->addWidget( continueBtn );
+   stackedBtnLayout->addWidget( resumeBtn );
    stackedBtnLayout->setCurrentWidget( startBtn );
 
    QVBoxLayout* mainLayout = safeNew( QVBoxLayout() );
@@ -59,8 +58,12 @@ Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowF
 
    // Connections with the same signal should be declared
    // in order of descending slot computational complexity
+   connect( startBtn, SIGNAL( clicked() ), this, SLOT( execStackedBtn() ) );
    connect( startBtn, SIGNAL( clicked() ), viewer, SLOT( startPaint() ) );
    connect( startBtn, SIGNAL( clicked() ), this, SLOT( runSim() ) );
+   connect( pauseBtn, SIGNAL( clicked() ), this, SLOT( execStackedBtn() ) );
+   connect( resumeBtn, SIGNAL( clicked() ), this, SLOT( execStackedBtn() ) );
+   connect( resumeBtn, SIGNAL( clicked() ), this, SLOT( runSim() ) );
 }
 
 
@@ -68,25 +71,22 @@ Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowF
 void
 Window::runSim()
 {
-   simStarted = true;
-
-   if( !simCompleted )
+   while( sim->iterate() )
    {
-      while( sim->iterate() )
-      {
-         // Update gui components
-         updateButton();
-         plot->update();
-         viewer->updateGL();
+      // Update gui components
+      plot->update();
+      viewer->updateGL();
 
-         // Check for Qt signals and events
-         QCoreApplication::processEvents();
-      }
+      // Check for Qt signals and events
+      QCoreApplication::processEvents();
 
-      simCompleted = true;
-      if( quitRequested )
-         close();
+      // Check for pausing
+      if( simPaused )
+         return;
    }
+
+   if( o->progress )
+      sim->forceProgressReport();
 }
 
 
@@ -96,7 +96,8 @@ void
 Window::closeEvent( QCloseEvent* event )
 {
    quitRequested = true;
-   sim->end();
+   if( o->progress )
+      sim->forceProgressReport();
 
    if( !simStarted )
    {
@@ -111,28 +112,47 @@ Window::closeEvent( QCloseEvent* event )
    }
    else
    {
-      if( simCompleted )
-      {
-         // Ask the user if and to where the temporary output
-         // files should be copied as permanent files
-         save();
+      // Ask the user if and to where the temporary output
+      // files should be copied as permanent files
+      save();
 
-         // Allow the application to close
+      // Allow the application to close if the user has not
+      // decided to cancel
+      if( quitRequested )
          event->accept();
-      }
       else
-      {
-         // Do NOT allow the application to close
          event->ignore();
-      }
    }
 }
 
 
 void
-Window::updateButton()
+Window::execStackedBtn()
 {
-   stackedBtnLayout->setCurrentWidget( pauseBtn );
+   switch( stackedBtnLayout->currentIndex() )
+   {
+      case 0: // startBtn
+         simStarted = true;
+         simPaused = false;
+         stackedBtnLayout->setCurrentWidget( pauseBtn );
+         break;
+      case 1: // pauseBtn
+         simStarted = true;
+         simPaused = true;
+         stackedBtnLayout->setCurrentWidget( resumeBtn );
+         if( o->progress )
+            sim->forceProgressReport();
+         break;
+      case 2: // resumeBtn
+         simStarted = true;
+         simPaused = false;
+         stackedBtnLayout->setCurrentWidget( pauseBtn );
+         break;
+      default:
+         std::cout << "updateStackedBtn: current widget unknown!" << std::endl;
+         exit( EXIT_FAILURE );
+         break;
+   }
 }
 
 
@@ -147,8 +167,8 @@ Window::save()
    // Ask the user if files should be saved
    choice = QMessageBox::question( this, "Save simulation output?",
       "Would you like to save the output for this simulation?",
-      QMessageBox::Save | QMessageBox::Discard,
-      QMessageBox::Save );
+      QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
+      QMessageBox::Cancel );
 
    while( true )
    {
@@ -162,6 +182,9 @@ Window::save()
             // If a valid directory was selected...
             if( savePath != NULL )
             {
+               // Clean up the simulation
+               sim->cleanup();
+
                // Delete any files in the target directory with the target
                // names so that copying can proceed
                QFile::remove( QDir( savePath ).filePath( "config.out" ) );
@@ -204,7 +227,7 @@ Window::save()
             {
                choice = QMessageBox::warning( this, "Cancel save?",
                   "Are you sure you do not wish to save the simulation output?",
-                  QMessageBox::Save | QMessageBox::Discard,
+                  QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
                   QMessageBox::Save );
                break;
             }
@@ -212,11 +235,21 @@ Window::save()
 
          // If the user chose NOT to save the files...
          case QMessageBox::Discard:
+            // Clean up the simulation
+            sim->cleanup();
+
             // Remove the temporary files permanently
             o->tempFiles[ Options::FILE_CONFIG ]->remove();
             o->tempFiles[ Options::FILE_CENSUS ]->remove();
             o->tempFiles[ Options::FILE_DIFFUSION ]->remove();
             o->tempFiles[ Options::FILE_RAND ]->remove();
+            return;
+            break;
+
+         // If the user chose to cancel closing the app...
+         case QMessageBox::Cancel:
+            // Reset the quitting flag
+            quitRequested = false;
             return;
             break;
 

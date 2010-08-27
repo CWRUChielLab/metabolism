@@ -206,7 +206,7 @@ Sim::iterate()
          ElementVector thisEleVector = *(i);
          for( unsigned int j = 0; j < thisEleVector.size(); j++ )
          {
-            allExtinct = (allExtinct && thisEleVector[j]->count == 0);
+            allExtinct = allExtinct && (thisEleVector[j]->count == 0);
          }
          if( allExtinct )
          {
@@ -223,9 +223,6 @@ Sim::iterate()
    }
    else
    {
-      // Finish collecting data and clean up
-      cleanup();
-
       return false;
    }
 }
@@ -249,26 +246,16 @@ Sim::cleanup()
    {
       finalized = true;
 
-      // Guard against any more iterations
-      o->maxIters = itersCompleted;
-
-      // Finalize the progress indicator to accurately
-      // display how many iterations were completed
-      // when the simulation ended (noticeable primarily
-      // when running batches)
-      if( o->progress )
-      {
-         forceReportProgress();
-      }
+      // Tell the simulation it is time to end prematurely
+      // (if necessary)
+      end();
 
       // Write the simulation parameters and diffusion
       // data to file and clean up ncurses
       writeConfig();
       writeDiffusion();
       if( o->gui == Options::GUI_NCURSES )
-      {
          killncurses();
-      }
 
       // Close the output streams
       delete o->out[ Options::FILE_CONFIG ];

@@ -449,10 +449,22 @@ Sim::reportProgress()
 
 // Force a progress report
 void
-Sim::forceReportProgress()
+Sim::forceProgressReport()
 {
    lastProgressUpdate = 0;
    reportProgress();
+}
+
+
+// Force a progress report and break the line
+void
+Sim::finishProgressReport()
+{
+   if( o->gui != Options::GUI_NCURSES )
+   {
+      forceProgressReport();
+      std::cout << std::endl;
+   }
 }
 
 
