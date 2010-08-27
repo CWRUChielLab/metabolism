@@ -80,17 +80,16 @@ bless: metabolism
 # identical results across tested systems
 check: metabolism-minimal
 	./$< --load $(CHECK_CONFIG)
-	@echo
-	@echo "census.out:" `diff census.out $(CHECK_CENSUS) | wc -l` "deviations"
+	@echo "config.out:   " `diff -I version config.out $(CHECK_CONFIG) | wc -l` "deviations"
+	@echo "census.out:   " `diff census.out $(CHECK_CENSUS) | wc -l` "deviations"
 	@echo "diffusion.out:" `diff diffusion.out $(CHECK_DIFFUSION) | wc -l` "deviations"
-	@echo "rand.out:" `diff rand.out $(CHECK_RAND) | wc -l` "deviations"
+	@echo "rand.out:     " `diff rand.out $(CHECK_RAND) | wc -l` "deviations"
 
 
 # Target for running a simulation and analyzing profiling
 # data to assist with optimization
 profile: metabolism-debug
 	./$< --iters 50 -x 1000 -y 1000
-	@echo
 	gprof $< > gprof.out
 	cat gprof.out | less
 
