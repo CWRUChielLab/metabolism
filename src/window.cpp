@@ -28,7 +28,7 @@ Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowF
    mainLayout->addWidget( createCtrl() );
    mainLayout->addWidget( createViewer() );
    mainLayout->addWidget( createPlot(), 1 );
-   createStatusBar();
+   setStatusBar( createStatusBar() );
 
    QWidget* mainWidget = safeNew( QWidget() );
    mainWidget->setLayout( mainLayout );
@@ -281,12 +281,16 @@ Window::createPlot()
 
 // Set up the widgets and connections for the
 // status bar
-void
+QStatusBar*
 Window::createStatusBar()
 {
+   QStatusBar* statusBar = safeNew( QStatusBar() );
+
    statusLbl = safeNew( QLabel( "Ready" ) );
    statusLbl->show();
-   statusBar()->addWidget( statusLbl );
+   statusBar->addWidget( statusLbl );
+
+   return statusBar;
 }
 
 

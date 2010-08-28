@@ -50,7 +50,7 @@ class Window : public QMainWindow
       QFrame* createCtrl();
       QFrame* createViewer();
       QFrame* createPlot();
-      void createStatusBar();
+      QStatusBar* createStatusBar();
       void save();
 };
 
