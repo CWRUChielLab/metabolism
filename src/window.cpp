@@ -23,9 +23,38 @@ Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowF
    simPaused = false;
    quitRequested = false;
 
-   //=================
-   //  CONTROL PANEL    
-   //=================
+   // Create the gui components
+   QHBoxLayout* mainLayout = safeNew( QHBoxLayout() );
+   mainLayout->addWidget( createCtrl() );
+   mainLayout->addWidget( createViewer() );
+   mainLayout->addWidget( createPlot(), 1 );
+   createStatusBar();
+
+   QWidget* mainWidget = safeNew( QWidget() );
+   mainWidget->setLayout( mainLayout );
+   setCentralWidget( mainWidget );
+   setWindowTitle( "Chemical Metabolism Simulator" );
+
+   // Connections with the same signal should be declared
+   // in order of descending slot computational complexity
+   connect( startBtn, SIGNAL( clicked() ), this, SLOT( execStackedBtn() ) );
+   connect( startBtn, SIGNAL( clicked() ), viewer, SLOT( startPaint() ) );
+   connect( startBtn, SIGNAL( clicked() ), this, SLOT( runSim() ) );
+   connect( pauseBtn, SIGNAL( clicked() ), this, SLOT( execStackedBtn() ) );
+   connect( resumeBtn, SIGNAL( clicked() ), this, SLOT( execStackedBtn() ) );
+   connect( resumeBtn, SIGNAL( clicked() ), this, SLOT( runSim() ) );
+
+   // Set the initial keyboard focus for the window
+   // to the start button
+   startBtn->setFocus();
+}
+
+
+// Set up the widgets and connections for the
+// control panel
+QFrame*
+Window::createCtrl()
+{
    QFrame* ctrlFrame = safeNew( QFrame() );
    QVBoxLayout* ctrlLayout = safeNew( QVBoxLayout() );
    ctrlFrame->setFrameStyle( QFrame::Box | QFrame::Sunken );
@@ -39,7 +68,7 @@ Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowF
    // Iterations controller
    QLabel* itersLbl = safeNew( QLabel( "&Iterations" ) );
    itersLbl->setToolTip( "Iterations" );
-   itersLbl->setMinimumWidth( 70 );
+   itersLbl->setMinimumSize( itersLbl->sizeHint() );
 
    QSlider* itersSlider = safeNew( QSlider( Qt::Horizontal ) );
    itersSlider->setMinimumWidth( 100 );
@@ -50,9 +79,10 @@ Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowF
 
    itersLbl->setBuddy( itersSlider );
 
-   QLabel* itersVal = safeNew( QLabel( QString::number( o->maxIters ) ) );
+   QLabel* itersVal = safeNew( QLabel( QString::number( itersSlider->maximum() ) ) );
    itersVal->setAlignment( Qt::AlignRight );
-   itersVal->setMinimumWidth( 60 );
+   itersVal->setMinimumSize( itersVal->sizeHint() );
+   itersVal->setText( QString::number( o->maxIters ) );
 
    QHBoxLayout* itersLayout = safeNew( QHBoxLayout() );
    itersLayout->addWidget( itersLbl );
@@ -65,7 +95,7 @@ Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowF
    // Lattice width controller
    QLabel* xLbl = safeNew( QLabel( "&Width" ) );
    xLbl->setToolTip( "Width" );
-   xLbl->setMinimumWidth( 70 );
+   xLbl->setMinimumSize( itersLbl->sizeHint() );
 
    QSlider* xSlider = safeNew( QSlider( Qt::Horizontal ) );
    xSlider->setMinimumWidth( 100 );
@@ -78,7 +108,7 @@ Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowF
 
    QLabel* xVal = safeNew( QLabel( QString::number( o->worldX ) ) );
    xVal->setAlignment( Qt::AlignRight );
-   xVal->setMinimumWidth( 60 );
+   xVal->setMinimumSize( itersVal->sizeHint() );
 
    QHBoxLayout* xLayout = safeNew( QHBoxLayout() );
    xLayout->addWidget( xLbl );
@@ -91,7 +121,7 @@ Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowF
    // Lattice height controller
    QLabel* yLbl = safeNew( QLabel( "&Height" ) );
    yLbl->setToolTip( "Height" );
-   yLbl->setMinimumWidth( 70 );
+   yLbl->setMinimumSize( itersLbl->sizeHint() );
 
    QSlider* ySlider = safeNew( QSlider( Qt::Horizontal ) );
    ySlider->setMinimumWidth( 100 );
@@ -104,7 +134,7 @@ Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowF
 
    QLabel* yVal = safeNew( QLabel( QString::number( o->worldX ) ) );
    yVal->setAlignment( Qt::AlignRight );
-   yVal->setMinimumWidth( 60 );
+   yVal->setMinimumSize( itersVal->sizeHint() );
 
    QHBoxLayout* yLayout = safeNew( QHBoxLayout() );
    yLayout->addWidget( yLbl );
@@ -126,13 +156,67 @@ Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowF
 
    QPushButton* seedBtn = safeNew( QPushButton( "Get &New" ) );
    seedBtn->setToolTip( "Seed" );
-   seedBtn->setMaximumWidth( 90 );
 
    QHBoxLayout* seedLayout = safeNew( QHBoxLayout() );
    seedLayout->addWidget( seedLbl );
    seedLayout->addWidget( seedVal );
    seedLayout->addWidget( seedBtn );
    ctrlLayout->addLayout( seedLayout );
+
+   // Element controllers
+   std::vector<Element*> eles;
+   std::vector<QPushButton*> removeEleBtns;
+   std::vector<QLineEdit*> eleNames;
+   std::vector<QPushButton*> colorChips;
+   std::vector<QSlider*> concSliders;
+   std::vector<QLabel*> concVals;
+
+   int i = 0;
+   for( ElementMap::iterator j = sim->periodicTable.begin(); j != sim->periodicTable.end(); j++ )
+   {
+      Element* thisEle = j->second;
+      if( thisEle != sim->periodicTable[ "Solvent" ] )
+      {
+         eles.push_back( thisEle );
+
+         removeEleBtns.push_back( safeNew( QPushButton( "-" ) ) );
+         removeEleBtns[ i ]->setFixedHeight( removeEleBtns[ i ]->sizeHint().height() );
+         removeEleBtns[ i ]->setFixedWidth( removeEleBtns[ i ]->sizeHint().height() );
+
+         colorChips.push_back( safeNew( QPushButton() ) );
+         //colorChips[ i ]->setFlat( true );
+         colorChips[ i ]->setStyleSheet( "background-color : " + QColor( thisEle->getColor().c_str() ).name() );
+         colorChips[ i ]->setFixedHeight( colorChips[ i ]->sizeHint().height() );
+         colorChips[ i ]->setFixedWidth( colorChips[ i ]->sizeHint().height() );
+
+         eleNames.push_back( safeNew( QLineEdit( thisEle->getName().c_str() ) ) );
+         eleNames[ i ]->setMinimumWidth( 100 );
+
+         concSliders.push_back( safeNew( QSlider( Qt::Horizontal ) ) );
+         concSliders[ i ]->setMinimumWidth( 100 );
+         concSliders[ i ]->setRange( 0, 1000 );
+         concSliders[ i ]->setPageStep( 100 );
+         concSliders[ i ]->setValue( (int)(1000 * thisEle->getStartConc()) );
+
+         concVals.push_back( safeNew( QLabel( QString::number( thisEle->getStartConc() ) ) ) );
+         concVals[ i ]->setAlignment( Qt::AlignRight );
+
+         //connect( concSliders[ i ], SIGNAL( valueChanged( int ) ), concVals[ i ], SLOT( setNum( int ) ) );
+
+         i++;
+      }
+   }
+
+   QGridLayout* eleLayout = safeNew( QGridLayout() );
+   for( unsigned int i = 0; i < sim->periodicTable.size() - 1; i++ )
+   {
+      eleLayout->addWidget( removeEleBtns[ i ], i, 0 );
+      eleLayout->addWidget( colorChips[ i ], i, 1 );
+      eleLayout->addWidget( eleNames[ i ], i , 2 );
+      eleLayout->addWidget( concSliders[ i ], i , 3 );
+      eleLayout->addWidget( concVals[ i ], i , 4 );
+   }
+   ctrlLayout->addLayout( eleLayout );
 
    // Vertical stretch
    ctrlLayout->addStretch( 1 );
@@ -155,9 +239,15 @@ Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowF
 
    connect( quitBtn, SIGNAL( clicked() ), this, SLOT( close() ) );
 
-   //=================
-   //     VIEWER
-   //=================
+   return ctrlFrame;
+}
+
+
+// Set up the widgets and connections for the
+// viewer
+QFrame*
+Window::createViewer()
+{
    QFrame* viewerFrame = safeNew( QFrame() );
    QVBoxLayout* viewerLayout = safeNew( QVBoxLayout() );
    viewerFrame->setFrameStyle( QFrame::Box | QFrame::Sunken );
@@ -167,9 +257,15 @@ Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowF
    viewer = safeNew( Viewer( o, sim, this ) );
    viewerLayout->addWidget( viewer );
 
-   //=================
-   //      PLOT
-   //=================
+   return viewerFrame;
+}
+
+
+// Set up the widgets and connections for the
+// plot
+QFrame*
+Window::createPlot()
+{
    QFrame* plotFrame = safeNew( QFrame() );
    QVBoxLayout* plotLayout = safeNew( QVBoxLayout() );
    plotFrame->setFrameStyle( QFrame::Box | QFrame::Sunken );
@@ -179,52 +275,18 @@ Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowF
    plot = safeNew( Plot( o, sim, this ) );
    plotLayout->addWidget( plot );
 
-   //=================
-   //   MAIN LAYOUT
-   //=================
-   QHBoxLayout* mainLayout = safeNew( QHBoxLayout() );
-   mainLayout->addWidget( ctrlFrame );
-   mainLayout->addWidget( viewerFrame );
-   mainLayout->addWidget( plotFrame );
+   return plotFrame;
+}
 
-   QWidget* mainWidget = safeNew( QWidget() );
-   mainWidget->setLayout( mainLayout );
 
-   setCentralWidget( mainWidget );
-   setWindowTitle( "Chemical Metabolism Simulator" );
-
-   //=================
-   //   STATUS BAR
-   //=================
-
-   statusBar = safeNew( QStatusBar() );
-   setStatusBar( statusBar );
-
+// Set up the widgets and connections for the
+// status bar
+void
+Window::createStatusBar()
+{
    statusLbl = safeNew( QLabel( "Ready" ) );
    statusLbl->show();
-   statusLbl->setMinimumWidth( 300 );
-   statusBar->addWidget( statusLbl );
-
-   QProgressBar* progressBar = safeNew( QProgressBar() );
-   progressBar->hide();
-   progressBar->setRange( 0, o->maxIters );
-   progressBar->setValue( 0 );
-   progressBar->setMinimumWidth( 350 );
-   progressBar->setMaximumWidth( 350 );
-   statusBar->addWidget( progressBar );
-
-   // Connections with the same signal should be declared
-   // in order of descending slot computational complexity
-   connect( startBtn, SIGNAL( clicked() ), this, SLOT( execStackedBtn() ) );
-   connect( startBtn, SIGNAL( clicked() ), viewer, SLOT( startPaint() ) );
-   connect( startBtn, SIGNAL( clicked() ), this, SLOT( runSim() ) );
-   connect( pauseBtn, SIGNAL( clicked() ), this, SLOT( execStackedBtn() ) );
-   connect( resumeBtn, SIGNAL( clicked() ), this, SLOT( execStackedBtn() ) );
-   connect( resumeBtn, SIGNAL( clicked() ), this, SLOT( runSim() ) );
-
-   // Set the initial keyboard focus for the window
-   // to the start button
-   startBtn->setFocus();
+   statusBar()->addWidget( statusLbl );
 }
 
 

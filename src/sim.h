@@ -52,12 +52,13 @@ class Sim
       std::vector<QTemporaryFile*> tempFiles;
 #endif
 
+      static const unsigned int MAX_RXNS_PER_SET_OF_REACTANTS = 2;
+      static const unsigned int MAX_ELES_NOT_INCLUDING_SOLVENT = 8;
+
    private:
       // Sim attributes
       Options* o;
       int itersCompleted;
-      static const unsigned int MAX_RXNS_PER_SET_OF_REACTANTS = 2;
-      static const unsigned int MAX_ELES_NOT_INCLUDING_SOLVENT = 8;
 
       bool elesLoaded;
       bool rxnsLoaded;

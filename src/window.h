@@ -40,7 +40,6 @@ class Window : public QMainWindow
       // GUI components
       Viewer* viewer;
       Plot* plot;
-      QStatusBar* statusBar;
       QLabel* statusLbl;
 
       QStackedLayout* stackedBtnLayout;
@@ -48,6 +47,10 @@ class Window : public QMainWindow
       QPushButton* pauseBtn;
       QPushButton* resumeBtn;
 
+      QFrame* createCtrl();
+      QFrame* createViewer();
+      QFrame* createPlot();
+      void createStatusBar();
       void save();
 };
 
