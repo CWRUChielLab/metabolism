@@ -5,15 +5,15 @@
 #include <cassert>
 #include <cmath>   // ceil
 #include <cstdarg> // variable arguments handling
+#include <cstdlib> // exit, posix_memalign
 #include <cstring> // memset
 #include <fstream>
+#include <iostream>
 #include <SFMT/SFMT.h>
 #ifdef BLR_USEMAC
 #include <sys/malloc.h> // aligned memory retrieval on Mac
 #endif
-#include "safecalls.h"
 #include "sim.h"
-using namespace SafeCalls;
 
 
 // Constructor
@@ -41,9 +41,9 @@ Sim::initializeEngine()
 
       // Set up the world
       itersCompleted = 0;
-      world = safeNew( Atom*[ o->worldX * o->worldY ] );
-      claimed = safeNew( uint8_t[ o->worldX * o->worldY ] );
-      positions = safeNew( unsigned int[ o->worldX * o->worldY ] );
+      world = new Atom*[ o->worldX * o->worldY ];
+      claimed = new uint8_t[ o->worldX * o->worldY ];
+      positions = new unsigned int[ o->worldX * o->worldY ];
       for( unsigned int i = 0; i < MAX_ELES_NOT_INCLUDING_SOLVENT; i++ )
          maxPositions[ i ] = (o->worldX * o->worldY) / MAX_ELES_NOT_INCLUDING_SOLVENT;
       for( unsigned int i = 0; i < (o->worldX * o->worldY) % MAX_ELES_NOT_INCLUDING_SOLVENT; i++ )
@@ -79,7 +79,7 @@ Sim::initializeEngine()
 
       // Create Solvent Element
       Element* tempEle;
-      tempEle = safeNew( Element( "Solvent", '*', "white", 0.0 ) );
+      tempEle = new Element( "Solvent", '*', "white", 0.0 );
       periodicTable[ "Solvent" ] = tempEle;
 
       // Load periodicTable, rxnTable, and extinctionTypes if available
@@ -91,19 +91,19 @@ Sim::initializeEngine()
       // Set up default periodicTable if one was not loaded
       if( !elesLoaded )
       {
-         tempEle = safeNew( Element( "A", 'A', "teal", 0.25 ) );
+         tempEle = new Element( "A", 'A', "teal", 0.25 );
          reservePositionSet( tempEle );
          periodicTable[ tempEle->getName() ] = tempEle;
 
-         tempEle = safeNew( Element( "B", 'B', "hotpink", 0.24 ) );
+         tempEle = new Element( "B", 'B', "hotpink", 0.24 );
          reservePositionSet( tempEle );
          periodicTable[ tempEle->getName() ] = tempEle;
 
-         tempEle = safeNew( Element( "C", 'C', "darkorange", 0.02 ) );
+         tempEle = new Element( "C", 'C', "darkorange", 0.02 );
          reservePositionSet( tempEle );
          periodicTable[ tempEle->getName() ] = tempEle;
 
-         tempEle = safeNew( Element( "D", 'D', "yellow", 0.01 ) );
+         tempEle = new Element( "D", 'D', "yellow", 0.01 );
          reservePositionSet( tempEle );
          periodicTable[ tempEle->getName() ] = tempEle;
       }
@@ -112,7 +112,7 @@ Sim::initializeEngine()
       if( !elesLoaded && !rxnsLoaded )
       {
          Reaction* tempRxn;
-         tempRxn = safeNew( Reaction( ev(2,"A","B"), ev(2,"C","D"), 0.5 ) );
+         tempRxn = new Reaction( ev(2,"A","B"), ev(2,"C","D"), 0.5 );
          rxnTable.insert( std::pair<int,Reaction*>( tempRxn->getKey(), tempRxn ) );
       }
 
@@ -154,7 +154,7 @@ Sim::initializeEngine()
          {
             x = positions[j] % o->worldX;
             y = positions[j] / o->worldX;
-            tempAtom = safeNew( Atom( thisEle, x, y ) );
+            tempAtom = new Atom( thisEle, x, y );
             world[ getWorldIndex(x,y) ] = tempAtom;
          }
       }
@@ -436,7 +436,7 @@ Sim::reservePositionSet( Element* ele )
          return;
       }
    }
-   std::cout << "reservePositionSet: limit of " << MAX_ELES_NOT_INCLUDING_SOLVENT << " Elements exceeded!" << std::endl;
+   std::cerr << "reservePositionSet: limit of " << MAX_ELES_NOT_INCLUDING_SOLVENT << " Elements exceeded!" << std::endl;
    exit( EXIT_FAILURE );
 }
 
@@ -454,7 +454,7 @@ Sim::reservePositionSet( Element* ele, int set )
    }
    else
    {
-      std::cout << "reservePositionSet: set " << set << " already reserved!" << std::endl;
+      std::cerr << "reservePositionSet: set " << set << " already reserved!" << std::endl;
       exit( EXIT_FAILURE );
    }
 }
@@ -467,7 +467,7 @@ Sim::shuffleWorld()
 {
    shufflePositions();
 
-   Atom** temp = safeNew( Atom*[ o->worldX * o->worldY ] );
+   Atom** temp = new Atom*[ o->worldX * o->worldY ];
    for( int i = 0; i < o->worldX * o->worldY; i++ )
    {
       temp[i] = NULL;
@@ -604,7 +604,7 @@ Sim::executeRxns()
          else
          // Else solvent is encountered
          {
-            thisAtom = safeNew( Atom( solventEle, x, y ) );
+            thisAtom = new Atom( solventEle, x, y );
          }
 
          // Determine which neighbor to attempt to react with, if any
@@ -646,7 +646,7 @@ Sim::executeRxns()
             }
             else
             {
-               neighborAtom = safeNew( Atom( solventEle, neighborX, neighborY ) );
+               neighborAtom = new Atom( solventEle, neighborX, neighborY );
             }
          }
 
@@ -741,7 +741,7 @@ Sim::executeRxns()
             else
             // Else solvent is encountered
             {
-               thisAtom = safeNew( Atom( solventEle, x, y) );
+               thisAtom = new Atom( solventEle, x, y);
             }
 
             // Determine which neighbor to attempt to react with, if any
@@ -783,7 +783,7 @@ Sim::executeRxns()
                }
                else
                {
-                  neighborAtom = safeNew( Atom( solventEle, neighborX, neighborY ) );
+                  neighborAtom = new Atom( solventEle, neighborX, neighborY );
                }
             }
 

@@ -4,10 +4,9 @@
 #ifdef HAVE_QT
 
 #include <cstdlib> // exit
+#include <iostream>
 #include <QDir>
-#include "safecalls.h"
 #include "window.h"
-using namespace SafeCalls;
 
 
 // Constructor
@@ -24,13 +23,13 @@ Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowF
    quitRequested = false;
 
    // Create the gui components
-   QHBoxLayout* mainLayout = safeNew( QHBoxLayout() );
+   QHBoxLayout* mainLayout = new QHBoxLayout();
    mainLayout->addWidget( createCtrl() );
    mainLayout->addWidget( createViewer() );
    mainLayout->addWidget( createPlot(), 1 );
    setStatusBar( createStatusBar() );
 
-   QWidget* mainWidget = safeNew( QWidget() );
+   QWidget* mainWidget = new QWidget();
    mainWidget->setLayout( mainLayout );
    setCentralWidget( mainWidget );
    setWindowTitle( "Chemical Metabolism Simulator" );
@@ -55,22 +54,22 @@ Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowF
 QFrame*
 Window::createCtrl()
 {
-   QFrame* ctrlFrame = safeNew( QFrame() );
-   QVBoxLayout* ctrlLayout = safeNew( QVBoxLayout() );
+   QFrame* ctrlFrame = new QFrame();
+   QVBoxLayout* ctrlLayout = new QVBoxLayout();
    ctrlFrame->setFrameStyle( QFrame::Box | QFrame::Sunken );
    ctrlFrame->setLayout( ctrlLayout );
 
    // Header label
-   QLabel* ctrlHeader = safeNew( QLabel( "<b>Control Panel</b>" ) );
+   QLabel* ctrlHeader = new QLabel( "<b>Control Panel</b>" );
    ctrlHeader->setAlignment( Qt::AlignHCenter );
    ctrlLayout->addWidget( ctrlHeader );
 
    // Iterations controller
-   QLabel* itersLbl = safeNew( QLabel( "&Iterations" ) );
+   QLabel* itersLbl = new QLabel( "&Iterations" );
    itersLbl->setToolTip( "Iterations" );
    itersLbl->setMinimumSize( itersLbl->sizeHint() );
 
-   QSlider* itersSlider = safeNew( QSlider( Qt::Horizontal ) );
+   QSlider* itersSlider = new QSlider( Qt::Horizontal );
    itersSlider->setMinimumWidth( 100 );
    itersSlider->setRange( 1, 1000000 );
    itersSlider->setPageStep( 1000 );
@@ -79,12 +78,12 @@ Window::createCtrl()
 
    itersLbl->setBuddy( itersSlider );
 
-   QLabel* itersVal = safeNew( QLabel( QString::number( itersSlider->maximum() ) ) );
+   QLabel* itersVal = new QLabel( QString::number( itersSlider->maximum() ) );
    itersVal->setAlignment( Qt::AlignRight );
    itersVal->setMinimumSize( itersVal->sizeHint() );
    itersVal->setText( QString::number( o->maxIters ) );
 
-   QHBoxLayout* itersLayout = safeNew( QHBoxLayout() );
+   QHBoxLayout* itersLayout = new QHBoxLayout();
    itersLayout->addWidget( itersLbl );
    itersLayout->addWidget( itersSlider );
    itersLayout->addWidget( itersVal );
@@ -93,11 +92,11 @@ Window::createCtrl()
    connect( itersSlider, SIGNAL( valueChanged( int ) ), itersVal, SLOT( setNum( int ) ) );
 
    // Lattice width controller
-   QLabel* xLbl = safeNew( QLabel( "&Width" ) );
+   QLabel* xLbl = new QLabel( "&Width" );
    xLbl->setToolTip( "Width" );
    xLbl->setMinimumSize( itersLbl->sizeHint() );
 
-   QSlider* xSlider = safeNew( QSlider( Qt::Horizontal ) );
+   QSlider* xSlider = new QSlider( Qt::Horizontal );
    xSlider->setMinimumWidth( 100 );
    xSlider->setRange( 1, 1000 );
    xSlider->setPageStep( 100 );
@@ -106,11 +105,11 @@ Window::createCtrl()
 
    xLbl->setBuddy( xSlider );
 
-   QLabel* xVal = safeNew( QLabel( QString::number( o->worldX ) ) );
+   QLabel* xVal = new QLabel( QString::number( o->worldX ) );
    xVal->setAlignment( Qt::AlignRight );
    xVal->setMinimumSize( itersVal->sizeHint() );
 
-   QHBoxLayout* xLayout = safeNew( QHBoxLayout() );
+   QHBoxLayout* xLayout = new QHBoxLayout();
    xLayout->addWidget( xLbl );
    xLayout->addWidget( xSlider );
    xLayout->addWidget( xVal );
@@ -119,11 +118,11 @@ Window::createCtrl()
    connect( xSlider, SIGNAL( valueChanged( int ) ), xVal, SLOT( setNum( int ) ) );
 
    // Lattice height controller
-   QLabel* yLbl = safeNew( QLabel( "&Height" ) );
+   QLabel* yLbl = new QLabel( "&Height" );
    yLbl->setToolTip( "Height" );
    yLbl->setMinimumSize( itersLbl->sizeHint() );
 
-   QSlider* ySlider = safeNew( QSlider( Qt::Horizontal ) );
+   QSlider* ySlider = new QSlider( Qt::Horizontal );
    ySlider->setMinimumWidth( 100 );
    ySlider->setRange( 1, 1000 );
    ySlider->setPageStep( 100 );
@@ -132,11 +131,11 @@ Window::createCtrl()
 
    yLbl->setBuddy( ySlider );
 
-   QLabel* yVal = safeNew( QLabel( QString::number( o->worldX ) ) );
+   QLabel* yVal = new QLabel( QString::number( o->worldX ) );
    yVal->setAlignment( Qt::AlignRight );
    yVal->setMinimumSize( itersVal->sizeHint() );
 
-   QHBoxLayout* yLayout = safeNew( QHBoxLayout() );
+   QHBoxLayout* yLayout = new QHBoxLayout();
    yLayout->addWidget( yLbl );
    yLayout->addWidget( ySlider );
    yLayout->addWidget( yVal );
@@ -145,19 +144,19 @@ Window::createCtrl()
    connect( ySlider, SIGNAL( valueChanged( int ) ), yVal, SLOT( setNum( int ) ) );
 
    // Seed controller
-   QLabel* seedLbl = safeNew( QLabel( "See&d" ) );
+   QLabel* seedLbl = new QLabel( "See&d" );
    seedLbl->setToolTip( "Seed" );
 
-   QLineEdit* seedVal = safeNew( QLineEdit( QString::number( o->seed ) ) );
-   seedVal->setValidator( safeNew( QIntValidator() ) );
+   QLineEdit* seedVal = new QLineEdit( QString::number( o->seed ) );
+   seedVal->setValidator( new QIntValidator() );
    seedVal->setToolTip( "Seed" );
 
    seedLbl->setBuddy( seedVal );
 
-   QPushButton* seedBtn = safeNew( QPushButton( "Get &New" ) );
+   QPushButton* seedBtn = new QPushButton( "Get &New" );
    seedBtn->setToolTip( "Seed" );
 
-   QHBoxLayout* seedLayout = safeNew( QHBoxLayout() );
+   QHBoxLayout* seedLayout = new QHBoxLayout();
    seedLayout->addWidget( seedLbl );
    seedLayout->addWidget( seedVal );
    seedLayout->addWidget( seedBtn );
@@ -179,26 +178,26 @@ Window::createCtrl()
       {
          eles.push_back( thisEle );
 
-         removeEleBtns.push_back( safeNew( QPushButton( "-" ) ) );
+         removeEleBtns.push_back( new QPushButton( "-" ) );
          removeEleBtns[ i ]->setFixedHeight( removeEleBtns[ i ]->sizeHint().height() );
          removeEleBtns[ i ]->setFixedWidth( removeEleBtns[ i ]->sizeHint().height() );
 
-         colorChips.push_back( safeNew( QPushButton() ) );
+         colorChips.push_back( new QPushButton() );
          //colorChips[ i ]->setFlat( true );
          colorChips[ i ]->setStyleSheet( "background-color : " + QColor( thisEle->getColor().c_str() ).name() );
          colorChips[ i ]->setFixedHeight( colorChips[ i ]->sizeHint().height() );
          colorChips[ i ]->setFixedWidth( colorChips[ i ]->sizeHint().height() );
 
-         eleNames.push_back( safeNew( QLineEdit( thisEle->getName().c_str() ) ) );
+         eleNames.push_back( new QLineEdit( thisEle->getName().c_str() ) );
          eleNames[ i ]->setMinimumWidth( 100 );
 
-         concSliders.push_back( safeNew( QSlider( Qt::Horizontal ) ) );
+         concSliders.push_back( new QSlider( Qt::Horizontal ) );
          concSliders[ i ]->setMinimumWidth( 100 );
          concSliders[ i ]->setRange( 0, 1000 );
          concSliders[ i ]->setPageStep( 100 );
          concSliders[ i ]->setValue( (int)(1000 * thisEle->getStartConc()) );
 
-         concVals.push_back( safeNew( QLabel( QString::number( thisEle->getStartConc() ) ) ) );
+         concVals.push_back( new QLabel( QString::number( thisEle->getStartConc() ) ) );
          concVals[ i ]->setAlignment( Qt::AlignRight );
 
          //connect( concSliders[ i ], SIGNAL( valueChanged( int ) ), concVals[ i ], SLOT( setNum( int ) ) );
@@ -207,7 +206,7 @@ Window::createCtrl()
       }
    }
 
-   QGridLayout* eleLayout = safeNew( QGridLayout() );
+   QGridLayout* eleLayout = new QGridLayout();
    for( unsigned int i = 0; i < sim->periodicTable.size() - 1; i++ )
    {
       eleLayout->addWidget( removeEleBtns[ i ], i, 0 );
@@ -222,11 +221,11 @@ Window::createCtrl()
    ctrlLayout->addStretch( 1 );
 
    // Start / Pause / Resume buttons
-   startBtn = safeNew( QPushButton( "&Start" ) );
-   pauseBtn = safeNew( QPushButton( "Pau&se" ) );
-   resumeBtn = safeNew( QPushButton( "Re&sume" ) );
+   startBtn = new QPushButton( "&Start" );
+   pauseBtn = new QPushButton( "Pau&se" );
+   resumeBtn = new QPushButton( "Re&sume" );
 
-   stackedBtnLayout = safeNew( QStackedLayout() );
+   stackedBtnLayout = new QStackedLayout();
    stackedBtnLayout->addWidget( startBtn );
    stackedBtnLayout->addWidget( pauseBtn );
    stackedBtnLayout->addWidget( resumeBtn );
@@ -234,7 +233,7 @@ Window::createCtrl()
    ctrlLayout->addLayout( stackedBtnLayout );
 
    // Quit button
-   QPushButton* quitBtn = safeNew( QPushButton( "&Quit" ) );
+   QPushButton* quitBtn = new QPushButton( "&Quit" );
    ctrlLayout->addWidget( quitBtn );
 
    connect( quitBtn, SIGNAL( clicked() ), this, SLOT( close() ) );
@@ -248,13 +247,13 @@ Window::createCtrl()
 QFrame*
 Window::createViewer()
 {
-   QFrame* viewerFrame = safeNew( QFrame() );
-   QVBoxLayout* viewerLayout = safeNew( QVBoxLayout() );
+   QFrame* viewerFrame = new QFrame();
+   QVBoxLayout* viewerLayout = new QVBoxLayout();
    viewerFrame->setFrameStyle( QFrame::Box | QFrame::Sunken );
    viewerFrame->setLayout( viewerLayout );
 
    // Viewer widget
-   viewer = safeNew( Viewer( o, sim, this ) );
+   viewer = new Viewer( o, sim, this );
    viewerLayout->addWidget( viewer );
 
    return viewerFrame;
@@ -266,13 +265,13 @@ Window::createViewer()
 QFrame*
 Window::createPlot()
 {
-   QFrame* plotFrame = safeNew( QFrame() );
-   QVBoxLayout* plotLayout = safeNew( QVBoxLayout() );
+   QFrame* plotFrame = new QFrame();
+   QVBoxLayout* plotLayout = new QVBoxLayout();
    plotFrame->setFrameStyle( QFrame::Box | QFrame::Sunken );
    plotFrame->setLayout( plotLayout );
 
    // Plot widget
-   plot = safeNew( Plot( o, sim, this ) );
+   plot = new Plot( o, sim, this );
    plotLayout->addWidget( plot );
 
    return plotFrame;
@@ -284,9 +283,9 @@ Window::createPlot()
 QStatusBar*
 Window::createStatusBar()
 {
-   QStatusBar* statusBar = safeNew( QStatusBar() );
+   QStatusBar* statusBar = new QStatusBar();
 
-   statusLbl = safeNew( QLabel( "Ready" ) );
+   statusLbl = new QLabel( "Ready" );
    statusLbl->show();
    statusBar->addWidget( statusLbl );
 
@@ -378,7 +377,7 @@ Window::execStackedBtn()
          stackedBtnLayout->setCurrentWidget( pauseBtn );
          break;
       default:
-         std::cout << "updateStackedBtn: current widget unknown!" << std::endl;
+         std::cerr << "updateStackedBtn: current widget unknown!" << std::endl;
          exit( EXIT_FAILURE );
          break;
    }
@@ -483,7 +482,7 @@ Window::save()
             break;
 
          default:
-            std::cout << "save: Unknown dialog return value!" << std::endl;
+            std::cerr << "save: Unknown dialog return value!" << std::endl;
             exit( EXIT_FAILURE );
             break;
       }

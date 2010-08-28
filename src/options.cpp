@@ -112,7 +112,7 @@ Options::Options( int argc, char* argv[] )
             loadFile.open( optarg );
             if( loadFile.fail() )
             {
-               std::cout << "options: unable to open file \"" << optarg << "\"!" << std::endl;
+               std::cerr << "options: unable to open file \"" << optarg << "\"!" << std::endl;
                exit( EXIT_FAILURE );
             }
             while( loadFile.good() )
@@ -146,7 +146,7 @@ Options::Options( int argc, char* argv[] )
                            }
                            else
                            {
-                              std::cout << "Load settings: \"reactions\" must have value \"on\" or \"off\"!" << std::endl;
+                              std::cerr << "Load settings: \"reactions\" must have value \"on\" or \"off\"!" << std::endl;
                               exit( EXIT_FAILURE );
                            }
                         }
@@ -175,7 +175,7 @@ Options::Options( int argc, char* argv[] )
                                  }
                                  else
                                  {
-                                    std::cout << "Load settings: \"shuffle\" must have value \"on\" or \"off\"!" << std::endl;
+                                    std::cerr << "Load settings: \"shuffle\" must have value \"on\" or \"off\"!" << std::endl;
                                     exit( EXIT_FAILURE );
                                  }
                               }
@@ -200,7 +200,7 @@ Options::Options( int argc, char* argv[] )
                                     }
                                     else
                                     {
-                                       std::cout << "Load settings: Unrecognized keyword \"" << keyword << "\"!" << std::endl;
+                                       std::cerr << "Load settings: Unrecognized keyword \"" << keyword << "\"!" << std::endl;
                                        exit( EXIT_FAILURE );
                                     }
                                  }
@@ -262,7 +262,7 @@ Options::Options( int argc, char* argv[] )
                default:
                   if( files_read_in_so_far >= 4 )
                   {
-                     std::cout << "options: --files can accept at most four file names." << std::endl;
+                     std::cerr << "options: --files can accept at most four file names." << std::endl;
                      exit( EXIT_FAILURE );
                   } else {
                      assert( files_read_in_so_far >= 1 && files_read_in_so_far <= 3 );
@@ -338,7 +338,7 @@ Options::Options( int argc, char* argv[] )
             doShuffle = false;
             break;
          default:
-            std::cout << "Unknown option.  Try --help for a full list." << std::endl;
+            std::cerr << "Unknown option.  Try --help for a full list." << std::endl;
             exit( EXIT_FAILURE );
             break;
       }

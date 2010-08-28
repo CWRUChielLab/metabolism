@@ -10,9 +10,7 @@
 #include <ncurses.h>
 #endif
 #include "options.h"
-#include "safecalls.h"
 #include "sim.h"
-using namespace SafeCalls;
 
 
 Options* o;
@@ -38,8 +36,8 @@ main( int argc, char* argv[] )
 #endif
 
    // Import command line options and initialize the simulation
-   o = safeNew( Options( argc, argv ) );
-   sim = safeNew( Sim(o) );
+   o = new Options( argc, argv );
+   sim = new Sim( o );
 
    // Set up handling of Ctrl-c abort
    signal( SIGINT, handleExit );
@@ -49,7 +47,7 @@ main( int argc, char* argv[] )
    {
 #ifdef HAVE_QT
       app = new QApplication( argc, argv );
-      Window* gui = safeNew( Window( o, sim ) );
+      Window* gui = new Window( o, sim );
       gui->show();
       retval = app->exec();
 #endif

@@ -243,10 +243,12 @@ $(OBJDIR)/%.o: %.cpp
 
 # Specify dependencies for all object files and include a
 # rule for compiling the .c source file
-$(OBJDIR)/atom.o: atom.cpp atom.h \
+$(OBJDIR)/atom.o: atom.cpp \
+		atom.h \
 		element.h
 
-$(OBJDIR)/element.o: element.cpp element.h
+$(OBJDIR)/element.o: element.cpp \
+		element.h
 
 $(OBJDIR)/main.o: main.cpp \
 		atom.h \
@@ -254,21 +256,23 @@ $(OBJDIR)/main.o: main.cpp \
 		options.h \
 		plot.h \
 		reaction.h \
-		safecalls.h \
 		sim.h \
 		viewer.h \
 		window.h
 
-$(OBJDIR)/options.o: options.cpp options.h \
-		boost-devices.h \
+$(OBJDIR)/options.o: options.cpp \
+		options.h \
 		safecalls.h
 
-$(OBJDIR)/reaction.o: reaction.cpp reaction.h \
-		element.h
+$(OBJDIR)/reaction.o: reaction.cpp \
+		element.h \
+		reaction.h
 
-$(OBJDIR)/safecalls.o: safecalls.cpp safecalls.h
+$(OBJDIR)/safecalls.o: safecalls.cpp \
+		safecalls.h
 
-$(OBJDIR)/SFMT.o: ../SFMT/SFMT.c ../SFMT/SFMT.h \
+$(OBJDIR)/SFMT.o: ../SFMT/SFMT.c \
+		../SFMT/SFMT.h \
 		../SFMT/SFMT-params.h \
 		../SFMT/SFMT-params607.h \
 		../SFMT/SFMT-params1279.h \
@@ -284,20 +288,20 @@ $(OBJDIR)/SFMT.o: ../SFMT/SFMT.c ../SFMT/SFMT.h \
 		../SFMT/SFMT-sse2.h
 	gcc -c -msse2 $(FLAGS) $(addprefix -D, $(DEFINES)) $(addprefix -I, $(INCPATH)) -o $@ $<
 
-$(OBJDIR)/sim-engine.o: sim-engine.cpp sim.h \
+$(OBJDIR)/sim-engine.o: sim-engine.cpp \
 		atom.h \
 		element.h \
 		options.h \
 		reaction.h \
-		safecalls.h
+		sim.h
 
-$(OBJDIR)/sim-io.o: sim-io.cpp sim.h \
+$(OBJDIR)/sim-io.o: sim-io.cpp \
 		atom.h \
 		boost-devices.h \
 		element.h \
 		options.h \
 		reaction.h \
-		safecalls.h
+		sim.h
 
 endif
 

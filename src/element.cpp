@@ -16,7 +16,7 @@ Element::Element( std::string initName, char initSymbol, std::string initColor, 
    // Ensure that concentration is sane
    if( initStartConc < 0 || initStartConc > 1 )
    {
-      std::cout << "Loading ele: concentration must fall between 0 and 1!" << std::endl;
+      std::cerr << "Loading ele: concentration must fall between 0 and 1!" << std::endl;
       exit( EXIT_FAILURE );
    }
    
@@ -96,7 +96,7 @@ Element::setStartConc( double newStartConc )
    // Ensure that concentration is sane
    if( newStartConc < 0 || newStartConc > 1 )
    {
-      std::cout << "setStartConc: concentration must fall between 0 and 1!" << std::endl;
+      std::cerr << "setStartConc: concentration must fall between 0 and 1!" << std::endl;
       exit( EXIT_FAILURE );
    }
 

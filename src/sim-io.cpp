@@ -13,9 +13,7 @@
 #include <ncurses.h>
 #endif
 #include "boost-devices.h"
-#include "safecalls.h"
 #include "sim.h"
-using namespace SafeCalls;
 
 
 #ifdef HAVE_NCURSES
@@ -117,7 +115,7 @@ Sim::openFiles()
       }
       else
       {
-         std::cout << "openFiles: unable to open temporary files in \"" << QDir::tempPath().toStdString() << "\"!" << std::endl;
+         std::cerr << "openFiles: unable to open temporary files in \"" << QDir::tempPath().toStdString() << "\"!" << std::endl;
          exit( EXIT_FAILURE );
       }
 
@@ -140,22 +138,22 @@ Sim::openFiles()
    // Check that the streams opened properly
    if( out[ Options::FILE_CONFIG ]->fail() )
    {
-         std::cout << "openFiles: unable to open file \"" << o->filePaths[ Options::FILE_CONFIG ] << "\"!" << std::endl;
+         std::cerr << "openFiles: unable to open file \"" << o->filePaths[ Options::FILE_CONFIG ] << "\"!" << std::endl;
          exit( EXIT_FAILURE );
    }
    if( out[ Options::FILE_CENSUS ]->fail() )
    {
-         std::cout << "openFiles: unable to open file \"" << o->filePaths[ Options::FILE_CENSUS ] << "\"!" << std::endl;
+         std::cerr << "openFiles: unable to open file \"" << o->filePaths[ Options::FILE_CENSUS ] << "\"!" << std::endl;
          exit( EXIT_FAILURE );
    }
    if( out[ Options::FILE_DIFFUSION ]->fail() )
    {
-         std::cout << "openFiles: unable to open file \"" << o->filePaths[ Options::FILE_DIFFUSION ] << "\"!" << std::endl;
+         std::cerr << "openFiles: unable to open file \"" << o->filePaths[ Options::FILE_DIFFUSION ] << "\"!" << std::endl;
          exit( EXIT_FAILURE );
    }
    if( out[ Options::FILE_RAND ]->fail() )
    {
-         std::cout << "openFiles: unable to open file \"" << o->filePaths[ Options::FILE_RAND ] << "\"!" << std::endl;
+         std::cerr << "openFiles: unable to open file \"" << o->filePaths[ Options::FILE_RAND ] << "\"!" << std::endl;
          exit( EXIT_FAILURE );
    }
 }
@@ -200,7 +198,7 @@ Sim::loadChemistry()
             int set;
 
             o->loadFile >> name >> symbol >> color >> startConc;
-            tempEle = safeNew( Element( name, symbol, color, startConc ) );
+            tempEle = new Element( name, symbol, color, startConc );
             periodicTable[ name ] = tempEle;
             elesLoaded = true;
             while( o->loadFile.peek() == ' ' )
@@ -256,7 +254,7 @@ Sim::loadChemistry()
                      }
                      else
                      {
-                        std::cout << "Loading rxn: " << word << " is not a defined Element!" << std::endl;
+                        std::cerr << "Loading rxn: " << word << " is not a defined Element!" << std::endl;
                         exit( EXIT_FAILURE );
                      }
                   }
@@ -267,7 +265,7 @@ Sim::loadChemistry()
                }
                if( o->loadFile.peek() == '\n' )
                {
-                  std::cout << "Loading rxn: premature line-break, was expecting \"->\"!" << std::endl;
+                  std::cerr << "Loading rxn: premature line-break, was expecting \"->\"!" << std::endl;
                   exit( EXIT_FAILURE );
                   break;
                }
@@ -278,7 +276,7 @@ Sim::loadChemistry()
             // are divided by a reaction arrow
             if( word != "->" )
             {
-               std::cout << "Loading rxn: confused by \"" << word << "\", was expecting \"->\"!" << std::endl;
+               std::cerr << "Loading rxn: confused by \"" << word << "\", was expecting \"->\"!" << std::endl;
                exit( EXIT_FAILURE );
             }
 
@@ -307,7 +305,7 @@ Sim::loadChemistry()
                      }
                      else
                      {
-                        std::cout << "Loading rxn: " << word << " is not a defined Element!" << std::endl;
+                        std::cerr << "Loading rxn: " << word << " is not a defined Element!" << std::endl;
                         exit( EXIT_FAILURE );
                      }
                   }
@@ -352,7 +350,7 @@ Sim::loadChemistry()
             }
 
             // Create the reaction and store it in the rxnTable
-            tempRxn = safeNew( Reaction( reactants, products, prob ) );
+            tempRxn = new Reaction( reactants, products, prob );
             if( rxnTable.count( tempRxn->getKey() ) < MAX_RXNS_PER_SET_OF_REACTANTS )
             {
                rxnTable.insert( std::pair<int,Reaction*>( tempRxn->getKey(), tempRxn ) );
@@ -360,7 +358,7 @@ Sim::loadChemistry()
             }
             else
             {
-               std::cout << "Loading rxn: the limit of " << MAX_RXNS_PER_SET_OF_REACTANTS <<
+               std::cerr << "Loading rxn: the limit of " << MAX_RXNS_PER_SET_OF_REACTANTS <<
                   " reactions per set of reactants has been exceeded!" << std::endl;
                exit( EXIT_FAILURE );
             }
@@ -383,7 +381,7 @@ Sim::loadChemistry()
                }
                else
                {
-                  std::cout << "Loading extinct: " << word << " is not a defined Element!" << std::endl;
+                  std::cerr << "Loading extinct: " << word << " is not a defined Element!" << std::endl;
                   exit( EXIT_FAILURE );
                }
             }
