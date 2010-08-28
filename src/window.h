@@ -40,6 +40,8 @@ class Window : public QMainWindow
       // GUI components
       Viewer* viewer;
       Plot* plot;
+      QStatusBar* statusBar;
+      QLabel* statusLbl;
 
       QStackedLayout* stackedBtnLayout;
       QPushButton* startBtn;

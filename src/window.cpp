@@ -23,38 +23,195 @@ Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowF
    simPaused = false;
    quitRequested = false;
 
-   // Set up GUI components
-   viewer = safeNew( Viewer( o, sim, this ) );
-   plot = safeNew( Plot( o, sim, this ) );
+   //=================
+   //  CONTROL PANEL    
+   //=================
+   QFrame* ctrlFrame = safeNew( QFrame() );
+   QVBoxLayout* ctrlLayout = safeNew( QVBoxLayout() );
+   ctrlFrame->setFrameStyle( QFrame::Box | QFrame::Sunken );
+   ctrlFrame->setLayout( ctrlLayout );
 
+   // Header label
+   QLabel* ctrlHeader = safeNew( QLabel( "<b>Control Panel</b>" ) );
+   ctrlHeader->setAlignment( Qt::AlignHCenter );
+   ctrlLayout->addWidget( ctrlHeader );
+
+   // Iterations controller
+   QLabel* itersLbl = safeNew( QLabel( "&Iterations" ) );
+   itersLbl->setToolTip( "Iterations" );
+   itersLbl->setMinimumWidth( 70 );
+
+   QSlider* itersSlider = safeNew( QSlider( Qt::Horizontal ) );
+   itersSlider->setMinimumWidth( 100 );
+   itersSlider->setRange( 1, 1000000 );
+   itersSlider->setPageStep( 1000 );
+   itersSlider->setValue( o->maxIters );
+   itersSlider->setToolTip( "Iterations" );
+
+   itersLbl->setBuddy( itersSlider );
+
+   QLabel* itersVal = safeNew( QLabel( QString::number( o->maxIters ) ) );
+   itersVal->setAlignment( Qt::AlignRight );
+   itersVal->setMinimumWidth( 60 );
+
+   QHBoxLayout* itersLayout = safeNew( QHBoxLayout() );
+   itersLayout->addWidget( itersLbl );
+   itersLayout->addWidget( itersSlider );
+   itersLayout->addWidget( itersVal );
+   ctrlLayout->addLayout( itersLayout );
+
+   connect( itersSlider, SIGNAL( valueChanged( int ) ), itersVal, SLOT( setNum( int ) ) );
+
+   // Lattice width controller
+   QLabel* xLbl = safeNew( QLabel( "&Width" ) );
+   xLbl->setToolTip( "Width" );
+   xLbl->setMinimumWidth( 70 );
+
+   QSlider* xSlider = safeNew( QSlider( Qt::Horizontal ) );
+   xSlider->setMinimumWidth( 100 );
+   xSlider->setRange( 1, 1000 );
+   xSlider->setPageStep( 100 );
+   xSlider->setValue( o->worldX );
+   xSlider->setToolTip( "Width" );
+
+   xLbl->setBuddy( xSlider );
+
+   QLabel* xVal = safeNew( QLabel( QString::number( o->worldX ) ) );
+   xVal->setAlignment( Qt::AlignRight );
+   xVal->setMinimumWidth( 60 );
+
+   QHBoxLayout* xLayout = safeNew( QHBoxLayout() );
+   xLayout->addWidget( xLbl );
+   xLayout->addWidget( xSlider );
+   xLayout->addWidget( xVal );
+   ctrlLayout->addLayout( xLayout );
+
+   connect( xSlider, SIGNAL( valueChanged( int ) ), xVal, SLOT( setNum( int ) ) );
+
+   // Lattice height controller
+   QLabel* yLbl = safeNew( QLabel( "&Height" ) );
+   yLbl->setToolTip( "Height" );
+   yLbl->setMinimumWidth( 70 );
+
+   QSlider* ySlider = safeNew( QSlider( Qt::Horizontal ) );
+   ySlider->setMinimumWidth( 100 );
+   ySlider->setRange( 1, 1000 );
+   ySlider->setPageStep( 100 );
+   ySlider->setValue( o->worldX );
+   ySlider->setToolTip( "Height" );
+
+   yLbl->setBuddy( ySlider );
+
+   QLabel* yVal = safeNew( QLabel( QString::number( o->worldX ) ) );
+   yVal->setAlignment( Qt::AlignRight );
+   yVal->setMinimumWidth( 60 );
+
+   QHBoxLayout* yLayout = safeNew( QHBoxLayout() );
+   yLayout->addWidget( yLbl );
+   yLayout->addWidget( ySlider );
+   yLayout->addWidget( yVal );
+   ctrlLayout->addLayout( yLayout );
+
+   connect( ySlider, SIGNAL( valueChanged( int ) ), yVal, SLOT( setNum( int ) ) );
+
+   // Seed controller
+   QLabel* seedLbl = safeNew( QLabel( "See&d" ) );
+   seedLbl->setToolTip( "Seed" );
+
+   QLineEdit* seedVal = safeNew( QLineEdit( QString::number( o->seed ) ) );
+   seedVal->setValidator( safeNew( QIntValidator() ) );
+   seedVal->setToolTip( "Seed" );
+
+   seedLbl->setBuddy( seedVal );
+
+   QPushButton* seedBtn = safeNew( QPushButton( "Get &New" ) );
+   seedBtn->setToolTip( "Seed" );
+   seedBtn->setMaximumWidth( 90 );
+
+   QHBoxLayout* seedLayout = safeNew( QHBoxLayout() );
+   seedLayout->addWidget( seedLbl );
+   seedLayout->addWidget( seedVal );
+   seedLayout->addWidget( seedBtn );
+   ctrlLayout->addLayout( seedLayout );
+
+   // Vertical stretch
+   ctrlLayout->addStretch( 1 );
+
+   // Start / Pause / Resume buttons
    startBtn = safeNew( QPushButton( "&Start" ) );
-   pauseBtn = safeNew( QPushButton( "&Pause" ) );
-   resumeBtn = safeNew( QPushButton( "&Resume" ) );
-
-   // Set up GUI layout
-   QFrame* frame = safeNew( QFrame() );
-   frame->setFrameStyle( QFrame::Box | QFrame::Sunken );
-
-   QHBoxLayout* frameLayout = safeNew( QHBoxLayout() );
-   frame->setLayout( frameLayout );
-   frameLayout->addWidget( viewer );
-   frameLayout->addWidget( plot );
+   pauseBtn = safeNew( QPushButton( "Pau&se" ) );
+   resumeBtn = safeNew( QPushButton( "Re&sume" ) );
 
    stackedBtnLayout = safeNew( QStackedLayout() );
    stackedBtnLayout->addWidget( startBtn );
    stackedBtnLayout->addWidget( pauseBtn );
    stackedBtnLayout->addWidget( resumeBtn );
    stackedBtnLayout->setCurrentWidget( startBtn );
+   ctrlLayout->addLayout( stackedBtnLayout );
 
-   QVBoxLayout* mainLayout = safeNew( QVBoxLayout() );
-   mainLayout->addWidget( frame );
-   mainLayout->addLayout( stackedBtnLayout );
+   // Quit button
+   QPushButton* quitBtn = safeNew( QPushButton( "&Quit" ) );
+   ctrlLayout->addWidget( quitBtn );
+
+   connect( quitBtn, SIGNAL( clicked() ), this, SLOT( close() ) );
+
+   //=================
+   //     VIEWER
+   //=================
+   QFrame* viewerFrame = safeNew( QFrame() );
+   QVBoxLayout* viewerLayout = safeNew( QVBoxLayout() );
+   viewerFrame->setFrameStyle( QFrame::Box | QFrame::Sunken );
+   viewerFrame->setLayout( viewerLayout );
+
+   // Viewer widget
+   viewer = safeNew( Viewer( o, sim, this ) );
+   viewerLayout->addWidget( viewer );
+
+   //=================
+   //      PLOT
+   //=================
+   QFrame* plotFrame = safeNew( QFrame() );
+   QVBoxLayout* plotLayout = safeNew( QVBoxLayout() );
+   plotFrame->setFrameStyle( QFrame::Box | QFrame::Sunken );
+   plotFrame->setLayout( plotLayout );
+
+   // Plot widget
+   plot = safeNew( Plot( o, sim, this ) );
+   plotLayout->addWidget( plot );
+
+   //=================
+   //   MAIN LAYOUT
+   //=================
+   QHBoxLayout* mainLayout = safeNew( QHBoxLayout() );
+   mainLayout->addWidget( ctrlFrame );
+   mainLayout->addWidget( viewerFrame );
+   mainLayout->addWidget( plotFrame );
 
    QWidget* mainWidget = safeNew( QWidget() );
    mainWidget->setLayout( mainLayout );
 
    setCentralWidget( mainWidget );
    setWindowTitle( "Chemical Metabolism Simulator" );
+
+   //=================
+   //   STATUS BAR
+   //=================
+
+   statusBar = safeNew( QStatusBar() );
+   setStatusBar( statusBar );
+
+   statusLbl = safeNew( QLabel( "Ready" ) );
+   statusLbl->show();
+   statusLbl->setMinimumWidth( 300 );
+   statusBar->addWidget( statusLbl );
+
+   QProgressBar* progressBar = safeNew( QProgressBar() );
+   progressBar->hide();
+   progressBar->setRange( 0, o->maxIters );
+   progressBar->setValue( 0 );
+   progressBar->setMinimumWidth( 350 );
+   progressBar->setMaximumWidth( 350 );
+   statusBar->addWidget( progressBar );
 
    // Connections with the same signal should be declared
    // in order of descending slot computational complexity
@@ -64,6 +221,10 @@ Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowF
    connect( pauseBtn, SIGNAL( clicked() ), this, SLOT( execStackedBtn() ) );
    connect( resumeBtn, SIGNAL( clicked() ), this, SLOT( execStackedBtn() ) );
    connect( resumeBtn, SIGNAL( clicked() ), this, SLOT( runSim() ) );
+
+   // Set the initial keyboard focus for the window
+   // to the start button
+   startBtn->setFocus();
 }
 
 
@@ -76,6 +237,8 @@ Window::runSim()
       // Update gui components
       plot->update();
       viewer->updateGL();
+      statusLbl->setText( "Iteration: " + QString::number( sim->getItersCompleted() ) + " of " + QString::number( o->maxIters )
+            + " | " + QString::number( (int)( 100 * (double)sim->getItersCompleted() / (double)o->maxIters ) ) + "\% complete" );
 
       // Check for Qt signals and events
       QCoreApplication::processEvents();
