@@ -34,17 +34,7 @@ Window::Window( Options* initOptions, Sim* initSim, QWidget* parent, Qt::WindowF
    setCentralWidget( mainWidget );
    setWindowTitle( "Chemical Metabolism Simulator" );
 
-   // Connections with the same signal should be declared
-   // in order of descending slot computational complexity
-   connect( startBtn, SIGNAL( clicked() ), this, SLOT( execStackedBtn() ) );
-   connect( startBtn, SIGNAL( clicked() ), viewer, SLOT( startPaint() ) );
-   connect( startBtn, SIGNAL( clicked() ), this, SLOT( runSim() ) );
-   connect( pauseBtn, SIGNAL( clicked() ), this, SLOT( execStackedBtn() ) );
-   connect( resumeBtn, SIGNAL( clicked() ), this, SLOT( execStackedBtn() ) );
-   connect( resumeBtn, SIGNAL( clicked() ), this, SLOT( runSim() ) );
-
-   // Set the initial keyboard focus for the window
-   // to the start button
+   // Set the initial keyboard focus to the start button
    startBtn->setFocus();
 }
 
@@ -65,11 +55,11 @@ Window::createCtrl()
    ctrlLayout->addWidget( ctrlHeader );
 
    // Iterations controller
-   QLabel* itersLbl = new QLabel( "&Iterations" );
+   itersLbl = new QLabel( "&Iterations" );
    itersLbl->setToolTip( "Iterations" );
    itersLbl->setMinimumSize( itersLbl->sizeHint() );
 
-   QSlider* itersSlider = new QSlider( Qt::Horizontal );
+   itersSlider = new QSlider( Qt::Horizontal );
    itersSlider->setMinimumWidth( 100 );
    itersSlider->setRange( 1, 1000000 );
    itersSlider->setPageStep( 1000 );
@@ -78,7 +68,7 @@ Window::createCtrl()
 
    itersLbl->setBuddy( itersSlider );
 
-   QLabel* itersVal = new QLabel( QString::number( itersSlider->maximum() ) );
+   itersVal = new QLabel( QString::number( itersSlider->maximum() ) );
    itersVal->setAlignment( Qt::AlignRight );
    itersVal->setMinimumSize( itersVal->sizeHint() );
    itersVal->setText( QString::number( o->maxIters ) );
@@ -92,11 +82,11 @@ Window::createCtrl()
    connect( itersSlider, SIGNAL( valueChanged( int ) ), itersVal, SLOT( setNum( int ) ) );
 
    // Lattice width controller
-   QLabel* xLbl = new QLabel( "&Width" );
+   xLbl = new QLabel( "&Width" );
    xLbl->setToolTip( "Width" );
    xLbl->setMinimumSize( itersLbl->sizeHint() );
 
-   QSlider* xSlider = new QSlider( Qt::Horizontal );
+   xSlider = new QSlider( Qt::Horizontal );
    xSlider->setMinimumWidth( 100 );
    xSlider->setRange( 1, 1000 );
    xSlider->setPageStep( 100 );
@@ -105,7 +95,7 @@ Window::createCtrl()
 
    xLbl->setBuddy( xSlider );
 
-   QLabel* xVal = new QLabel( QString::number( o->worldX ) );
+   xVal = new QLabel( QString::number( o->worldX ) );
    xVal->setAlignment( Qt::AlignRight );
    xVal->setMinimumSize( itersVal->sizeHint() );
 
@@ -118,11 +108,11 @@ Window::createCtrl()
    connect( xSlider, SIGNAL( valueChanged( int ) ), xVal, SLOT( setNum( int ) ) );
 
    // Lattice height controller
-   QLabel* yLbl = new QLabel( "&Height" );
+   yLbl = new QLabel( "&Height" );
    yLbl->setToolTip( "Height" );
    yLbl->setMinimumSize( itersLbl->sizeHint() );
 
-   QSlider* ySlider = new QSlider( Qt::Horizontal );
+   ySlider = new QSlider( Qt::Horizontal );
    ySlider->setMinimumWidth( 100 );
    ySlider->setRange( 1, 1000 );
    ySlider->setPageStep( 100 );
@@ -131,7 +121,7 @@ Window::createCtrl()
 
    yLbl->setBuddy( ySlider );
 
-   QLabel* yVal = new QLabel( QString::number( o->worldX ) );
+   yVal = new QLabel( QString::number( o->worldX ) );
    yVal->setAlignment( Qt::AlignRight );
    yVal->setMinimumSize( itersVal->sizeHint() );
 
@@ -144,16 +134,16 @@ Window::createCtrl()
    connect( ySlider, SIGNAL( valueChanged( int ) ), yVal, SLOT( setNum( int ) ) );
 
    // Seed controller
-   QLabel* seedLbl = new QLabel( "See&d" );
+   seedLbl = new QLabel( "See&d" );
    seedLbl->setToolTip( "Seed" );
 
-   QLineEdit* seedVal = new QLineEdit( QString::number( o->seed ) );
+   seedVal = new QLineEdit( QString::number( o->seed ) );
    seedVal->setValidator( new QIntValidator() );
    seedVal->setToolTip( "Seed" );
 
    seedLbl->setBuddy( seedVal );
 
-   QPushButton* seedBtn = new QPushButton( "Get &New" );
+   seedBtn = new QPushButton( "Get &New" );
    seedBtn->setToolTip( "Seed" );
 
    QHBoxLayout* seedLayout = new QHBoxLayout();
@@ -163,13 +153,6 @@ Window::createCtrl()
    ctrlLayout->addLayout( seedLayout );
 
    // Element controllers
-   std::vector<Element*> eles;
-   std::vector<QPushButton*> removeEleBtns;
-   std::vector<QLineEdit*> eleNames;
-   std::vector<QPushButton*> colorChips;
-   std::vector<QSlider*> concSliders;
-   std::vector<QLabel*> concVals;
-
    int i = 0;
    for( ElementMap::iterator j = sim->periodicTable.begin(); j != sim->periodicTable.end(); j++ )
    {
@@ -178,13 +161,18 @@ Window::createCtrl()
       {
          eles.push_back( thisEle );
 
-         removeEleBtns.push_back( new QPushButton( "-" ) );
+         removeEleBtns.push_back( new QPushButton( QApplication::style()->standardIcon( QStyle::SP_TrashIcon ), "" ) );
+         //removeEleBtns.push_back( new QPushButton( QApplication::style()->standardIcon( QStyle::SP_TitleBarCloseButton ), "" ) );
+         //removeEleBtns.push_back( new QPushButton( QApplication::style()->standardIcon( QStyle::SP_DockWidgetCloseButton ), "" ) );
+         //removeEleBtns.push_back( new QPushButton( QApplication::style()->standardIcon( QStyle::SP_DialogCloseButton ), "" ) );
+         //removeEleBtns.push_back( new QPushButton( QApplication::style()->standardIcon( QStyle::SP_DialogCancelButton ), "" ) );
+         //removeEleBtns.push_back( new QPushButton( QApplication::style()->standardIcon( QStyle::SP_DialogDiscardButton ), "" ) );
+         //removeEleBtns.push_back( new QPushButton( QApplication::style()->standardIcon( QStyle::SP_DialogNoButton ), "" ) );
          removeEleBtns[ i ]->setFixedHeight( removeEleBtns[ i ]->sizeHint().height() );
          removeEleBtns[ i ]->setFixedWidth( removeEleBtns[ i ]->sizeHint().height() );
 
          colorChips.push_back( new QPushButton() );
-         //colorChips[ i ]->setFlat( true );
-         colorChips[ i ]->setStyleSheet( "background-color : " + QColor( thisEle->getColor().c_str() ).name() );
+         colorChips[ i ]->setStyleSheet( "border: 0px; border-radius: 3px; background: " + QString( thisEle->getColor().c_str() ) );
          colorChips[ i ]->setFixedHeight( colorChips[ i ]->sizeHint().height() );
          colorChips[ i ]->setFixedWidth( colorChips[ i ]->sizeHint().height() );
 
@@ -207,7 +195,8 @@ Window::createCtrl()
    }
 
    QGridLayout* eleLayout = new QGridLayout();
-   for( unsigned int i = 0; i < sim->periodicTable.size() - 1; i++ )
+   //for( unsigned int i = 0; i < sim->periodicTable.size() - 1; i++ )
+   for( unsigned int i = 0; i < eles.size(); i++ )
    {
       eleLayout->addWidget( removeEleBtns[ i ], i, 0 );
       eleLayout->addWidget( colorChips[ i ], i, 1 );
@@ -232,8 +221,12 @@ Window::createCtrl()
    stackedBtnLayout->setCurrentWidget( startBtn );
    ctrlLayout->addLayout( stackedBtnLayout );
 
+   connect( startBtn, SIGNAL( clicked() ), this, SLOT( startPauseResume() ) );
+   connect( pauseBtn, SIGNAL( clicked() ), this, SLOT( startPauseResume() ) );
+   connect( resumeBtn, SIGNAL( clicked() ), this, SLOT( startPauseResume() ) );
+
    // Quit button
-   QPushButton* quitBtn = new QPushButton( "&Quit" );
+   quitBtn = new QPushButton( "&Quit" );
    ctrlLayout->addWidget( quitBtn );
 
    connect( quitBtn, SIGNAL( clicked() ), this, SLOT( close() ) );
@@ -355,26 +348,78 @@ Window::closeEvent( QCloseEvent* event )
 
 
 void
-Window::execStackedBtn()
+Window::startPauseResume()
 {
    switch( stackedBtnLayout->currentIndex() )
    {
       case 0: // startBtn
          simStarted = true;
          simPaused = false;
+
+         itersLbl->setEnabled( false );
+         itersSlider->setEnabled( false );
+         itersVal->setEnabled( false );
+
+         xLbl->setEnabled( false );
+         xSlider->setEnabled( false );
+         xVal->setEnabled( false );
+
+         yLbl->setEnabled( false );
+         ySlider->setEnabled( false );
+         yVal->setEnabled( false );
+
+         seedLbl->setEnabled( false );
+         seedVal->setEnabled( false );
+         seedBtn->setEnabled( false );
+
+         for( unsigned int i = 0; i < eles.size(); i++ )
+         {
+            removeEleBtns[ i ]->setEnabled( false );
+            colorChips[ i ]->setEnabled( false );
+            eleNames[ i ]->setEnabled( false );
+            concSliders[ i ]->setEnabled( false );
+            concVals[ i ]->setEnabled( false );
+         }
+
          stackedBtnLayout->setCurrentWidget( pauseBtn );
+
+         viewer->startPaint();
+         runSim();
+
          break;
       case 1: // pauseBtn
          simStarted = true;
          simPaused = true;
+
+         itersLbl->setEnabled( true );
+         itersSlider->setEnabled( true );
+         itersSlider->setMinimum( sim->getItersCompleted() );
+         itersVal->setEnabled( true );
+
+         for( unsigned int i = 0; i < eles.size(); i++ )
+            colorChips[ i ]->setEnabled( true );
+
          stackedBtnLayout->setCurrentWidget( resumeBtn );
+
          if( o->progress )
             sim->forceProgressReport();
+
          break;
       case 2: // resumeBtn
          simStarted = true;
          simPaused = false;
+
+         itersLbl->setEnabled( false );
+         itersSlider->setEnabled( false );
+         itersVal->setEnabled( false );
+
+         for( unsigned int i = 0; i < eles.size(); i++ )
+            colorChips[ i ]->setEnabled( false );
+
          stackedBtnLayout->setCurrentWidget( pauseBtn );
+
+         runSim();
+
          break;
       default:
          std::cerr << "updateStackedBtn: current widget unknown!" << std::endl;

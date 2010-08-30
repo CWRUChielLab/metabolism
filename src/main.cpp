@@ -33,6 +33,9 @@ main( int argc, char* argv[] )
 #ifdef HAVE_QT
    // Create the core Qt controller application
    QCoreApplication *app;
+   //QApplication::setStyle( new QPlastiqueStyle() );
+   //QApplication::setStyle( new QWindowsStyle() );
+   //QApplication::setStyle( new QMotifStyle() );
 #endif
 
    // Import command line options and initialize the simulation

@@ -23,7 +23,7 @@ class Window : public QMainWindow
       void closeEvent( QCloseEvent* event );
 
    public slots:
-      void execStackedBtn();
+      void startPauseResume();
       void runSim();
 
    signals:
@@ -42,10 +42,34 @@ class Window : public QMainWindow
       Plot* plot;
       QLabel* statusLbl;
 
+      QLabel* itersLbl;
+      QSlider* itersSlider;
+      QLabel* itersVal;
+
+      QLabel* xLbl;
+      QSlider* xSlider;
+      QLabel* xVal;
+
+      QLabel* yLbl;
+      QSlider* ySlider;
+      QLabel* yVal;
+
+      QLabel* seedLbl;
+      QLineEdit* seedVal;
+      QPushButton* seedBtn;
+
+      std::vector<Element*> eles;
+      std::vector<QPushButton*> removeEleBtns;
+      std::vector<QPushButton*> colorChips;
+      std::vector<QLineEdit*> eleNames;
+      std::vector<QSlider*> concSliders;
+      std::vector<QLabel*> concVals;
+
       QStackedLayout* stackedBtnLayout;
       QPushButton* startBtn;
       QPushButton* pauseBtn;
       QPushButton* resumeBtn;
+      QPushButton* quitBtn;
 
       QFrame* createCtrl();
       QFrame* createViewer();
