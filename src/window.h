@@ -23,8 +23,13 @@ class Window : public QMainWindow
       void closeEvent( QCloseEvent* event );
 
    public slots:
-      void startPauseResume();
       void runSim();
+      void startPauseResume();
+      void updateIters( int newVal );
+      void removeElement( int eleIndex );
+      void updateEleColor( int eleIndex );
+      void updateEleName( int eleIndex );
+      void updateEleConc( int eleIndex );
 
    signals:
       void iterDone();

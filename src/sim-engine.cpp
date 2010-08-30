@@ -24,7 +24,6 @@ Sim::Sim( Options* initOptions )
 
    // Initialize the Sim
    initializeEngine();
-   initializeIO();
 }
 
 
@@ -170,6 +169,9 @@ Sim::initializeEngine()
 bool
 Sim::iterate()
 {
+   if( itersCompleted == 0 )
+      initializeIO();
+
    if( itersCompleted < o->maxIters )
    {
       // Assign atoms new positions in the world

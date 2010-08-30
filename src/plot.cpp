@@ -15,11 +15,16 @@ Plot::Plot( Options* initOptions, Sim* initSim, QWidget* parent )
    sim = initSim;
 
    // Set up the plot
-   setMinimumWidth( 350 );
    setTitle( "" );
    setAxisTitle( 0, "Density" );
    setAxisTitle( 2, "Time (iters)" );
+}
 
+
+// ...
+void
+Plot::startup()
+{
    // Create and initialize the array of x-coordinate values
    iterData = new double [ o->maxIters + 1 ];
    iterData[ sim->getItersCompleted() ] = sim->getItersCompleted();
@@ -61,6 +66,7 @@ Plot::update()
          density[ ele->getName() ][ sim->getItersCompleted() ] = (double)ele->count / (double)(o->worldX * o->worldY);
 
          // Update the curve for this Element
+         curves[ ele->getName() ]->setPen( QColor( ele->getColor().c_str() ) );
          curves[ ele->getName() ]->setData( iterData, density[ ele->getName() ], sim->getItersCompleted() + 1 );
       }
    }

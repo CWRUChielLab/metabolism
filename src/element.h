@@ -15,10 +15,12 @@ class Element
       // Get and set functions
       int getKey();
       std::string getName();
+      void setName( std::string newName );
       char getSymbol();
-      double getStartConc();
+      void setSymbol( char newSymbol );
       std::string getColor();
       void setColor( std::string newColor );
+      double getStartConc();
       void setStartConc( double newStartConc );
 
       int count;

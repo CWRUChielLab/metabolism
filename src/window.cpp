@@ -79,7 +79,7 @@ Window::createCtrl()
    itersLayout->addWidget( itersVal );
    ctrlLayout->addLayout( itersLayout );
 
-   connect( itersSlider, SIGNAL( valueChanged( int ) ), itersVal, SLOT( setNum( int ) ) );
+   connect( itersSlider, SIGNAL( valueChanged( int ) ), this, SLOT( updateIters( int ) ) );
 
    // Lattice width controller
    xLbl = new QLabel( "&Width" );
@@ -153,6 +153,11 @@ Window::createCtrl()
    ctrlLayout->addLayout( seedLayout );
 
    // Element controllers
+   QSignalMapper* removeEleBtnMapper = new QSignalMapper();
+   QSignalMapper* colorChipMapper = new QSignalMapper();
+   QSignalMapper* eleNameMapper = new QSignalMapper();
+   QSignalMapper* concSliderMapper = new QSignalMapper();
+
    int i = 0;
    for( ElementMap::iterator j = sim->periodicTable.begin(); j != sim->periodicTable.end(); j++ )
    {
@@ -162,40 +167,50 @@ Window::createCtrl()
          eles.push_back( thisEle );
 
          removeEleBtns.push_back( new QPushButton( QApplication::style()->standardIcon( QStyle::SP_TrashIcon ), "" ) );
-         //removeEleBtns.push_back( new QPushButton( QApplication::style()->standardIcon( QStyle::SP_TitleBarCloseButton ), "" ) );
-         //removeEleBtns.push_back( new QPushButton( QApplication::style()->standardIcon( QStyle::SP_DockWidgetCloseButton ), "" ) );
-         //removeEleBtns.push_back( new QPushButton( QApplication::style()->standardIcon( QStyle::SP_DialogCloseButton ), "" ) );
-         //removeEleBtns.push_back( new QPushButton( QApplication::style()->standardIcon( QStyle::SP_DialogCancelButton ), "" ) );
-         //removeEleBtns.push_back( new QPushButton( QApplication::style()->standardIcon( QStyle::SP_DialogDiscardButton ), "" ) );
-         //removeEleBtns.push_back( new QPushButton( QApplication::style()->standardIcon( QStyle::SP_DialogNoButton ), "" ) );
          removeEleBtns[ i ]->setFixedHeight( removeEleBtns[ i ]->sizeHint().height() );
          removeEleBtns[ i ]->setFixedWidth( removeEleBtns[ i ]->sizeHint().height() );
 
+         connect( removeEleBtns[ i ], SIGNAL( clicked() ), removeEleBtnMapper, SLOT( map() ) );
+         removeEleBtnMapper->setMapping( removeEleBtns[ i ], i );
+
          colorChips.push_back( new QPushButton() );
-         colorChips[ i ]->setStyleSheet( "border: 0px; border-radius: 3px; background: " + QString( thisEle->getColor().c_str() ) );
          colorChips[ i ]->setFixedHeight( colorChips[ i ]->sizeHint().height() );
          colorChips[ i ]->setFixedWidth( colorChips[ i ]->sizeHint().height() );
+         colorChips[ i ]->setStyleSheet( "background: " + QString( thisEle->getColor().c_str() ) );
+
+         connect( colorChips[ i ], SIGNAL( clicked() ), colorChipMapper, SLOT( map() ) );
+         colorChipMapper->setMapping( colorChips[ i ], i );
 
          eleNames.push_back( new QLineEdit( thisEle->getName().c_str() ) );
          eleNames[ i ]->setMinimumWidth( 100 );
+         eleNames[ i ]->setValidator( new QRegExpValidator( QRegExp( "\\S+" ), this ) );
+
+         connect( eleNames[ i ], SIGNAL( textChanged( QString ) ), eleNameMapper, SLOT( map() ) );
+         eleNameMapper->setMapping( eleNames[ i ], i );
 
          concSliders.push_back( new QSlider( Qt::Horizontal ) );
          concSliders[ i ]->setMinimumWidth( 100 );
          concSliders[ i ]->setRange( 0, 1000 );
          concSliders[ i ]->setPageStep( 100 );
-         concSliders[ i ]->setValue( (int)(1000 * thisEle->getStartConc()) );
+         concSliders[ i ]->setValue( (int)(1000 * thisEle->getStartConc() + 0.5) );
 
-         concVals.push_back( new QLabel( QString::number( thisEle->getStartConc() ) ) );
+         connect( concSliders[ i ], SIGNAL( valueChanged( int ) ), concSliderMapper, SLOT( map() ) );
+         concSliderMapper->setMapping( concSliders[ i ], i );
+
+         concVals.push_back( new QLabel( "0.999" ) );
          concVals[ i ]->setAlignment( Qt::AlignRight );
-
-         //connect( concSliders[ i ], SIGNAL( valueChanged( int ) ), concVals[ i ], SLOT( setNum( int ) ) );
+         concVals[ i ]->setFixedWidth( concVals[ i ]->sizeHint().width() );
+         concVals[ i ]->setNum( thisEle->getStartConc() );
 
          i++;
       }
    }
+   connect( removeEleBtnMapper, SIGNAL( mapped( int ) ), this, SLOT( removeElement( int ) ) );
+   connect( colorChipMapper, SIGNAL( mapped( int ) ), this, SLOT( updateEleColor( int ) ) );
+   connect( eleNameMapper, SIGNAL( mapped( int ) ), this, SLOT( updateEleName( int ) ) );
+   connect( concSliderMapper, SIGNAL( mapped( int ) ), this, SLOT( updateEleConc( int ) ) );
 
    QGridLayout* eleLayout = new QGridLayout();
-   //for( unsigned int i = 0; i < sim->periodicTable.size() - 1; i++ )
    for( unsigned int i = 0; i < eles.size(); i++ )
    {
       eleLayout->addWidget( removeEleBtns[ i ], i, 0 );
@@ -265,6 +280,7 @@ Window::createPlot()
 
    // Plot widget
    plot = new Plot( o, sim, this );
+   plot->setMinimumWidth( 350 );
    plotLayout->addWidget( plot );
 
    return plotFrame;
@@ -347,6 +363,7 @@ Window::closeEvent( QCloseEvent* event )
 }
 
 
+// ...
 void
 Window::startPauseResume()
 {
@@ -375,7 +392,6 @@ Window::startPauseResume()
          for( unsigned int i = 0; i < eles.size(); i++ )
          {
             removeEleBtns[ i ]->setEnabled( false );
-            colorChips[ i ]->setEnabled( false );
             eleNames[ i ]->setEnabled( false );
             concSliders[ i ]->setEnabled( false );
             concVals[ i ]->setEnabled( false );
@@ -384,6 +400,7 @@ Window::startPauseResume()
          stackedBtnLayout->setCurrentWidget( pauseBtn );
 
          viewer->startPaint();
+         plot->startup();
          runSim();
 
          break;
@@ -395,9 +412,6 @@ Window::startPauseResume()
          itersSlider->setEnabled( true );
          itersSlider->setMinimum( sim->getItersCompleted() );
          itersVal->setEnabled( true );
-
-         for( unsigned int i = 0; i < eles.size(); i++ )
-            colorChips[ i ]->setEnabled( true );
 
          stackedBtnLayout->setCurrentWidget( resumeBtn );
 
@@ -413,9 +427,6 @@ Window::startPauseResume()
          itersSlider->setEnabled( false );
          itersVal->setEnabled( false );
 
-         for( unsigned int i = 0; i < eles.size(); i++ )
-            colorChips[ i ]->setEnabled( false );
-
          stackedBtnLayout->setCurrentWidget( pauseBtn );
 
          runSim();
@@ -426,6 +437,64 @@ Window::startPauseResume()
          exit( EXIT_FAILURE );
          break;
    }
+}
+
+
+// ...
+void
+Window::updateIters( int newVal )
+{
+   itersVal->setNum( newVal );
+   o->maxIters = newVal;
+}
+
+
+// ...
+void
+Window::removeElement( int eleIndex )
+{
+   std::cout << "remove " << eleIndex << std::endl;
+}
+
+
+// ...
+void
+Window::updateEleColor( int eleIndex )
+{
+   QColor newColor = QColorDialog::getColor( QColor( eles[ eleIndex ]->getColor().c_str() ), this,
+      "Select a color for \"" + QString( eles[ eleIndex ]->getName().c_str() ) + "\"" );
+
+   if( newColor.isValid() )
+   {
+      eles[ eleIndex ]->setColor( newColor.name().toStdString() );
+      colorChips[ eleIndex ]->setStyleSheet( "background: " + QString( eles[ eleIndex ]->getColor().c_str() ) );
+      viewer->updateGL();
+      plot->update();
+   }
+}
+
+
+// ...
+void
+Window::updateEleName( int eleIndex )
+{
+   std::string newName = eleNames[ eleIndex ]->text().toStdString();
+   //std::cout << "name " << eleIndex << " is " << newName << std::endl;
+
+   Element* thisEle = eles[ eleIndex ];
+   sim->periodicTable.erase( thisEle->getName() );
+   thisEle->setName( newName );
+   sim->periodicTable[ thisEle->getName() ] = thisEle;
+   std::cout << "new name is " << sim->periodicTable[ thisEle->getName() ]->getName() << std::endl;
+}
+
+
+// ...
+void
+Window::updateEleConc( int eleIndex )
+{
+   double newConc = (double)concSliders[ eleIndex ]->value() / (double)1000;
+   concVals[ eleIndex ]->setNum( newConc );
 }
 
 

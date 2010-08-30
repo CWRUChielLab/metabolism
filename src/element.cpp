@@ -62,10 +62,24 @@ Element::getName()
 }
 
 
+void
+Element::setName( std::string newName )
+{
+   name = newName;
+}
+
+
 char
 Element::getSymbol()
 {
    return symbol;
+}
+
+
+void
+Element::setSymbol( char newSymbol )
+{
+   symbol = newSymbol;
 }
 
 
@@ -76,17 +90,17 @@ Element::getColor()
 }
 
 
-double
-Element::getStartConc()
-{
-   return startConc;
-}
-
-
 void
 Element::setColor( std::string newColor )
 {
    color = newColor;
+}
+
+
+double
+Element::getStartConc()
+{
+   return startConc;
 }
 
 
