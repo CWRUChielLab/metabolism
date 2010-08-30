@@ -38,17 +38,7 @@ Sim::initializeEngine()
    {
       initialized = true;
 
-      // Set up the world
       itersCompleted = 0;
-      world = new Atom*[ o->worldX * o->worldY ];
-      claimed = new uint8_t[ o->worldX * o->worldY ];
-      positions = new unsigned int[ o->worldX * o->worldY ];
-      for( unsigned int i = 0; i < MAX_ELES_NOT_INCLUDING_SOLVENT; i++ )
-         maxPositions[ i ] = (o->worldX * o->worldY) / MAX_ELES_NOT_INCLUDING_SOLVENT;
-      for( unsigned int i = 0; i < (o->worldX * o->worldY) % MAX_ELES_NOT_INCLUDING_SOLVENT; i++ )
-         maxPositions[ i ]++;
-      for( unsigned int i = 0; i < MAX_ELES_NOT_INCLUDING_SOLVENT; i++ )
-         positionSetReserved[ i ] = false;
 
       dirdx = new int[8];
       dirdx[0] = 0;  // N
@@ -69,12 +59,6 @@ Sim::initializeEngine()
       dirdy[5] = 1;  // SW
       dirdy[6] = 0;  // W
       dirdy[7] = -1; // NW
-
-      // Initialize the world array to NULL
-      for( int i = 0; i < o->worldX * o->worldY; i++ )
-      {
-         world[i] = NULL;
-      }
 
       // Create Solvent Element
       Element* tempEle;
@@ -128,34 +112,73 @@ Sim::initializeEngine()
       // some numbers to file)
       openFiles();
 
-      // Initialize the random number generator
-      initRNG( o->seed );
+      buildWorld();
+   }
+}
 
-      // Initialize the positions array with a random
-      // ordering of integers ranging from 0 to
-      // worldX*worldY-1
-      shufflePositions();
 
-      // Fill the array of random numbers
-      generateRandNums();
+// Assumes worldX and worldY have not changed
+void
+Sim::destroyWorld()
+{
+   // Delete old world (if there is one)
+   if( world != NULL )
+      for( int i = 0; i < o->worldX * o->worldY; i++ )
+         delete world[ i ];
+   delete world;
+   delete claimed;
+   delete positions;
+}
 
-      // Initialize the world with Atoms
-      Atom* tempAtom;
-      int x, y;
-      for( ElementMap::iterator i = periodicTable.begin(); i != periodicTable.end(); i++ )
+
+// ...
+void
+Sim::buildWorld()
+{
+   // Set up the world
+   world = new Atom*[ o->worldX * o->worldY ];
+   claimed = new uint8_t[ o->worldX * o->worldY ];
+   positions = new unsigned int[ o->worldX * o->worldY ];
+   for( unsigned int i = 0; i < MAX_ELES_NOT_INCLUDING_SOLVENT; i++ )
+      maxPositions[ i ] = (o->worldX * o->worldY) / MAX_ELES_NOT_INCLUDING_SOLVENT;
+   for( unsigned int i = 0; i < (o->worldX * o->worldY) % MAX_ELES_NOT_INCLUDING_SOLVENT; i++ )
+      maxPositions[ i ]++;
+   for( unsigned int i = 0; i < MAX_ELES_NOT_INCLUDING_SOLVENT; i++ )
+      positionSetReserved[ i ] = false;
+
+   // Initialize the world array to NULL
+   for( int i = 0; i < o->worldX * o->worldY; i++ )
+   {
+      world[i] = NULL;
+   }
+
+   // Initialize the random number generator
+   initRNG( o->seed );
+
+   // Initialize the positions array with a random
+   // ordering of integers ranging from 0 to
+   // worldX*worldY-1
+   shufflePositions();
+
+   // Fill the array of random numbers
+   generateRandNums();
+
+   // Initialize the world with Atoms
+   Atom* tempAtom;
+   int x, y;
+   for( ElementMap::iterator i = periodicTable.begin(); i != periodicTable.end(); i++ )
+   {
+      Element* thisEle = i->second;
+      unsigned int nAtoms = (unsigned int)((double)thisEle->getStartConc() * (double)maxPositions[ positionSets[ thisEle->getName() ] ] + 0.5);
+      unsigned int setStart = 0;
+      for( int i = 0; i < positionSets[ thisEle->getName() ]; i++ )
+         setStart += maxPositions[ i ];
+      for( unsigned int j = setStart; j < setStart + nAtoms; j++ )
       {
-         Element* thisEle = i->second;
-         unsigned int nAtoms = (unsigned int)((double)thisEle->getStartConc() * (double)maxPositions[ positionSets[ thisEle->getName() ] ] + 0.5);
-         unsigned int setStart = 0;
-         for( int i = 0; i < positionSets[ thisEle->getName() ]; i++ )
-            setStart += maxPositions[ i ];
-         for( unsigned int j = setStart; j < setStart + nAtoms; j++ )
-         {
-            x = positions[j] % o->worldX;
-            y = positions[j] / o->worldX;
-            tempAtom = new Atom( thisEle, x, y );
-            world[ getWorldIndex(x,y) ] = tempAtom;
-         }
+         x = positions[j] % o->worldX;
+         y = positions[j] / o->worldX;
+         tempAtom = new Atom( thisEle, x, y );
+         world[ getWorldIndex(x,y) ] = tempAtom;
       }
    }
 }
@@ -321,9 +344,10 @@ Sim::initRNG( int initSeed )
    init_gen_rand( (uint32_t)(initSeed) );
 
    static bool allocated = false;
-   if( !allocated )
-   {
+//   if( !allocated )
+//   {
       allocated = true;
+      free( randNums );
 
       // The array randNums will be treated by the
       // RNG as an array of 64-bit ints.  The length
@@ -364,7 +388,7 @@ Sim::initRNG( int initSeed )
 #endif
       assert( rc == 0 );
       assert( randNums );
-   }
+//   }
 }
 
 

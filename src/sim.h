@@ -29,6 +29,8 @@ class Sim
       Sim( Options* initOptions );
 
       // Public engine methods
+      void destroyWorld();
+      void buildWorld();
       bool iterate();
       void end();
       void cleanup();

@@ -88,7 +88,7 @@ Window::createCtrl()
 
    xSlider = new QSlider( Qt::Horizontal );
    xSlider->setMinimumWidth( 100 );
-   xSlider->setRange( 1, 1000 );
+   xSlider->setRange( 1, 500 );
    xSlider->setPageStep( 100 );
    xSlider->setValue( o->worldX );
    xSlider->setToolTip( "Width" );
@@ -105,7 +105,7 @@ Window::createCtrl()
    xLayout->addWidget( xVal );
    ctrlLayout->addLayout( xLayout );
 
-   connect( xSlider, SIGNAL( valueChanged( int ) ), xVal, SLOT( setNum( int ) ) );
+   connect( xSlider, SIGNAL( valueChanged( int ) ), this, SLOT( updateWidth( int ) ) );
 
    // Lattice height controller
    yLbl = new QLabel( "&Height" );
@@ -114,7 +114,7 @@ Window::createCtrl()
 
    ySlider = new QSlider( Qt::Horizontal );
    ySlider->setMinimumWidth( 100 );
-   ySlider->setRange( 1, 1000 );
+   ySlider->setRange( 1, 500 );
    ySlider->setPageStep( 100 );
    ySlider->setValue( o->worldX );
    ySlider->setToolTip( "Height" );
@@ -131,7 +131,7 @@ Window::createCtrl()
    yLayout->addWidget( yVal );
    ctrlLayout->addLayout( yLayout );
 
-   connect( ySlider, SIGNAL( valueChanged( int ) ), yVal, SLOT( setNum( int ) ) );
+   connect( ySlider, SIGNAL( valueChanged( int ) ), this, SLOT( updateHeight( int ) ) );
 
    // Seed controller
    seedLbl = new QLabel( "See&d" );
@@ -151,6 +151,9 @@ Window::createCtrl()
    seedLayout->addWidget( seedVal );
    seedLayout->addWidget( seedBtn );
    ctrlLayout->addLayout( seedLayout );
+
+   connect( seedVal, SIGNAL( textChanged( QString ) ), this, SLOT( updateSeed( QString ) ) );
+   connect( seedBtn, SIGNAL( clicked() ), this, SLOT( generateSeed() ) );
 
    // Element controllers
    QSignalMapper* removeEleBtnMapper = new QSignalMapper();
@@ -246,6 +249,7 @@ Window::createCtrl()
 
    connect( quitBtn, SIGNAL( clicked() ), this, SLOT( close() ) );
 
+   ctrlFrame->setFixedWidth( ctrlFrame->sizeHint().width() );
    return ctrlFrame;
 }
 
@@ -324,6 +328,8 @@ Window::runSim()
 
    if( o->progress )
       sim->forceProgressReport();
+
+   startPauseResume();
 }
 
 
@@ -451,6 +457,49 @@ Window::updateIters( int newVal )
 
 // ...
 void
+Window::updateWidth( int newVal )
+{
+   xVal->setNum( newVal );
+   sim->destroyWorld();
+   o->worldX = newVal;
+   sim->buildWorld();
+   viewer->updateGL();
+}
+
+
+// ...
+void
+Window::updateHeight( int newVal )
+{
+   yVal->setNum( newVal );
+   sim->destroyWorld();
+   o->worldY = newVal;
+   sim->buildWorld();
+   viewer->updateGL();
+}
+
+
+// ...
+void
+Window::updateSeed( QString newVal )
+{
+   o->seed = newVal.toInt();
+   sim->destroyWorld();
+   sim->buildWorld();
+   viewer->updateGL();
+}
+
+
+// ...
+void
+Window::generateSeed()
+{
+   seedVal->setText( QString::number( time(NULL) ) );
+}
+
+
+// ...
+void
 Window::removeElement( int eleIndex )
 {
    std::cout << "remove " << eleIndex << std::endl;
@@ -469,7 +518,8 @@ Window::updateEleColor( int eleIndex )
       eles[ eleIndex ]->setColor( newColor.name().toStdString() );
       colorChips[ eleIndex ]->setStyleSheet( "background: " + QString( eles[ eleIndex ]->getColor().c_str() ) );
       viewer->updateGL();
-      plot->update();
+      if( sim->getItersCompleted() > 0 )
+         plot->update();
    }
 }
 
@@ -479,13 +529,10 @@ void
 Window::updateEleName( int eleIndex )
 {
    std::string newName = eleNames[ eleIndex ]->text().toStdString();
-   //std::cout << "name " << eleIndex << " is " << newName << std::endl;
-
    Element* thisEle = eles[ eleIndex ];
    sim->periodicTable.erase( thisEle->getName() );
    thisEle->setName( newName );
    sim->periodicTable[ thisEle->getName() ] = thisEle;
-   std::cout << "new name is " << sim->periodicTable[ thisEle->getName() ]->getName() << std::endl;
 }
 
 
@@ -495,6 +542,11 @@ Window::updateEleConc( int eleIndex )
 {
    double newConc = (double)concSliders[ eleIndex ]->value() / (double)1000;
    concVals[ eleIndex ]->setNum( newConc );
+
+   eles[ eleIndex ]->setStartConc( newConc );
+   sim->destroyWorld();
+   sim->buildWorld();
+   viewer->updateGL();
 }
 
 

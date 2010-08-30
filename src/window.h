@@ -26,6 +26,10 @@ class Window : public QMainWindow
       void runSim();
       void startPauseResume();
       void updateIters( int newVal );
+      void updateWidth( int newVal );
+      void updateHeight( int newVal );
+      void updateSeed( QString newVal );
+      void generateSeed();
       void removeElement( int eleIndex );
       void updateEleColor( int eleIndex );
       void updateEleName( int eleIndex );
