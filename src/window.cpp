@@ -138,7 +138,7 @@ Window::createCtrl()
    seedLbl->setToolTip( "Seed" );
 
    seedVal = new QLineEdit( QString::number( o->seed ) );
-   seedVal->setValidator( new QIntValidator() );
+   seedVal->setValidator( new QIntValidator( this ) );
    seedVal->setToolTip( "Seed" );
 
    seedLbl->setBuddy( seedVal );
