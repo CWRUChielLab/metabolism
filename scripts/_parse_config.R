@@ -13,6 +13,10 @@ if (!exists("path_to_config"))
    q(save="no", status=1, runLast=FALSE)
 }
 
+# Constant used for determining initial system state
+# (should match the value defined in src/sim.h)
+MAX_ELES_NOT_INCLUDING_SOLVENT = 8
+
 # Colors
 colors = list()
 colors["teal"] = "#008080"
@@ -45,6 +49,7 @@ if (length(y) != 1)
 config_ele = config[keywords == "ele"]
 ele_names = list()
 ele_colors = list()
+ele_conc = list()
 for (i in 1:length(config_ele))
 {
    ele_names[[i]] = config_ele[[i]][[2]]
@@ -52,6 +57,7 @@ for (i in 1:length(config_ele))
       ele_colors[[ ele_names[[i]] ]] = colors[[ config_ele[[i]][[4]] ]]
    else
       ele_colors[[ ele_names[[i]] ]] = config_ele[[i]][[4]]
+   ele_conc[[ ele_names[[i]] ]] = as.numeric(config_ele[[i]][[5]])
 }
 ele_colors[[ "default" ]] = colors[[ "black" ]]
 
@@ -195,4 +201,10 @@ for (i in 1:length(config_rxn))
       hazard_def = paste(hazard_def, "))\n}", sep="")
 }
 N$h = eval(parse(text=hazard_def))
+
+# Determine initial system state
+N$M = round(unlist(ele_conc) * x * y / MAX_ELES_NOT_INCLUDING_SOLVENT)
+names(N$M) = NULL
+
+# End
 

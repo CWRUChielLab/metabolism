@@ -134,9 +134,8 @@ gillespie = function(N, tmax, dt)
    }
 }
 
-# Create initial system state
-random_types = sample(init, size=atoms, replace=TRUE)
-N$M = summary(factor(random_types, levels=ele_names))
+# Remove names from initial system state vector
+# for improved efficiency
 names(N$M) = NULL
 
 # Dump seed and petri net to file
