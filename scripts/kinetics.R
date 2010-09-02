@@ -2,7 +2,7 @@
 #
 # Creates plots in R of the observed and expected reaction trajectories
 #
-# Usage: ./kinetics_analysis.R output_type should_integrate path_to_config path_to_census path_to_plots
+# Usage: ./kinetics.R output_type should_integrate path_to_config path_to_census path_to_plots
 #   output_type       the type of output that the R script should create; valid options
 #                        are "pdf", "png", and "latex"
 #   should_integrate  whether or not to run the numerical integrator to find the
@@ -18,8 +18,8 @@ Args = commandArgs()
 if (length(Args) > 10)
 {
    sink(stderr())
-   print("ANALYSIS FAILED: Too many parameters!")
-   print("  Usage: ./kinetics_analysis.R output_type should_integrate path_to_config path_to_census path_to_plots")
+   print("KINETICS SCRIPT FAILED: Too many parameters!")
+   print("  Usage: ./kinetics.R output_type should_integrate path_to_config path_to_census path_to_plots")
    sink()
    q(save="no", status=1, runLast=FALSE)
 }
@@ -79,8 +79,9 @@ source("../scripts/_parse_census.R")
 source("../scripts/_integrate.R")
 
 
-# Plot the simulation data and numerical integration data
-source("../scripts/_plot_data.R")
+# Plot the simulation and numerically integrated kinetics
+# data
+source("../scripts/_plot_kinetics.R")
 
 
 # End

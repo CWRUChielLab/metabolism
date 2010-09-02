@@ -18,7 +18,7 @@ Args = commandArgs()
 if (length(Args) > 10)
 {
    sink(stderr())
-   print("SIMULATION FAILED: Too many parameters!")
+   print("GILLESPIE SCRIPT FAILED: Too many parameters!")
    print("  Usage: ./gillespie.R output_type should_integrate path_to_config path_to_output seed")
    sink()
    q(save="no", status=1, runLast=FALSE)
@@ -180,7 +180,7 @@ source("../scripts/_integrate.R")
 
 # Plot the simulation data and numerical integration data
 path_to_plots = paste(path_to_output, "_plots", sep="")
-source("../scripts/_plot_data.R")
+source("../scripts/_plot_kinetics.R")
 
 
 # End

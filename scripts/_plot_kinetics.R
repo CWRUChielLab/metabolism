@@ -1,7 +1,7 @@
 #!/usr/bin/Rscript
 #
-# Subroutine for plotting simulation data and numerical
-# integration data; depends on _parse_config.R,
+# Subroutine for plotting simulated and numerical integrated
+# chemical kinetics data; depends on _parse_config.R,
 # _parse_census.R, _integrate.R, and the existence of
 # output_type and path_to_plots; if output_type is any one
 # of "pdf", "png", or "latex", appropriate output files will
