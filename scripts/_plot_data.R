@@ -1,100 +1,64 @@
 #!/usr/bin/Rscript
 #
-# Creates plots in R of the observed and expected reaction trajectories
-#
-# Usage: ./rate_plot.R output_type path_to_config path_to_census path_to_plots
-#   output_type     the type of output that the R script should create; valid options
-#                      are "pdf", "png", and "latex"
-#   do_integration  whether or not to run the numerical integration to find the
-#                      expected trajectories; valid options are "true" and "false"
-#   path_to_config  the path of the config.out file to be read
-#   path_to_census  the path of the census.out file to be read
-#   path_to_plots   the path of the output that the R script will create without
-#                      the file extension
+# Subroutine for plotting simulation data and numerical
+# integration data; depends on _parse_config.R,
+# _parse_census.R, _integrate.R, and the existence of
+# output_type and path_to_plots; if output_type is any one
+# of "pdf", "png", or "latex", appropriate output files will
+# be created, otherwise none will be
 
-# Import command line arguments
-Args = commandArgs()
-if (length(Args) > 10)
+
+# Check for config_parsed
+if (!exists("config_parsed"))
 {
    sink(stderr())
-   print("ANALYSIS FAILED: Too many parameters!")
-   print("  Usage: ./rate_plot.R output_type do_integration path_to_config path_to_census path_to_plots")
+   print("PLOT DATA FAILED: _parse_config.R must be executed first!")
    sink()
    q(save="no", status=1, runLast=FALSE)
 }
 
-# Set parameters to default values if they were not
-# specified on the command line
-if (!is.na(Args[6]))
+# Check for census_parsed
+if (!exists("census_parsed"))
 {
-   output_type = as.character(Args[6])
-} else {
-   output_type = "pdf"
+   sink(stderr())
+   print("PLOT DATA FAILED: _parse_census.R must be executed first!")
+   sink()
+   q(save="no", status=1, runLast=FALSE)
 }
 
-if (!is.na(Args[7]))
+# Check for integration_done
+if (!exists("integration_done"))
 {
-   do_integration = as.character(Args[7])
-} else {
-   do_integration = "true"
+   sink(stderr())
+   print("PLOT DATA FAILED: _integrate.R must be executed first!")
+   sink()
+   q(save="no", status=1, runLast=FALSE)
 }
 
-if (!is.na(Args[8]))
+# Check for output_type
+if (!exists("output_type"))
 {
-   path_to_config = as.character(Args[8])
-} else {
-   path_to_config = "config.out"
+   sink(stderr())
+   print("PLOT DATA FAILED: output_type is not defined!")
+   sink()
+   q(save="no", status=1, runLast=FALSE)
 }
 
-if (!is.na(Args[9]))
+# Check for path_to_plots
+if (!exists("path_to_plots"))
 {
-   path_to_census = as.character(Args[9])
-} else {
-   path_to_census = "census.out"
+   sink(stderr())
+   print("PLOT DATA FAILED: path_to_plots is not defined!")
+   sink()
+   q(save="no", status=1, runLast=FALSE)
 }
 
-if (!is.na(Args[10]))
-{
-   path_to_plots = as.character(Args[10])
-} else {
-   path_to_plots = "plots"
-}
 
-# Import experimental parameters, parse Elements and
-# Reactions, calculate reaction hazards, and build a
-# stochastic petri net
-source("../scripts/_parse_config.R")
-
-# Import particle count data
-rate_data = read.table(path_to_census, header=TRUE, check.names=FALSE)
-iter_data = rate_data[["iter"]]
-ele_data = rate_data[names(rate_data) != "iter" & names(rate_data) != "total"]
-ele_data = ele_data[, unlist(ele_names)]
-total_data = rate_data[["total"]]
-
-# Define a function that returns the value of the rate laws
-# when passed a state vector and perform a numerical
-# integration on each rate law to find the expected
-# trajectories of each Element
-if (do_integration == "true")
-{
-   library(deSolve)
-   initial_values = unlist(ele_data[1,])
-   rates = function(t, state, params)
-            {
-               derivatives = as.vector(t(N$Post-N$Pre) %*% N$h(state))
-               return(list(derivatives))
-            }
-   expected_data = ode(initial_values, seq(0, iters, length.out=10000), rates, constants)
-} else {
-   expected_data = ele_data
-}
-
-# Function for plotting a single line as a series of line
-# segments; handles transparency by decreasing the alpha
-# value of each line segment incrementally; used for phase
-# portraits
-plotAsSegments = function(x, y, col="black", ...)
+# Define a function for plotting a single line as a series
+# of line segments; handles transparency by decreasing the
+# alpha value of each line segment incrementally; used for
+# phase portraits
+plot_as_segments = function(x, y, col="black", ...)
 {
    n = length(x)
    plot(c(x[1], x[2]), c(y[1], y[2]),
@@ -112,12 +76,14 @@ plotAsSegments = function(x, y, col="black", ...)
    }
 }
 
+
 # If individual LaTeX documents are to be created, load the
 # TikZ package
 if (output_type == "latex")
 {
    library(tikzDevice)
 }
+
 
 # If all plots are to be drawn in a single PDF, open a PDF
 # graphics device and set a few parameters
@@ -126,6 +92,7 @@ if (output_type == "pdf")
    pdf(file=paste(path_to_plots, ".pdf", sep=""), family="Palatino")
    par(font.lab=2)
 }
+
 
 #################################
 # Observed Density Trajectories #
@@ -148,12 +115,20 @@ if (output_type == "latex")
    par(font.main=1)
 }
 
+# Determine the appropriate plot range
+if (integration_done)
+{
+   ylim=c(0, max(ele_data/(x*y), expected_data[, names(ele_data)]/(x*y)))
+} else {
+   ylim=c(0, max(ele_data/(x*y)))
+}
+
 plot(iter_data, ele_data[[1]]/(x*y),
    col=ele_colors[[ names(ele_data)[1] ]],
    main="Observed Density Trajectories",
    xlab="Time",
    ylab="Density",
-   ylim=c(0, max(ele_data/(x*y), expected_data[, names(ele_data)]/(x*y))),
+   ylim=ylim,
    type="l")
 for (i in 2:length(ele_data))
 {
@@ -174,11 +149,12 @@ if (output_type == "png" || output_type == "latex")
    dev.off()
 }
 
+
 #################################
 # Expected Density Trajectories #
 #################################
 
-if (do_integration == "true")
+if (integration_done)
 {
    # If individual PNG graphics are to be created, open a PNG
    # graphics device and set a few parameters
@@ -224,6 +200,7 @@ if (do_integration == "true")
    }
 }
 
+
 ###################################
 # Observed Density Phase Portrait #
 ###################################
@@ -247,13 +224,23 @@ if (length(ele_data) == 2)
       par(font.main=1)
    }
 
-   plotAsSegments(ele_data[[1]]/(x*y), ele_data[[2]]/(x*y),
+   # Determine the appropriate plot range
+   if (integration_done)
+   {
+      xlim=c(0, max(ele_data[[1]]/(x*y), expected_data[, names(ele_data)[1]]/(x*y)))
+      ylim=c(0, max(ele_data[[2]]/(x*y), expected_data[, names(ele_data)[2]]/(x*y)))
+   } else {
+      xlim=c(0, max(ele_data[[1]]/(x*y)))
+      ylim=c(0, max(ele_data[[2]]/(x*y)))
+   }
+
+   plot_as_segments(ele_data[[1]]/(x*y), ele_data[[2]]/(x*y),
       col=ele_colors[[ "default" ]],
       main="Observed Density Phase Portrait",
       xlab=paste("Density of ", names(ele_data)[1], sep=""),
       ylab=paste("Density of ", names(ele_data)[2], sep=""),
-      xlim=c(0, max(ele_data[[1]]/(x*y), expected_data[, names(ele_data)[1]]/(x*y))),
-      ylim=c(0, max(ele_data[[2]]/(x*y), expected_data[, names(ele_data)[2]]/(x*y))),
+      xlim=xlim,
+      ylim=ylim,
       type="l")
 
    # If individual LaTeX documents or PNG graphics are to be
@@ -264,11 +251,12 @@ if (length(ele_data) == 2)
    }
 }
 
+
 ###################################
 # Expected Density Phase Portrait #
 ###################################
 
-if (do_integration == "true" && length(ele_data) == 2)
+if (integration_done && length(ele_data) == 2)
 {
    # If individual PNG graphics are to be created, open a PNG
    # graphics device and set a few parameters
@@ -287,7 +275,7 @@ if (do_integration == "true" && length(ele_data) == 2)
       par(font.main=1)
    }
 
-   plotAsSegments(expected_data[, names(ele_data)[1]]/(x*y), expected_data[, names(ele_data)[2]]/(x*y),
+   plot_as_segments(expected_data[, names(ele_data)[1]]/(x*y), expected_data[, names(ele_data)[2]]/(x*y),
       col=ele_colors[[ "default" ]],
       main="Expected Density Phase Portrait",
       xlab=paste("Density of ", names(ele_data)[1], sep=""),
@@ -303,6 +291,7 @@ if (do_integration == "true" && length(ele_data) == 2)
       dev.off()
    }
 }
+
 
 ###################################
 # Individual Density Trajectories #
@@ -327,15 +316,23 @@ for (i in 1:length(ele_data))
       par(font.main=1)
    }
 
+   # Determine the appropriate plot range
+   if (integration_done)
+   {
+      ylim=c(0, max(ele_data[[i]]/(x*y), expected_data[, names(ele_data)[i]]/(x*y)))
+   } else {
+      ylim=c(0, max(ele_data[[i]]/(x*y)))
+   }
+
    plot(iter_data, ele_data[[i]]/(x*y),
       col=ele_colors[[ names(ele_data)[i] ]],
       main=paste("Density Trajectory of ", names(ele_data)[i], sep=""),
       xlab="Time",
       ylab="Density",
-      ylim=c(0, max(ele_data[[i]]/(x*y), expected_data[, names(ele_data)[i]]/(x*y))),
+      ylim=ylim,
       type="l")
 
-   if (do_integration == "true")
+   if (integration_done)
    {
       points(expected_data[, "time"], expected_data[, names(ele_data)[i]]/(x*y),
          col=ele_colors[[ names(ele_data)[i] ]],
@@ -355,6 +352,7 @@ for (i in 1:length(ele_data))
       dev.off()
    }
 }
+
 
 ##############################
 # Overall Density Trajectory #
@@ -377,15 +375,23 @@ if (output_type == "latex")
    par(font.main=1)
 }
 
+# Determine the appropriate plot range
+if (integration_done)
+{ 
+   ylim=c(0, max(total_data/(x*y), rowSums(expected_data[, names(ele_data)]/(x*y))))
+} else {
+   ylim=c(0, max(total_data/(x*y)))
+}
+
 plot(iter_data, total_data/(x*y),
    col=ele_colors[["default"]],
    main="Overall Density Trajectory",
    xlab="Time",
    ylab="Density",
-   ylim=c(0, max(total_data/(x*y), rowSums(expected_data[, names(ele_data)]/(x*y)))),
+   ylim=ylim,
    type="l")
 
-if (do_integration == "true")
+if (integration_done)
 {
    points(expected_data[, "time"], rowSums(expected_data[, names(ele_data)]/(x*y)),
       col=ele_colors[["default"]],
@@ -405,6 +411,7 @@ if (output_type == "png" || output_type == "latex")
    dev.off()
 }
 
+
 #############
 # End Plots #
 #############
@@ -415,6 +422,7 @@ if (output_type == "pdf")
 {
    dev.off()
 }
+
 
 # End
 

@@ -1,21 +1,26 @@
 #!/usr/bin/Rscript
 #
-# Subroutine for initialization, importing the contents of a
-# config file, and building a petri net for the reaction
-# system
+# Subroutine for importing the contents of a config file and
+# building a petri net for the reaction system; depends on
+# the existence of path_to_config
+
 
 # Check for path_to_config
 if (!exists("path_to_config"))
 {
    sink(stderr())
-   print("PARSE CONFIG FAILED: path_to_config not defined!")
+   print("PARSE CONFIG FAILED: path_to_config is not defined!")
    sink()
    q(save="no", status=1, runLast=FALSE)
 }
 
-# Constant used for determining initial system state
-# (should match the value defined in src/sim.h)
+
+# Constants used for determining rate constants and initial
+# system state (should match the values defined in
+# src/sim.h)
+MAX_RXNS_PER_SET_OF_REACTANTS = 2
 MAX_ELES_NOT_INCLUDING_SOLVENT = 8
+
 
 # Colors
 colors = list()
@@ -28,6 +33,7 @@ colors["green"] = "#008000"
 colors["blue"] = "#0000FF"
 colors["black"] = "#000000"
 
+
 # Import experimental parameters
 config = readLines(path_to_config)
 config = strsplit(config[config != ""], " ")
@@ -36,6 +42,7 @@ iters = as.integer(unlist(config[keywords == "iters"])[2])
 x = as.integer(unlist(config[keywords == "x"])[2])
 y = as.integer(unlist(config[keywords == "y"])[2])
 
+
 # Use defaults if parameters were absent
 if (length(iters) != 1)
    iters = 1000000
@@ -43,6 +50,7 @@ if (length(x) != 1)
    x = 250
 if (length(y) != 1)
    y = 250
+
 
 # Read in the list of Elements and store their names and
 # colors
@@ -61,7 +69,8 @@ for (i in 1:length(config_ele))
 }
 ele_colors[[ "default" ]] = colors[[ "black" ]]
 
-# Read in the list of extinct's
+
+# Read in the extinction rules
 config_extinct = config[keywords == "extinct"]
 extinct = lapply(config_extinct, function(y) return(y[3:length(y)]))
 haveExtinction = function(state)
@@ -73,6 +82,7 @@ haveExtinction = function(state)
    }
    return(FALSE)
 }
+
 
 # Read in the list of Reactions, store reactants and
 # products in the matrices N$Pre and N$Post, and calculate
@@ -151,7 +161,7 @@ for (i in 1:length(config_rxn))
    # Chemistry" (Gill, 2010)
    r = sum(N$Pre[i,])  # number of reactants
    p = sum(N$Post[i,]) # number of products
-   m = 2               # max_rxns_per_set_of_reactants
+   m = MAX_RXNS_PER_SET_OF_REACTANTS
    d = 2               # dimensionality of space
    n = 3^d - 1         # number of neighbors (8)
    h = n/2 + 1         # half-neighborhood plus self (5)
@@ -182,7 +192,8 @@ for (i in 1:length(config_rxn))
    }
 }
 
-# Define a function for calculating the reaction hazard
+
+# Define a function for calculating the reaction hazards
 # given the state of the system
 hazard_def = "function(state)\n{\n\treturn(c("
 for (i in 1:length(config_rxn))
@@ -202,9 +213,15 @@ for (i in 1:length(config_rxn))
 }
 N$h = eval(parse(text=hazard_def))
 
-# Determine initial system state
+
+# Determine initial system state (should be approximately
+# equivalent to the initial state of the simulator)
 N$M = round(unlist(ele_conc) * x * y / MAX_ELES_NOT_INCLUDING_SOLVENT)
-names(N$M) = NULL
+
+
+# Set completion flag
+config_parsed = TRUE
+
 
 # End
 

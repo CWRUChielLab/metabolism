@@ -1,25 +1,29 @@
 #!/usr/bin/Rscript
 #
-# An implementation of the Gillespie algorithm
+# An implementation of the Gillespie algorithm in R
 #
-# Usage: ./gillespie.R output_type path_to_config path_to_output seed
-#   output_type     the type of output that the R script should create; valid options
-#                      are "pdf", "png", and "latex"
-#   path_to_config  the path of the config.out file to be read
-#   path_to_output  the path of the output that the R script will create, such as
-#                      plots and text files, without the file extension
-#   seed            seed for the pseudorandom number generator
+# Usage: ./gillespie.R output_type should_integrate path_to_config path_to_output seed
+#   output_type       the type of output that the R script should create; valid options
+#                        are "pdf", "png", and "latex"
+#   should_integrate  whether or not to run the numerical integrator to find the
+#                        expected trajectories; valid options are "true" and "false"
+#   path_to_config    the path of the config.out file to be read
+#   path_to_output    the path of the output that the R script will create, such as
+#                        plots and text files (without the file extension)
+#   seed              seed for the pseudorandom number generator
+
 
 # Import command line arguments
 Args = commandArgs()
-if (length(Args) > 9)
+if (length(Args) > 10)
 {
    sink(stderr())
    print("SIMULATION FAILED: Too many parameters!")
-   print("  Usage: ./gillespie.R output_type path_to_config path_to_output seed")
+   print("  Usage: ./gillespie.R output_type should_integrate path_to_config path_to_output seed")
    sink()
    q(save="no", status=1, runLast=FALSE)
 }
+
 
 # Set parameters to default values if they were not
 # specified on the command line
@@ -32,40 +36,43 @@ if (!is.na(Args[6]))
 
 if (!is.na(Args[7]))
 {
-   path_to_config = as.character(Args[7])
+   should_integrate = as.character(Args[7])
 } else {
-   path_to_config = "config.out"
+   should_integrate = "true"
 }
 
 if (!is.na(Args[8]))
 {
-   path_to_output = as.character(Args[8])
+   path_to_config = as.character(Args[8])
 } else {
-   path_to_output = "gillespie"
+   path_to_config = "config.out"
 }
 
 if (!is.na(Args[9]))
 {
-   seed = as.integer(Args[9])
+   path_to_output = as.character(Args[9])
+} else {
+   path_to_output = "gillespie"
+}
+
+if (!is.na(Args[10]))
+{
+   seed = as.integer(Args[10])
 } else {
    seed = as.integer(runif(1)*2^31)
 }
 set.seed(seed)
 
-# Import experimental parameters, parse Elements and
-# Reactions, calculate reaction hazards, and build a
-# stochastic petri net
-source("../scripts/_parse_config.R")
 
-# The Gillespie algorithm, taken from
-# Wilkinson, D. J. 2006.
-# Stochastic Modelling for Systems Biology.
-# Chapman & Hall/CRC: Boca Raton, p.155.
-# The function takes a stochastic petri net N (which has
-# initial marking M, reactant quantities Pre, product
-# quantities Post, and reaction hazard function h), a max
-# run duration tmax, and discritization time-step dt as
-# arguments.
+# An R implementation of the Gillespie algorithm, modified
+# from Wilkinson, D. J. 2006. Stochastic Modelling for
+# Systems Biology. Chapman & Hall/CRC: Boca Raton, p.155.
+# The function takes as arguments a stochastic petri net N
+# (which has initial marking M, reactant quantities Pre,
+# product quantities Post, and reaction hazard function h),
+# a max run duration tmax, and discritization time-step dt.
+# The function dumps the simulated data to a file and
+# returns the amount of time simulated.
 gillespie = function(N, tmax, dt)
 {
    state = N$M
@@ -95,6 +102,7 @@ gillespie = function(N, tmax, dt)
 
       # If the reaction occurs after the next time a census
       # record needs to be created, copy the latest record
+      # to fill the interim
       while (t >= targetTime)
       {
          i = i + 1
@@ -111,21 +119,13 @@ gillespie = function(N, tmax, dt)
          census[i,] = state
 
          # Write census data to file
-         cat(paste(targetTime, " ", sep=""), file=output_file, append=TRUE)
-         cat(state, file=output_file, append=TRUE)
-         cat(paste(" ", sum(state), "\n", sep=""), file=output_file, append=TRUE)
+         cat(paste(targetTime, " ", sep=""), file=path_to_census, append=TRUE)
+         cat(state, file=path_to_census, append=TRUE)
+         cat(paste(" ", sum(state), "\n", sep=""), file=path_to_census, append=TRUE)
 
-         # Check for running out of time
-         if (i > maxSteps)
-            return(list(t=tvec, x=census))
-
-         # Check for extinction
-         if (haveExtinction(state))
-         {
-            tvec = tvec[1:i]
-            census = census[1:i,]
-            return(list(t=tvec, x=census))
-         }
+         # Check for running out of time or extinction
+         if (i > maxSteps || haveExtinction(state))
+            return(tvec[i])
       }
 
       # Pick a reaction and update the state
@@ -134,104 +134,54 @@ gillespie = function(N, tmax, dt)
    }
 }
 
-# Remove names from initial system state vector
-# for improved efficiency
-names(N$M) = NULL
+
+# Import experimental parameters, parse Elements and
+# Reactions, calculate reaction hazards, and build a
+# stochastic petri net
+source("../scripts/_parse_config.R")
+
 
 # Dump seed and petri net to file
-output_file = paste(path_to_output, "_config.out", sep="")
-write(paste("seed =", seed), file=output_file)
-write("\nN$Pre",    file=output_file, append=TRUE)
-write.table(N$Pre,  file=output_file, append=TRUE, row.names=FALSE, col.names=FALSE)
-write("\nN$Post",   file=output_file, append=TRUE)
-write.table(N$Post, file=output_file, append=TRUE, row.names=FALSE, col.names=FALSE)
-write("\nN$h",      file=output_file, append=TRUE)
-sink(file=output_file, append=TRUE)
+petri_file = paste(path_to_output, "_petri.out", sep="")
+write(paste("seed =", seed), file=petri_file)
+write("\nN$Pre",    file=petri_file, append=TRUE)
+write.table(N$Pre,  file=petri_file, append=TRUE, row.names=FALSE, col.names=FALSE)
+write("\nN$Post",   file=petri_file, append=TRUE)
+write.table(N$Post, file=petri_file, append=TRUE, row.names=FALSE, col.names=FALSE)
+write("\nN$h",      file=petri_file, append=TRUE)
+sink(file=petri_file, append=TRUE)
 print(N$h)
 sink()
 
+
 # Write the census file header
-output_file = paste(path_to_output, "_census.out", sep="")
-cat("iter ", file=output_file)
-cat(unlist(ele_names), file=output_file, append=TRUE)
-cat(" total\n", file=output_file, append=TRUE)
+path_to_census = paste(path_to_output, "_census.out", sep="")
+cat("iter ", file=path_to_census)
+cat(unlist(ele_names), file=path_to_census, append=TRUE)
+cat(" total\n", file=path_to_census, append=TRUE)
 
-# Run the Gillespie algorithm
-out = gillespie(N, tmax=iters, dt=1)
 
-# If individual LaTeX documents are to be created, load the
-# TikZ package
-if (output_type == "latex")
-{
-   library(tikzDevice)
-}
+# Run the Gillespie algorithm (and remove names from initial
+# system state vector for improved efficiency)
+names(N$M) = NULL
+iters = gillespie(N, tmax=iters, dt=1)
+names(N$M) = ele_names
 
-# If all plots are to be drawn in a single PDF, open a PDF
-# graphics device and set a few parameters
-if (output_type == "pdf")
-{
-   pdf(file=paste(path_to_output, "_plots.pdf", sep=""), family="Palatino")
-   par(font.lab=2)
-}
 
-###############################
-# Observed Density Trajectory #
-###############################
+# Import simulated kinetics data
+source("../scripts/_parse_census.R")
 
-# If individual PNG graphics are to be created, open a PNG
-# graphics device and set a few parameters
-if (output_type == "png")
-{
-   png(file=paste(path_to_output, "_plots_observed.png", sep=""))
-   par(font.lab=2)
-}
 
-# If individual LaTeX documents are to be created, open a
-# TikZ graphics device and set a few parameters
-if (output_type == "latex")
-{
-   tikz(file=paste(path_to_output, "_plots_observed.tex", sep=""), width=3, height=2.7)
-   par(cex=0.7)
-   par(font.main=1)
-}
+# Perform a numerical intergration on the rate laws
+# associated with the reaction system to find the expected
+# trajectories of each Element
+source("../scripts/_integrate.R")
 
-plot(out$t, out$x[,1]/(x*y),
-   main="Observed Density Trajectories (Gillespie)",
-   xlab="Time",
-   ylab="Density",
-   ylim=c(0, max(out$x/(x*y))),
-   col=ele_colors[[ ele_names[[1]] ]],
-   type="l")
 
-for (i in 2:length(ele_names))
-{
-   points(out$t, out$x[,i]/(x*y),
-      col=ele_colors[[ ele_names[[i]] ]],
-      type="l")
-}
+# Plot the simulation data and numerical integration data
+path_to_plots = paste(path_to_output, "_plots", sep="")
+source("../scripts/_plot_data.R")
 
-legend("topright",
-   legend=unlist(ele_names),
-   fill=unlist(ele_colors),
-   bg="white")
-
-# If individual LaTeX documents or PNG graphics are to be
-# created, close the current graphics device
-if (output_type == "png" || output_type == "latex")
-{
-   dev.off()
-}
-
-#############
-# End Plots #
-#############
-
-# If all plots are to be drawn in a single PDF, close the
-# current graphics device
-if (output_type == "pdf")
-{
-   dev.off()
-}
 
 # End
 
