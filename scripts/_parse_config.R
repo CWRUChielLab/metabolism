@@ -92,102 +92,105 @@ N = list()
 N$Pre  = matrix(0, nrow=length(config_rxn), ncol=length(config_ele))
 N$Post = matrix(0, nrow=length(config_rxn), ncol=length(config_ele))
 constants = vector(length=length(config_rxn))
-for (i in 1:length(config_rxn))
+if (length(config_rxn) > 0)
 {
-   # Grab the probability of reaction (the second word in
-   # the line)
-   prob = as.numeric(config_rxn[[i]][[2]])
-
-   # Fill in the non-zero elements of the N$Pre matrix with
-   # the stoichiometries of the reactants for each reaction
-   j = 3
-   while (config_rxn[[i]][[j]] != "->")
+   for (i in 1:length(config_rxn))
    {
-      if (config_rxn[[i]][[j]] != "+" && config_rxn[[i]][[j]] != "*")
+      # Grab the probability of reaction (the second word in
+      # the line)
+      prob = as.numeric(config_rxn[[i]][[2]])
+
+      # Fill in the non-zero elements of the N$Pre matrix with
+      # the stoichiometries of the reactants for each reaction
+      j = 3
+      while (config_rxn[[i]][[j]] != "->")
       {
-         if (config_rxn[[i]][[j]] == "1" || config_rxn[[i]][[j]] == "2")
+         if (config_rxn[[i]][[j]] != "+" && config_rxn[[i]][[j]] != "*")
          {
-            ele = config_rxn[[i]][[j+1]]
-            ele_index = which(unlist(ele_names) == ele)
-            for (n in 1:as.integer(config_rxn[[i]][[j]]))
+            if (config_rxn[[i]][[j]] == "1" || config_rxn[[i]][[j]] == "2")
             {
+               ele = config_rxn[[i]][[j+1]]
+               ele_index = which(unlist(ele_names) == ele)
+               for (n in 1:as.integer(config_rxn[[i]][[j]]))
+               {
+                  N$Pre[i, ele_index] = N$Pre[i, ele_index] + 1
+               }
+               j = j + 2
+            } else {
+               ele = config_rxn[[i]][[j]]
+               ele_index = which(unlist(ele_names) == ele)
                N$Pre[i, ele_index] = N$Pre[i, ele_index] + 1
+               j = j + 1
             }
-            j = j + 2
          } else {
-            ele = config_rxn[[i]][[j]]
-            ele_index = which(unlist(ele_names) == ele)
-            N$Pre[i, ele_index] = N$Pre[i, ele_index] + 1
             j = j + 1
          }
-      } else {
-         j = j + 1
       }
-   }
 
-   # Fill in the non-zero elements of the N$Post matrix with
-   # the stoichiometries of the products for each reaction
-   j = j + 1
-   while (j <= length(config_rxn[[i]]))
-   {
-      if (config_rxn[[i]][[j]] != "+" && config_rxn[[i]][[j]] != "*")
+      # Fill in the non-zero elements of the N$Post matrix with
+      # the stoichiometries of the products for each reaction
+      j = j + 1
+      while (j <= length(config_rxn[[i]]))
       {
-         if (config_rxn[[i]][[j]] == "1" || config_rxn[[i]][[j]] == "2")
+         if (config_rxn[[i]][[j]] != "+" && config_rxn[[i]][[j]] != "*")
          {
-            ele = config_rxn[[i]][[j+1]]
-            ele_index = which(unlist(ele_names) == ele)
-            for (n in 1:as.integer(config_rxn[[i]][[j]]))
+            if (config_rxn[[i]][[j]] == "1" || config_rxn[[i]][[j]] == "2")
             {
+               ele = config_rxn[[i]][[j+1]]
+               ele_index = which(unlist(ele_names) == ele)
+               for (n in 1:as.integer(config_rxn[[i]][[j]]))
+               {
+                  N$Post[i, ele_index] = N$Post[i, ele_index] + 1
+               }
+               j = j + 2
+            } else {
+               ele = config_rxn[[i]][[j]]
+               ele_index = which(unlist(ele_names) == ele)
                N$Post[i, ele_index] = N$Post[i, ele_index] + 1
+               j = j + 1
             }
-            j = j + 2
          } else {
-            ele = config_rxn[[i]][[j]]
-            ele_index = which(unlist(ele_names) == ele)
-            N$Post[i, ele_index] = N$Post[i, ele_index] + 1
             j = j + 1
          }
-      } else {
-         j = j + 1
       }
-   }
 
-   # Calculate the stochastic rate constant for this
-   # Reaction using the probability of reaction; the
-   # calculation depends on the numbers and types of
-   # reactants and products as well; see table 1 of
-   # "Zeroth-, First-, and Second-Order Chemical Reactions
-   # and Michaelis-Menten Enzyme Kinetics in an Artificial
-   # Chemistry" (Gill, 2010)
-   r = sum(N$Pre[i,])  # number of reactants
-   p = sum(N$Post[i,]) # number of products
-   m = MAX_RXNS_PER_SET_OF_REACTANTS
-   d = 2               # dimensionality of space
-   n = 3^d - 1         # number of neighbors (8)
-   h = n/2 + 1         # half-neighborhood plus self (5)
-   constants[i] = 0
-   if (r == 0)
-   {
-      constants[i] = prob/(m*h) * (x*y)
-      if (p == 2)
+      # Calculate the stochastic rate constant for this
+      # Reaction using the probability of reaction; the
+      # calculation depends on the numbers and types of
+      # reactants and products as well; see table 1 of
+      # "Zeroth-, First-, and Second-Order Chemical Reactions
+      # and Michaelis-Menten Enzyme Kinetics in an Artificial
+      # Chemistry" (Gill, 2010)
+      r = sum(N$Pre[i,])  # number of reactants
+      p = sum(N$Post[i,]) # number of products
+      m = MAX_RXNS_PER_SET_OF_REACTANTS
+      d = 2               # dimensionality of space
+      n = 3^d - 1         # number of neighbors (8)
+      h = n/2 + 1         # half-neighborhood plus self (5)
+      constants[i] = 0
+      if (r == 0)
       {
-         constants[i] = constants[i] * n / 2
+         constants[i] = prob/(m*h) * (x*y)
+         if (p == 2)
+         {
+            constants[i] = constants[i] * n / 2
+         }
       }
-   }
-   if (r == 1)
-   {
-      constants[i] = prob/(m*h)
-      if (p == 2)
+      if (r == 1)
       {
-         constants[i] = constants[i] * n
+         constants[i] = prob/(m*h)
+         if (p == 2)
+         {
+            constants[i] = constants[i] * n
+         }
       }
-   }
-   if (r == 2)
-   {
-      constants[i] = prob/(m*h) * n/(x*y)
-      if (length(N$Pre[i, N$Pre[i,] == 2]) > 0 )
+      if (r == 2)
       {
-         constants[i] = constants[i] / 2
+         constants[i] = prob/(m*h) * n/(x*y)
+         if (length(N$Pre[i, N$Pre[i,] == 2]) > 0 )
+         {
+            constants[i] = constants[i] / 2
+         }
       }
    }
 }
@@ -196,20 +199,25 @@ for (i in 1:length(config_rxn))
 # Define a function for calculating the reaction hazards
 # given the state of the system
 hazard_def = "function(state)\n{\n\treturn(c("
-for (i in 1:length(config_rxn))
+if (length(config_rxn) > 0)
 {
-   hazard_def = paste(hazard_def, constants[i], sep="")
-   for (j in 1:length(config_ele))
+   for (i in 1:length(config_rxn))
    {
-      if (N$Pre[i,j] == 1)
-         hazard_def = paste(hazard_def, "*state[", j, "]", sep="")
-      else if (N$Pre[i,j] > 1)
-         hazard_def = paste(hazard_def, "*state[", j, "]^", N$Pre[i,j], sep="")
+      hazard_def = paste(hazard_def, constants[i], sep="")
+      for (j in 1:length(config_ele))
+      {
+         if (N$Pre[i,j] == 1)
+            hazard_def = paste(hazard_def, "*state[", j, "]", sep="")
+         else if (N$Pre[i,j] > 1)
+            hazard_def = paste(hazard_def, "*state[", j, "]^", N$Pre[i,j], sep="")
+      }
+      if (i < nrow(N$Pre))
+         hazard_def = paste(hazard_def, ",\n\t\t", sep="")
+      else
+         hazard_def = paste(hazard_def, "))\n}", sep="")
    }
-   if (i < nrow(N$Pre))
-      hazard_def = paste(hazard_def, ",\n\t\t", sep="")
-   else
-      hazard_def = paste(hazard_def, "))\n}", sep="")
+} else {
+   hazard_def = paste(hazard_def, "))\n}", sep="")
 }
 N$h = eval(parse(text=hazard_def))
 

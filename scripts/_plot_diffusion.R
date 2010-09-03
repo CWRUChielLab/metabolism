@@ -43,25 +43,27 @@ if (!exists("path_to_plots"))
 
 
 # Define the plot titles
+plot_title = list()
 if (output_type == "latex")
 {
-      plot_title = c("Displacement in the\n$x$-Dimension with Collisions",
-                     "Displacement in the\n$y$-Dimension with Collisions",
-                     "Displacement in the\n$x$-Dimension without Collisions",
-                     "Displacement in the\n$y$-Dimension without Collisions")
+   plot_title[which(diffusion_types == "dx_actual")] = "Displacement in the\n$x$-Dimension with Collisions"
+   plot_title[which(diffusion_types == "dx_ideal")]  = "Displacement in the\n$x$-Dimension without Collisions"
+   plot_title[which(diffusion_types == "dy_actual")] = "Displacement in the\n$y$-Dimension with Collisions"
+   plot_title[which(diffusion_types == "dy_ideal")]  = "Displacement in the\n$y$-Dimension without Collisions"
 } else {
-      plot_title = c("Displacement in the\nx-Dimension with Collisions",
-                     "Displacement in the\ny-Dimension with Collisions",
-                     "Displacement in the\nx-Dimension without Collisions",
-                     "Displacement in the\ny-Dimension without Collisions")
+   plot_title[which(diffusion_types == "dx_actual")] = "Displacement in the\nx-Dimension with Collisions"
+   plot_title[which(diffusion_types == "dx_ideal")]  = "Displacement in the\nx-Dimension without Collisions"
+   plot_title[which(diffusion_types == "dy_actual")] = "Displacement in the\ny-Dimension with Collisions"
+   plot_title[which(diffusion_types == "dy_ideal")]  = "Displacement in the\ny-Dimension without Collisions"
 }
 
 
 # Define the plot color schemes
-plot_color = c("#249800",  # green
-               "#0020AB",  # blue
-               "#237A09",  # darkgreen
-               "#001055")  # darkblue
+plot_color = list()
+plot_color[which(diffusion_types == "dx_actual")] = "#249800"  # green
+plot_color[which(diffusion_types == "dx_ideal")]  = "#237A09"  # darkgreen
+plot_color[which(diffusion_types == "dy_actual")] = "#0020AB"  # blue
+plot_color[which(diffusion_types == "dy_ideal")]  = "#001055"  # darkblue
 
 
 # Define the suggested number of bins for each histogram
@@ -86,6 +88,7 @@ if (output_type == "pdf")
 {
    pdf(file=paste(path_to_plots, ".pdf", sep=""), family="Palatino")
    par(font.lab=2)
+   par(mfrow=c(2,2))
 }
 
 
@@ -114,7 +117,9 @@ for (i in 1:length(diffusion_types))
    }
 
    # Draw a normal Q-Q plot
-   qqnorm(diffusion_data[, diffusion_types[i]], main=plot_title[i], col=plot_color[i])
+   qqnorm(diffusion_data[, diffusion_types[i]],
+      col=plot_color[[i]],
+      main=plot_title[[i]])
 
    # Add a straight line corresponding to the expected
    # distribution
@@ -155,8 +160,8 @@ for (i in 1:length(diffusion_types))
 
    # Draw histogram
    hist(diffusion_data[, diffusion_types[i]],
-      col=plot_color[i],
-      main=plot_title[i],
+      col=plot_color[[i]],
+      main=plot_title[[i]],
       xlab="Displacement",
       breaks=bins,
       freq=FALSE)
@@ -277,8 +282,8 @@ for (i in 1:length(diffusion_types))
 
    # Draw the empirical CDF and expected CDF
    plot(ecdf(diffusion_data[,diffusion_types[i]]),
-      col=plot_color[i],
-      main=plot_title[i],
+      col=plot_color[[i]],
+      main=plot_title[[i]],
       xlab="Displacement",
       ylab="Cumulative Density",
       lwd=1,
@@ -297,6 +302,8 @@ for (i in 1:length(diffusion_types))
    # Label the plot with statistical values
    if (output_type != "latex")
    {
+      n_label = substitute(paste(n == nsamples),
+                       list(nsamples=samples))
       d_label = substitute(paste(D == dstatistic),
                        list(dstatistic=signif(ks_results$statistic, digits=3)))
       if (ks_results$p.value > 10^-6)
@@ -309,6 +316,7 @@ for (i in 1:length(diffusion_types))
       }
       old_size = par("cex")
       par(cex=old_size*0.8)
+      corner.label(n_label, x=1, y=-1, yoff=5.5*strheight("m"))
       corner.label(d_label, x=1, y=-1, yoff=3.5*strheight("m"))
       corner.label(p_label, x=1, y=-1, yoff=1.5*strheight("m"))
       par(cex=old_size)

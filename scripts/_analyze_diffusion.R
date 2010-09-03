@@ -47,7 +47,7 @@ alpha = 0.05
 
 # Calculate the theoretical population mean and variance,
 # and find the confidence intervals around these values
-# which contain (1-alpha)% of sample mean and variance
+# which contain 100*(1-alpha)% of sample mean and variance
 # values assuming they are drawn from the theoretical
 # population
 expected_mean = 0
@@ -62,6 +62,7 @@ expected_sd_upper_ci   = sqrt(expected_var_upper_ci)
 
 # Save statistics for exporting
 stats_data[["alpha"]] = alpha
+stats_data[["samples"]] = samples
 stats_data[["expected_mean"]] = expected_mean
 stats_data[["expected_var"]]  = expected_var
 stats_data[["expected_sd"]]   = expected_sd
@@ -76,7 +77,7 @@ stats_data[["expected_sd_upper_ci"]]   = expected_sd_upper_ci
 for (i in 1:length(diffusion_types))
 {
    # Calculate the sample mean and variance, and find the
-   # (1-alpha)% confidence intervals around these values
+   # 100*(1-alpha)% confidence intervals around these values
    # which contain the population mean and variance from
    # which the samples were drawn
    data_mean = mean(diffusion_data[, diffusion_types[i]])

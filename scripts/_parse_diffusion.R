@@ -19,7 +19,7 @@ diffusion_data = read.table(path_to_diffusion, header=TRUE)
 
 
 # Grab the relevant column labels from the diffusion data
-diffusion_types = names(diffusion_data)[2:5]
+diffusion_types = c("dx_actual", "dx_ideal", "dy_actual", "dy_ideal")
 
 
 # Count the number of particles

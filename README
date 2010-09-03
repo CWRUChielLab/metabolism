@@ -113,7 +113,7 @@ diffusion.out and census.out, and the simulation parameters
 are recorded in config.out. To plot the trajectory of the
 reaction, run:
 
-   ../scripts/rate_plot.R
+   ../scripts/kinetics.R
 
 A PDF file is generated containing plots of the changes in
 chemical species concentration against time. View the PDF:
@@ -134,13 +134,13 @@ be "mixed" or "stirred" to maximize the rate of collisions
 between reactants. Now try:
 
    ./metabolism --gui-off --load ../load/mm.load --iters 2000 --shuffle
-   ../scripts/rate_plot.R pdf true config.out census.out plots-shuffle
+   ../scripts/kinetics.R pdf true config.out census.out plots-shuffle
    evince plots-shuffle.pdf
 
 or on Mac:
 
    metabolism.app/Contents/MacOS/metabolism --gui-off --load ../load/mm.load --iters 2000 --shuffle
-   ../scripts/rate_plot.R pdf true config.out census.out plots-shuffle
+   ../scripts/kinetics.R pdf true config.out census.out plots-shuffle
    open plots-shuffle.pdf
 
 (The extra parameters passed to the script are explained
