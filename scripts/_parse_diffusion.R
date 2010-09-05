@@ -18,7 +18,7 @@ if (!exists("path_to_diffusion"))
 diffusion_data = read.table(path_to_diffusion, header=TRUE)
 
 
-# Grab the relevant column labels from the diffusion data
+# List the names of the diffusion data types
 diffusion_types = c("dx_actual", "dx_ideal", "dy_actual", "dy_ideal")
 
 

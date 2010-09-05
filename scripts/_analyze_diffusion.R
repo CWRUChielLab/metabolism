@@ -61,8 +61,11 @@ expected_sd_lower_ci   = sqrt(expected_var_lower_ci)
 expected_sd_upper_ci   = sqrt(expected_var_upper_ci)
 
 # Save statistics for exporting
-stats_data[["alpha"]] = alpha
+stats_data[["x"]] = x
+stats_data[["y"]] = y
 stats_data[["samples"]] = samples
+stats_data[["density"]] = samples / (x*y)
+stats_data[["alpha"]] = alpha
 stats_data[["expected_mean"]] = expected_mean
 stats_data[["expected_var"]]  = expected_var
 stats_data[["expected_sd"]]   = expected_sd
