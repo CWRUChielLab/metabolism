@@ -95,7 +95,7 @@ DENSITYSCALE=$(echo "1/$MAX_ELES_NOT_INCLUDING_SOLVENT" | bc -l)
 for i in `seq 0 $(($STEPS-1))`; do
    # Pause to guarentee that each seed taken from the
    # system time is unique
-#   sleep 1
+   sleep 1
    echo "Beginning simulation $(($i+1)) of $STEPS..."
 
    # Create a data directory for the simulation

@@ -76,7 +76,7 @@ stats_data[["expected_var_upper_ci"]]  = expected_var_upper_ci
 stats_data[["expected_sd_lower_ci"]]   = expected_sd_lower_ci
 stats_data[["expected_sd_upper_ci"]]   = expected_sd_upper_ci
 
-
+diffusion_types = c("dx_actual", "dx_ideal", "dy_actual", "dy_ideal")
 for (i in 1:length(diffusion_types))
 {
    # Calculate the sample mean and variance, and find the
