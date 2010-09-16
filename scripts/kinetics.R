@@ -4,7 +4,7 @@
 #
 # Usage: ./kinetics.R output_type should_integrate path_to_config path_to_census path_to_plots
 #   output_type       the type of output that the R script should create; valid options
-#                        are "pdf", "png", and "latex"
+#                        are "pdf", "png", "svg", and "latex"
 #   should_integrate  whether or not to run the numerical integrator to find the
 #                        expected trajectories; valid options are "true" and "false"
 #   path_to_config    the path of the config.out file to be read

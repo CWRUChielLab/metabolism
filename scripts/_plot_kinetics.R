@@ -4,15 +4,15 @@
 # chemical kinetics data; depends on _parse_config.R,
 # _parse_census.R, _integrate.R, and the existence of
 # output_type and path_to_plots; if output_type is any one
-# of "pdf", "png", or "latex", appropriate output files will
-# be created, otherwise none will be
+# of "pdf", "png", "svg", or "latex", appropriate output
+# files will be created, otherwise none will be
 
 
 # Check for config_parsed
 if (!exists("config_parsed"))
 {
    sink(stderr())
-   print("PLOT DATA FAILED: _parse_config.R must be executed first!")
+   print("PLOT KINETICS FAILED: _parse_config.R must be executed first!")
    sink()
    q(save="no", status=1, runLast=FALSE)
 }
@@ -21,7 +21,7 @@ if (!exists("config_parsed"))
 if (!exists("census_parsed"))
 {
    sink(stderr())
-   print("PLOT DATA FAILED: _parse_census.R must be executed first!")
+   print("PLOT KINETICS FAILED: _parse_census.R must be executed first!")
    sink()
    q(save="no", status=1, runLast=FALSE)
 }
@@ -30,7 +30,7 @@ if (!exists("census_parsed"))
 if (!exists("integration_done"))
 {
    sink(stderr())
-   print("PLOT DATA FAILED: _integrate.R must be executed first!")
+   print("PLOT KINETICS FAILED: _integrate.R must be executed first!")
    sink()
    q(save="no", status=1, runLast=FALSE)
 }
@@ -39,7 +39,7 @@ if (!exists("integration_done"))
 if (!exists("output_type"))
 {
    sink(stderr())
-   print("PLOT DATA FAILED: output_type is not defined!")
+   print("PLOT KINETICS FAILED: output_type is not defined!")
    sink()
    q(save="no", status=1, runLast=FALSE)
 }
@@ -48,7 +48,7 @@ if (!exists("output_type"))
 if (!exists("path_to_plots"))
 {
    sink(stderr())
-   print("PLOT DATA FAILED: path_to_plots is not defined!")
+   print("PLOT KINETICS FAILED: path_to_plots is not defined!")
    sink()
    q(save="no", status=1, runLast=FALSE)
 }
@@ -106,6 +106,14 @@ if (output_type == "png")
    par(font.lab=2)
 }
 
+# If individual SVG graphics are to be created, open a SVG
+# graphics device and set a few parameters
+if (output_type == "svg")
+{
+   svg(file=paste(path_to_plots, "_observed.svg", sep=""))
+   par(font.lab=2)
+}
+
 # If individual LaTeX documents are to be created, open a
 # TikZ graphics device and set a few parameters
 if (output_type == "latex")
@@ -142,9 +150,9 @@ legend("topright",
    fill=unlist(ele_colors[ names(ele_data) ]),
    bg="white")
 
-# If individual LaTeX documents or PNG graphics are to be
-# created, close the current graphics device
-if (output_type == "png" || output_type == "latex")
+# If individual PNG or SVG graphics or LaTeX documents
+# are to be created, close the current graphics device
+if (output_type == "png" || output_type == "svg" || output_type == "latex")
 {
    dev.off()
 }
@@ -161,6 +169,14 @@ if (integration_done)
    if (output_type == "png")
    {
       png(file=paste(path_to_plots, "_expected.png", sep=""))
+      par(font.lab=2)
+   }
+
+   # If individual SVG graphics are to be created, open a SVG
+   # graphics device and set a few parameters
+   if (output_type == "svg")
+   {
+      svg(file=paste(path_to_plots, "_expected.svg", sep=""))
       par(font.lab=2)
    }
 
@@ -192,9 +208,9 @@ if (integration_done)
       fill=unlist(ele_colors[ names(ele_data) ]),
       bg="white")
 
-   # If individual LaTeX documents or PNG graphics are to be
-   # created, close the current graphics device
-   if (output_type == "png" || output_type == "latex")
+   # If individual PNG or SVG graphics or LaTeX documents
+   # are to be created, close the current graphics device
+   if (output_type == "png" || output_type == "svg" || output_type == "latex")
    {
       dev.off()
    }
@@ -212,6 +228,14 @@ if (length(ele_data) == 2)
    if (output_type == "png")
    {
       png(file=paste(path_to_plots, "_obs_phase.png", sep=""))
+      par(font.lab=2)
+   }
+
+   # If individual SVG graphics are to be created, open a SVG
+   # graphics device and set a few parameters
+   if (output_type == "svg")
+   {
+      svg(file=paste(path_to_plots, "_obs_phase.svg", sep=""))
       par(font.lab=2)
    }
 
@@ -243,9 +267,9 @@ if (length(ele_data) == 2)
       ylim=ylim,
       type="l")
 
-   # If individual LaTeX documents or PNG graphics are to be
-   # created, close the current graphics device
-   if (output_type == "png" || output_type == "latex")
+   # If individual PNG or SVG graphics or LaTeX documents
+   # are to be created, close the current graphics device
+   if (output_type == "png" || output_type == "svg" || output_type == "latex")
    {
       dev.off()
    }
@@ -263,6 +287,14 @@ if (integration_done && length(ele_data) == 2)
    if (output_type == "png")
    {
       png(file=paste(path_to_plots, "_exp_phase.png", sep=""))
+      par(font.lab=2)
+   }
+
+   # If individual SVG graphics are to be created, open a SVG
+   # graphics device and set a few parameters
+   if (output_type == "svg")
+   {
+      svg(file=paste(path_to_plots, "_exp_phase.svg", sep=""))
       par(font.lab=2)
    }
 
@@ -284,9 +316,9 @@ if (integration_done && length(ele_data) == 2)
       ylim=c(0, max(ele_data[[2]]/(x*y), expected_data[, names(ele_data)[2]]/(x*y))),
       type="l")
 
-   # If individual LaTeX documents or PNG graphics are to be
-   # created, close the current graphics device
-   if (output_type == "png" || output_type == "latex")
+   # If individual PNG or SVG graphics or LaTeX documents
+   # are to be created, close the current graphics device
+   if (output_type == "png" || output_type == "svg" || output_type == "latex")
    {
       dev.off()
    }
@@ -304,6 +336,14 @@ for (i in 1:length(ele_data))
    if (output_type == "png")
    {
       png(file=paste(path_to_plots, "_", names(ele_data)[i], ".png", sep=""))
+      par(font.lab=2)
+   }
+
+   # If individual SVG graphics are to be created, open a SVG
+   # graphics device and set a few parameters
+   if (output_type == "svg")
+   {
+      svg(file=paste(path_to_plots, "_", names(ele_data)[i], ".svg", sep=""))
       par(font.lab=2)
    }
 
@@ -345,9 +385,9 @@ for (i in 1:length(ele_data))
          bg="white")
    }
 
-   # If individual LaTeX documents or PNG graphics are to be
-   # created, close the current graphics device
-   if (output_type == "png" || output_type == "latex")
+   # If individual PNG or SVG graphics or LaTeX documents
+   # are to be created, close the current graphics device
+   if (output_type == "png" || output_type == "svg" || output_type == "latex")
    {
       dev.off()
    }
@@ -363,6 +403,14 @@ for (i in 1:length(ele_data))
 if (output_type == "png")
 {
    png(file=paste(path_to_plots, "_total.png", sep=""))
+   par(font.lab=2)
+}
+
+# If individual SVG graphics are to be created, open a SVG
+# graphics device and set a few parameters
+if (output_type == "svg")
+{
+   svg(file=paste(path_to_plots, "_total.svg", sep=""))
    par(font.lab=2)
 }
 
@@ -404,9 +452,9 @@ if (integration_done)
       bg="white")
 }
 
-# If individual LaTeX documents or PNG graphics are to be
-# created, close the current graphics device
-if (output_type == "png" || output_type == "latex")
+# If individual PNG or SVG graphics or LaTeX documents
+# are to be created, close the current graphics device
+if (output_type == "png" || output_type == "svg" || output_type == "latex")
 {
    dev.off()
 }

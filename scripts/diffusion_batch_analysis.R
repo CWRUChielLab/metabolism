@@ -6,7 +6,7 @@
 #   path_to_batch  the path of the batch directory
 #   n_simulations  the number of simulations in the batch
 #   output_type    the type of output that the R script should create; valid
-#                     options are "pdf", "png", and "latex"
+#                     options are "pdf", "png", "svg", and "latex"
 #   path_to_plots  the path of the output that the R script will create (without
 #                     the file extension)
 

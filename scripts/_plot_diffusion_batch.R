@@ -2,7 +2,10 @@
 #
 # Subroutine for plotting statistical data from a batch of
 # simulated diffusion data; depends on _parse_batch_stats.R
-# and the existence of path_to_plots
+# and the existence of output_type and path_to_plots; if
+# output_type is any one of "pdf", "png", "svg", or "latex",
+# appropriate output files will be created, otherwise none
+# will be
 
 
 # Check for batch_stats_parsed
@@ -10,6 +13,15 @@ if (!exists("batch_stats_parsed"))
 {
    sink(stderr())
    print("PLOT DIFFUSION BATCH FAILED: _parse_batch_stats.R must be executed first!")
+   sink()
+   q(save="no", status=1, runLast=FALSE)
+}
+
+# Check for output_type
+if (!exists("output_type"))
+{
+   sink(stderr())
+   print("PLOT DIFFUSION BATCH FAILED: output_type is not defined!")
    sink()
    q(save="no", status=1, runLast=FALSE)
 }
@@ -64,6 +76,14 @@ for (i in 1:length(diffusion_types))
       par(font.lab=2)
    }
 
+   # If individual SVG graphics are to be created, open a SVG
+   # graphics device and set a few parameters
+   if (output_type == "svg")
+   {
+      svg(file=paste(path_to_plots, "_", diffusion_types[i], "_mean.svg", sep=""))
+      par(font.lab=2)
+   }
+
    # If individual LaTeX documents are to be created, open a
    # TikZ graphics device and set a few parameters
    if (output_type == "latex")
@@ -100,7 +120,7 @@ for (i in 1:length(diffusion_types))
       add=TRUE)
 
    # Label the plot with statistical values
-   if (output_type != "latex")
+   if (output_type == "pdf" || output_type == "png")
    {
       alpha_label = substitute(paste(alpha == a),
                            list(a=alpha))
@@ -110,9 +130,9 @@ for (i in 1:length(diffusion_types))
       par(cex=old_size)
    }
 
-   # If individual LaTeX documents or PNG graphics are to be
-   # created, close the current graphics device
-   if (output_type == "png" || output_type == "latex")
+   # If individual PNG or SVG graphics or LaTeX documents
+   # are to be created, close the current graphics device
+   if (output_type == "png" || output_type == "svg" || output_type == "latex")
    {
       dev.off()
    }
@@ -130,6 +150,14 @@ for (i in 1:length(diffusion_types))
    if (output_type == "png")
    {
       png(file=paste(path_to_plots, "_", diffusion_types[i], "_sd.png", sep=""))
+      par(font.lab=2)
+   }
+
+   # If individual SVG graphics are to be created, open a SVG
+   # graphics device and set a few parameters
+   if (output_type == "svg")
+   {
+      svg(file=paste(path_to_plots, "_", diffusion_types[i], "_sd.svg", sep=""))
       par(font.lab=2)
    }
 
@@ -169,7 +197,7 @@ for (i in 1:length(diffusion_types))
       add=TRUE)
 
    # Label the plot with statistical values
-   if (output_type != "latex")
+   if (output_type == "pdf" || output_type == "png")
    {
       alpha_label = substitute(paste(alpha == a),
                            list(a=alpha))
@@ -179,9 +207,9 @@ for (i in 1:length(diffusion_types))
       par(cex=old_size)
    }
 
-   # If individual LaTeX documents or PNG graphics are to be
-   # created, close the current graphics device
-   if (output_type == "png" || output_type == "latex")
+   # If individual PNG or SVG graphics or LaTeX documents
+   # are to be created, close the current graphics device
+   if (output_type == "png" || output_type == "svg" || output_type == "latex")
    {
       dev.off()
    }

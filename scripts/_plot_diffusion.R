@@ -2,7 +2,10 @@
 #
 # Subroutine for plotting simulated diffusion data; depends
 # on _parse_config.R, _parse_diffusion.R,
-# _analyze_diffusion.R, and the existence of path_to_plots
+# _analyze_diffusion.R, and the existence of output_type and
+# path_to_plots; if output_type is any one of "pdf", "png",
+# "svg", or "latex", appropriate output files will be
+# created, otherwise none will be
 
 
 # Check for config_parsed
@@ -28,6 +31,15 @@ if (!exists("diffusion_analyzed"))
 {
    sink(stderr())
    print("PLOT DIFFUSION FAILED: _analyze_diffusion.R must be executed first!")
+   sink()
+   q(save="no", status=1, runLast=FALSE)
+}
+
+# Check for output_type
+if (!exists("output_type"))
+{
+   sink(stderr())
+   print("PLOT DIFFUSION FAILED: output_type is not defined!")
    sink()
    q(save="no", status=1, runLast=FALSE)
 }
@@ -86,6 +98,14 @@ for (i in 1:length(diffusion_types))
       par(font.lab=2)
    }
 
+   # If individual SVG graphics are to be created, open a SVG
+   # graphics device and set a few parameters
+   if (output_type == "svg")
+   {
+      svg(file=paste(path_to_plots, "_", diffusion_types[i], "_qq.svg", sep=""))
+      par(font.lab=2)
+   }
+
    # If individual LaTeX documents are to be created, open a
    # TikZ graphics device and set a few parameters
    if (output_type == "latex")
@@ -105,9 +125,9 @@ for (i in 1:length(diffusion_types))
    # distribution
    abline(a=expected_mean, b=expected_sd, col="red")
 
-   # If individual LaTeX documents or PNG graphics are to be
-   # created, close the current graphics device
-   if (output_type == "png" || output_type == "latex")
+   # If individual PNG or SVG graphics or LaTeX documents
+   # are to be created, close the current graphics device
+   if (output_type == "png" || output_type == "svg" || output_type == "latex")
    {
       dev.off()
    }
@@ -125,6 +145,14 @@ for (i in 1:length(diffusion_types))
    if (output_type == "png")
    {
       png(file=paste(path_to_plots, "_", diffusion_types[i], "_hist.png", sep=""))
+      par(font.lab=2)
+   }
+
+   # If individual SVG graphics are to be created, open a SVG
+   # graphics device and set a few parameters
+   if (output_type == "svg")
+   {
+      svg(file=paste(path_to_plots, "_", diffusion_types[i], "_hist.svg", sep=""))
       par(font.lab=2)
    }
 
@@ -207,7 +235,7 @@ for (i in 1:length(diffusion_types))
    }
 
    # Label the plot with statistical values
-   if (output_type != "latex")
+   if (output_type == "pdf" || output_type == "png")
    {
       density_label = substitute(paste(rho == d, "%"),
                            list(d=signif(100*samples/(x*y), digits=3)))
@@ -227,9 +255,9 @@ for (i in 1:length(diffusion_types))
       par(cex=old_size)
    }
 
-   # If individual LaTeX documents or PNG graphics are to be
-   # created, close the current graphics device
-   if (output_type == "png" || output_type == "latex")
+   # If individual PNG or SVG graphics or LaTeX documents
+   # are to be created, close the current graphics device
+   if (output_type == "png" || output_type == "svg" || output_type == "latex")
    {
       dev.off()
    }
@@ -247,6 +275,14 @@ for (i in 1:length(diffusion_types))
    if (output_type == "png")
    {
       png(file=paste(path_to_plots, "_", diffusion_types[i], "_ks.png", sep=""))
+      par(font.lab=2)
+   }
+
+   # If individual SVG graphics are to be created, open a SVG
+   # graphics device and set a few parameters
+   if (output_type == "svg")
+   {
+      svg(file=paste(path_to_plots, "_", diffusion_types[i], "_ks.svg", sep=""))
       par(font.lab=2)
    }
 
@@ -280,7 +316,7 @@ for (i in 1:length(diffusion_types))
    ks_results$p.value   = stats_data[[paste(diffusion_types[i], "_p", sep="")]]
 
    # Label the plot with statistical values
-   if (output_type != "latex")
+   if (output_type == "pdf" || output_type == "png")
    {
       n_label = substitute(paste(n == nsamples),
                        list(nsamples=samples))
@@ -302,9 +338,9 @@ for (i in 1:length(diffusion_types))
       par(cex=old_size)
    }
 
-   # If individual LaTeX documents or PNG graphics are to be
-   # created, close the current graphics device
-   if (output_type == "png" || output_type == "latex")
+   # If individual PNG or SVG graphics or LaTeX documents
+   # are to be created, close the current graphics device
+   if (output_type == "png" || output_type == "svg" || output_type == "latex")
    {
       dev.off()
    }

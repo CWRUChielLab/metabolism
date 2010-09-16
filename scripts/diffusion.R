@@ -4,7 +4,7 @@
 #
 # Usage: ./diffusion.R output_type path_to_config path_to_diffusion path_to_plots path_to_stats
 #   output_type        the type of output that the R script should create; valid
-#                         options are "pdf", "png", and "latex"
+#                         options are "pdf", "png", "svg", and "latex"
 #   path_to_config     the path of the config.out file to be read
 #   path_to_diffusion  the path of the diffusion.out file to be read
 #   path_to_plots      the path of the output that the R script will create
