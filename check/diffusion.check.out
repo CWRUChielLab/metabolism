@@ -1,726 +1,726 @@
-type        dx_actual   dy_actual   dx_ideal    dy_ideal    collisions  
-Substrate   17          8           16          3           8           
-ES          9           3           9           8           16          
-Substrate   3           -3          3           -3          13          
-Substrate   5           6           7           5           6           
-Substrate   -8          0           -9          -1          16          
-ES          6           -9          11          -10         11          
-Substrate   1           9           -2          15          11          
-Substrate   4           -2          -3          -1          13          
-Enzyme      -20         0           -20         1           7           
-Substrate   -5          -1          -7          0           11          
-Substrate   7           1           6           0           13          
-Substrate   -3          14          -6          15          15          
-Substrate   15          15          11          15          10          
-ES          -4          -6          -3          -9          10          
-Substrate   -3          1           -1          5           8           
-Product     -3          1           -3          1           0           
-Substrate   1           4           1           10          10          
-Substrate   6           -16         9           -18         10          
-Substrate   8           3           8           0           12          
-ES          7           3           9           7           15          
-Substrate   7           -2          4           -8          15          
-Substrate   3           -9          0           -8          16          
-Substrate   -6          1           -8          0           15          
-Substrate   8           5           1           4           14          
-ES          -5          -6          0           -6          14          
-Substrate   6           32          9           35          13          
-Substrate   6           2           4           -2          10          
-Enzyme      -7          -4          -5          -8          9           
-Substrate   10          16          11          19          17          
-Enzyme      -18         14          -16         15          15          
-Substrate   -6          9           -11         7           13          
-ES          -5          -8          -2          -8          16          
-Enzyme      5           3           -1          1           13          
-Enzyme      12          -15         6           -15         13          
-Substrate   6           3           9           4           18          
-Substrate   -5          1           -1          1           5           
-Enzyme      3           7           3           8           5           
-Substrate   -2          -2          -2          -2          15          
-Substrate   1           -1          -2          -3          15          
-ES          -2          14          -8          14          10          
-Substrate   -4          -8          -1          -6          16          
-ES          -4          -15         -5          -16         13          
-Substrate   -14         -7          -12         -10         14          
-Substrate   -7          -17         -13         -21         15          
-Substrate   10          -1          9           -4          7           
-Substrate   -3          18          -3          21          10          
-Substrate   6           9           6           13          9           
-Substrate   2           -4          4           0           6           
-Substrate   13          -1          11          -1          13          
-Substrate   1           10          -3          11          13          
-ES          0           6           0           8           14          
-Enzyme      1           4           -1          -1          18          
-Substrate   3           -5          4           -6          7           
-Enzyme      10          4           9           2           8           
-Substrate   -6          9           -6          8           10          
-Substrate   -6          4           -8          7           13          
-Product     0           4           0           2           7           
-Substrate   -14         4           -9          3           11          
-Substrate   5           16          1           16          9           
-Enzyme      -1          9           -2          10          12          
-Substrate   -8          -12         -9          -12         12          
-Substrate   20          13          22          11          6           
-Substrate   5           -5          7           -5          13          
-Substrate   3           -4          2           -2          16          
-Substrate   -6          -1          -5          -6          12          
-Product     -1          -8          -3          -11         10          
-Substrate   -3          2           -3          6           14          
-Substrate   -1          -5          1           -3          11          
-Enzyme      -6          -4          -5          -5          4           
-Enzyme      2           -1          3           0           3           
-Product     3           1           3           0           1           
-ES          -5          -16         -6          -21         14          
-Substrate   -1          -6          2           -5          10          
-Enzyme      7           -6          5           -8          8           
-Substrate   2           9           0           5           12          
-Substrate   3           -9          3           -8          8           
-Substrate   6           -5          5           -6          9           
-ES          9           -8          8           -5          19          
-Substrate   3           -4          2           -4          12          
-Substrate   -7          3           -14         3           16          
-Substrate   6           -5          5           -3          14          
-Substrate   0           -3          3           -4          13          
-Enzyme      -1          -4          -1          -5          2           
-ES          -4          5           -5          3           14          
-ES          1           -2          5           1           14          
-Enzyme      5           -8          4           -7          9           
-Substrate   -22         -7          -19         -3          14          
-Product     1           -1          1           -1          0           
-Substrate   6           3           0           5           15          
-Enzyme      4           -3          4           -4          1           
-Substrate   2           5           0           -1          16          
-Substrate   2           13          7           18          9           
-Substrate   11          5           12          10          14          
-Substrate   0           0           10          0           13          
-Enzyme      7           -4          9           -7          7           
-ES          -18         -3          -14         -3          11          
-Substrate   6           0           6           4           14          
-Substrate   -8          7           -6          9           9           
-Substrate   -7          4           -10         5           17          
-Substrate   19          15          19          15          10          
-Substrate   -3          3           -5          6           9           
-Substrate   9           2           11          4           11          
-ES          3           -5          1           -6          11          
-Enzyme      -6          4           -8          3           12          
-Substrate   -9          3           0           4           16          
-Substrate   -4          -3          -4          -2          8           
-Product     -13         -18         -12         -15         12          
-Substrate   0           -2          1           -1          2           
-Product     14          -2          15          -2          12          
-ES          17          -3          22          -4          12          
-Substrate   -5          6           -7          10          15          
-Substrate   -11         6           -13         8           12          
-Substrate   -10         -1          -11         -3          2           
-Substrate   4           1           6           0           6           
-Substrate   -6          0           -9          4           16          
-Substrate   1           1           0           0           1           
-Substrate   -24         18          -29         14          12          
-Substrate   8           -3          6           -3          14          
-Substrate   -9          -1          -6          0           19          
-Substrate   -4          9           -2          13          18          
-Substrate   -3          -6          -5          -11         14          
-ES          6           -5          7           -2          18          
-Substrate   -5          -3          -3          -3          9           
-Substrate   -19         -6          -17         -3          14          
-Substrate   2           0           3           -1          1           
-Enzyme      -5          4           -9          2           9           
-Enzyme      17          -1          19          7           19          
-ES          1           1           4           0           3           
-Substrate   8           -8          2           -6          14          
-Substrate   15          -11         17          -10         13          
-ES          -9          -8          -13         -5          15          
-Substrate   -3          -3          -7          -5          15          
-Substrate   -5          -13         -9          -14         9           
-Substrate   5           2           6           -1          11          
-Substrate   10          -1          11          -3          9           
-Substrate   4           7           7           7           14          
-Substrate   18          12          16          12          10          
-ES          10          -6          12          -5          4           
-Substrate   2           4           -4          1           12          
-Enzyme      0           0           1           -1          16          
-Substrate   -5          -11         1           -5          20          
-Substrate   -9          -4          -7          -10         9           
-Enzyme      -5          -3          -4          -2          12          
-Substrate   -5          2           -8          -2          11          
-Substrate   5           2           -1          -1          12          
-ES          -12         -1          -12         -4          9           
-Substrate   7           17          11          14          13          
-Substrate   2           3           5           -1          11          
-Enzyme      -7          -4          -8          -8          7           
-Enzyme      -8          8           -9          5           11          
-Substrate   -6          9           -7          8           6           
-Substrate   -2          7           -2          9           16          
-ES          -6          -11         -6          -13         11          
-Substrate   -1          -9          2           -6          21          
-Substrate   6           -1          9           5           18          
-Enzyme      0           -5          -3          -4          17          
-Substrate   7           -2          9           -4          14          
-Substrate   9           -2          12          0           7           
-Substrate   2           -4          6           -7          14          
-ES          3           -7          -1          -7          11          
-Substrate   -1          -1          0           0           7           
-Product     -1          11          1           10          18          
-Enzyme      -9          4           -6          3           12          
-Substrate   7           4           8           0           14          
-Enzyme      3           -1          6           3           13          
-Substrate   15          -2          19          -7          20          
-Substrate   5           5           7           3           13          
-Substrate   -1          6           -3          5           11          
-Substrate   -2          6           3           2           19          
-ES          11          -6          9           -6          10          
-Enzyme      8           -3          10          3           12          
-Substrate   -6          4           -3          6           10          
-ES          2           0           -1          3           14          
-ES          4           -6          4           -4          11          
-Substrate   1           -15         0           -12         8           
-Product     -1          1           -1          1           0           
-Substrate   -2          5           -2          9           13          
-Substrate   1           -15         4           -16         10          
-Substrate   -14         1           -18         1           10          
-Enzyme      -8          3           -7          8           11          
-Substrate   9           10          10          13          7           
-Substrate   1           4           1           9           11          
-ES          -5          7           -1          5           15          
-Substrate   1           10          2           7           13          
-Substrate   -4          -4          -2          -4          11          
-Substrate   -3          -8          0           -10         8           
-Substrate   -6          16          -10         17          12          
-Substrate   15          4           20          3           17          
-Substrate   15          14          10          11          11          
-Substrate   0           -1          -1          -2          2           
-Substrate   5           -8          11          -14         13          
-Substrate   4           4           3           4           4           
-ES          -2          -3          -6          -6          11          
-Substrate   -16         1           -17         0           9           
-Enzyme      4           4           5           6           14          
-Product     5           -10         4           -17         13          
-Substrate   -21         6           -21         11          19          
-Substrate   6           -5          0           -3          13          
-ES          -7          1           -2          3           10          
-Substrate   -5          -7          -6          0           10          
-Substrate   1           -2          7           -1          15          
-Enzyme      -2          0           -2          0           0           
-Enzyme      -15         7           -15         10          11          
-Substrate   -6          4           -12         8           14          
-Substrate   -7          2           -9          -3          10          
-Enzyme      0           5           -1          3           3           
-Substrate   -4          3           0           6           17          
-Product     7           5           6           5           6           
-Product     -2          6           0           9           12          
-Substrate   -12         1           -11         3           17          
-ES          12          4           13          1           9           
-Substrate   -15         -9          -17         -11         17          
-Substrate   0           0           0           -1          8           
-Substrate   -1          -2          -1          -1          1           
-Substrate   -11         -4          -7          1           10          
-Substrate   -3          -9          -1          -9          12          
-ES          7           9           4           9           12          
-Substrate   7           -2          13          0           13          
-Substrate   -13         15          -17         13          10          
-Substrate   -9          9           -12         13          14          
-ES          -7          0           -3          1           15          
-ES          -3          1           -5          1           9           
-Substrate   -4          3           -9          8           11          
-Substrate   1           4           1           4           11          
-Substrate   -1          11          -5          12          10          
-Substrate   2           2           6           -1          15          
-ES          5           -2          12          -3          12          
-Enzyme      10          1           9           2           7           
-Substrate   1           -10         3           -11         19          
-Substrate   24          12          25          12          16          
-Enzyme      -5          -4          -3          -3          14          
-Substrate   -14         -7          -17         -10         11          
-Substrate   7           -6          8           -7          14          
-Substrate   -7          -3          -8          -5          11          
-Product     -9          4           -8          3           15          
-Enzyme      0           4           0           4           6           
-ES          -6          -4          -1          -2          15          
-Enzyme      -1          -6          -3          -9          18          
-Substrate   3           3           4           5           8           
-ES          -7          21          -5          18          14          
-Substrate   10          -8          11          -9          9           
-Enzyme      0           0           0           0           0           
-Substrate   3           2           1           6           12          
-Product     2           3           5           3           14          
-Enzyme      -5          8           -4          7           10          
-Substrate   10          -1          9           -2          15          
-Substrate   8           9           11          10          12          
-Product     4           -4          4           -2          3           
-Substrate   -13         0           -11         0           9           
-Substrate   1           2           -1          1           14          
-Substrate   -13         2           -10         -3          17          
-Enzyme      0           2           1           4           2           
-Substrate   9           7           12          1           15          
-Substrate   3           4           6           5           8           
-Substrate   -13         3           -16         3           8           
-Enzyme      0           -14         1           -10         12          
-Substrate   0           -13         3           -11         11          
-Substrate   1           -3          7           -9          16          
-Enzyme      1           1           1           1           0           
-Product     0           4           -7          2           22          
-Substrate   0           12          -3          9           10          
-Substrate   -9          -20         -6          -21         12          
-Substrate   -4          -11         -6          -9          10          
-Substrate   -12         14          -8          16          13          
-Substrate   9           7           12          5           9           
-Substrate   -2          2           -2          -2          16          
-Substrate   4           1           5           1           5           
-Substrate   -7          6           -7          4           14          
-Substrate   -1          10          -3          9           12          
-Product     15          11          17          11          10          
-Substrate   16          18          12          17          14          
-ES          -11         -1          -11         -1          12          
-Substrate   -6          -10         -3          -10         7           
-Product     -3          -4          -4          -2          9           
-ES          12          8           14          6           12          
-Substrate   6           -1          4           2           10          
-Substrate   -11         -12         -7          -10         13          
-ES          -6          -1          -9          2           10          
-Enzyme      0           -9          4           -5          12          
-Substrate   -4          -27         -5          -26         9           
-ES          4           2           10          2           9           
-Substrate   4           9           8           6           9           
-Substrate   2           21          2           21          14          
-Substrate   -1          -8          -1          -7          13          
-Substrate   -11         -13         -7          -13         17          
-Substrate   0           4           -1          7           11          
-Substrate   11          -9          6           -14         11          
-ES          -12         20          -12         16          11          
-Enzyme      4           0           -1          0           15          
-Product     -3          1           -3          1           0           
-Enzyme      -2          11          -5          12          9           
-Enzyme      -4          -2          -3          -4          4           
-Enzyme      -4          -10         -4          -10         3           
-Substrate   5           6           5           7           7           
-Product     2           -8          5           -7          10          
-Substrate   11          4           14          5           12          
-Enzyme      -5          10          -2          14          15          
-Enzyme      -2          4           4           4           14          
-Substrate   0           -6          -2          -5          14          
-Substrate   -4          -4          -5          1           15          
-Substrate   1           -4          -1          -1          15          
-ES          11          0           10          1           15          
-Substrate   -19         5           -16         2           14          
-Substrate   1           11          2           11          15          
-Product     -13         1           -15         1           6           
-ES          -6          -7          -9          -5          11          
-Substrate   -8          -4          -8          -4          15          
-Substrate   -17         -3          -18         -5          8           
-Substrate   14          13          8           13          14          
-Substrate   3           -3          6           0           7           
-Substrate   -6          -12         -14         -9          16          
-Substrate   12          -11         14          -11         10          
-Enzyme      -7          2           -14         6           12          
-Enzyme      8           -5          8           -5          9           
-Substrate   2           -8          2           -12         12          
-Substrate   -1          1           -5          2           12          
-Substrate   3           -6          -1          -8          15          
-Substrate   -2          15          -3          15          14          
-Substrate   -10         -14         -17         -14         14          
-Substrate   -6          19          -8          16          15          
-Substrate   -10         3           -12         1           9           
-ES          -2          -12         -2          -14         11          
-Enzyme      1           -2          1           -7          15          
-Enzyme      0           7           1           8           8           
-Substrate   7           -1          8           -5          16          
-Substrate   4           -3          8           -3          11          
-Substrate   -17         13          -20         14          15          
-Substrate   3           -14         5           -16         11          
-Substrate   -7          -6          -11         -7          17          
-ES          -9          -10         -9          -6          11          
-Substrate   2           3           -1          5           11          
-Substrate   -4          0           1           4           14          
-Substrate   0           -3          -2          -3          4           
-Substrate   1           4           1           5           10          
-Substrate   -4          -3          -9          -4          12          
-Enzyme      0           5           1           4           4           
-Substrate   -16         6           -14         5           8           
-Product     4           1           0           1           4           
-Enzyme      8           0           5           -2          8           
-Substrate   1           -1          -1          -1          9           
-Substrate   -8          -10         -9          -17         13          
-Enzyme      -3          1           -9          8           10          
-Substrate   6           -8          6           -4          19          
-Enzyme      9           5           7           7           14          
-ES          12          -14         6           -16         10          
-Substrate   -9          1           -6          5           12          
-Substrate   -2          -3          -1          -1          14          
-Substrate   -3          -8          1           -10         12          
-Substrate   -6          -7          -6          -5          9           
-Enzyme      9           9           13          6           8           
-Substrate   -4          9           -7          10          11          
-Enzyme      -16         2           -13         1           8           
-Substrate   7           5           3           7           7           
-Substrate   0           2           -1          3           16          
-Substrate   -6          -8          -3          -10         11          
-Enzyme      -3          -7          2           -9          14          
-Product     -2          1           -3          0           1           
-Product     1           -1          1           -1          0           
-Substrate   5           5           6           6           11          
-Substrate   6           1           7           1           4           
-Substrate   0           -4          -2          -3          10          
-Enzyme      -6          2           -8          2           10          
-ES          -16         4           -16         6           8           
-Substrate   11          2           11          -1          12          
-Enzyme      0           -11         -6          -8          12          
-Substrate   -12         -14         -12         -9          13          
-Substrate   -1          11          -2          14          13          
-Substrate   -9          -1          -14         -2          7           
-Substrate   0           -12         3           -12         10          
-Substrate   -4          -14         -7          -13         9           
-Substrate   1           -5          1           -6          9           
-Substrate   4           4           -6          6           15          
-Product     3           2           0           -2          4           
-Product     -5          8           -4          11          15          
-ES          8           8           8           7           6           
-Substrate   10          -4          5           -9          11          
-Substrate   -5          1           -4          3           12          
-Substrate   -10         11          -8          11          7           
-Substrate   7           -3          10          -2          13          
-Enzyme      4           3           5           3           4           
-Substrate   -5          1           -5          3           6           
-Substrate   9           -6          6           1           12          
-Substrate   -4          -13         -4          -11         9           
-Substrate   5           15          6           15          7           
-Substrate   17          4           16          5           14          
-Substrate   0           12          5           14          19          
-Substrate   -13         3           -15         0           11          
-Substrate   -11         -6          -5          -7          10          
-Substrate   -3          1           -6          6           8           
-ES          -9          -17         -10         -22         16          
-Enzyme      1           -11         0           -15         11          
-Substrate   -6          3           -8          2           16          
-Substrate   -5          -8          -7          -8          4           
-Enzyme      -1          -9          -5          -6          9           
-Product     -2          -2          -2          -5          4           
-Substrate   -4          -2          -4          -2          11          
-ES          -5          9           -3          7           17          
-Substrate   13          5           12          5           10          
-Substrate   6           19          6           19          14          
-Substrate   0           -2          -2          2           18          
-Substrate   -4          7           -1          7           11          
-Substrate   6           -4          5           1           8           
-Substrate   -5          1           -1          1           16          
-ES          6           2           10          1           17          
-Enzyme      4           -14         6           -15         14          
-Substrate   -1          2           -9          6           14          
-Substrate   3           -7          6           -5          13          
-Enzyme      3           0           3           0           2           
-Substrate   -8          -13         -12         -16         10          
-Substrate   -15         1           -16         2           6           
-Enzyme      2           -2          3           -2          1           
-Substrate   5           2           4           3           15          
-ES          13          -1          15          -2          13          
-Substrate   -5          4           -9          4           13          
-Substrate   -9          2           -10         3           2           
-Substrate   -10         4           -10         0           12          
-Enzyme      10          -3          14          -4          13          
-Product     -10         -13         -7          -14         11          
-Substrate   19          7           21          4           16          
-ES          -1          -1          1           3           9           
-Substrate   -2          -1          -3          0           5           
-Substrate   11          -10         10          -11         11          
-ES          4           3           12          4           21          
-Enzyme      6           2           6           1           11          
-Substrate   -9          -9          -14         -6          7           
-Substrate   -14         -5          -16         -7          10          
-Substrate   -1          5           -2          6           9           
-ES          1           -16         4           -16         8           
-Substrate   5           -12         7           -11         13          
-Enzyme      6           8           5           9           1           
-Substrate   1           9           -2          12          12          
-Substrate   8           5           7           3           7           
-ES          11          1           10          -1          7           
-Substrate   -8          2           -9          7           10          
-Substrate   -9          2           -9          7           8           
-Substrate   0           16          5           8           12          
-Substrate   6           16          8           17          13          
-Product     0           8           2           8           4           
-ES          -2          -2          -1          2           14          
-ES          0           6           -1          8           15          
-Substrate   -16         -2          -20         -4          15          
-Substrate   2           4           0           5           13          
-Substrate   -5          -23         -11         -26         11          
-Substrate   -6          -6          -6          -6          13          
-Substrate   -3          2           -4          8           18          
-Enzyme      -3          8           -3          4           12          
-Substrate   -12         8           -13         7           11          
-Substrate   -3          2           -3          5           11          
-Substrate   7           13          2           17          8           
-Substrate   -16         -10         -22         -7          14          
-Substrate   19          10          20          14          5           
-Product     5           9           4           11          10          
-Substrate   5           -4          0           -8          9           
-Enzyme      2           5           1           5           16          
-Substrate   4           -8          3           -10         9           
-Substrate   12          -17         11          -14         12          
-Substrate   -8          15          -7          12          9           
-Substrate   3           3           0           5           20          
-ES          8           8           11          7           10          
-Substrate   14          -4          13          -6          11          
-Enzyme      13          2           18          1           11          
-Substrate   -5          2           -3          5           11          
-ES          -7          -6          -9          -7          15          
-Enzyme      19          -5          17          -4          9           
-Enzyme      1           -1          1           -2          1           
-Substrate   1           -1          -1          0           3           
-ES          8           0           9           1           8           
-Substrate   2           -9          4           -8          9           
-Enzyme      -4          5           -3          4           1           
-Substrate   -7          -18         -11         -15         11          
-Substrate   11          -6          10          -4          11          
-Substrate   -12         -6          -11         -3          15          
-Substrate   1           -5          2           -3          15          
-ES          -6          3           -6          5           8           
-ES          -1          7           1           12          11          
-Substrate   -8          3           -6          3           7           
-Substrate   11          1           13          1           12          
-ES          -8          -1          -8          3           11          
-Enzyme      -7          -2          -6          -5          10          
-ES          -14         12          -12         12          14          
-Product     3           -2          2           -1          1           
-Substrate   2           -1          -2          1           10          
-Substrate   1           3           1           2           7           
-Substrate   -2          2           -6          2           13          
-Enzyme      15          22          13          13          14          
-Enzyme      -9          -9          -8          -6          4           
-ES          5           -9          3           -13         15          
-Enzyme      12          9           8           13          18          
-Substrate   4           -8          6           -5          10          
-Substrate   12          -7          9           -6          9           
-Substrate   -8          9           -9          12          14          
-Substrate   5           -4          10          -5          11          
-ES          0           3           -2          0           10          
-Substrate   -4          11          1           10          10          
-Substrate   -7          -2          -7          0           8           
-Substrate   11          -4          13          1           9           
-Substrate   8           -9          6           -4          15          
-Substrate   3           -4          7           1           13          
-Substrate   -6          4           -4          2           6           
-Enzyme      -11         -4          -13         0           12          
-Substrate   -13         6           -15         3           8           
-Substrate   -11         7           -7          7           17          
-Substrate   -11         9           -8          11          14          
-ES          -14         13          -14         16          9           
-Substrate   6           -3          9           -3          13          
-Product     6           13          7           14          21          
-Substrate   5           6           8           7           8           
-ES          -22         6           -29         2           14          
-Substrate   -7          3           -7          1           9           
-ES          -1          2           -5          3           14          
-Substrate   0           -10         -1          -13         7           
-Product     12          7           9           8           12          
-Substrate   3           -2          5           -7          17          
-Substrate   -10         -5          -8          -9          11          
-Product     -1          4           -2          3           10          
-Product     -1          2           1           0           9           
-Substrate   5           7           13          8           18          
-Enzyme      4           3           5           5           10          
-Substrate   -14         19          -13         20          8           
-Product     3           8           8           8           12          
-Substrate   7           -11         10          -10         17          
-Enzyme      -6          1           -5          -3          7           
-Substrate   -9          -8          -10         -10         13          
-Substrate   -16         -20         -18         -15         8           
-Substrate   -3          -1          -1          -2          8           
-Substrate   -9          -4          -10         -6          16          
-Substrate   4           2           4           0           14          
-Substrate   -6          0           -6          -3          13          
-Substrate   -4          6           -6          5           6           
-Enzyme      11          -3          8           -4          10          
-Substrate   0           0           1           1           1           
-ES          -14         -3          -13         -3          11          
-Enzyme      -2          -3          2           -5          7           
-Substrate   -2          -3          0           0           15          
-ES          -2          7           -5          10          13          
-Enzyme      -5          -3          -3          -2          11          
-Substrate   6           -1          5           3           12          
-Enzyme      13          -9          13          -5          10          
-Substrate   1           0           2           -1          2           
-Enzyme      -8          3           -5          2           10          
-Substrate   7           -2          10          -4          14          
-Substrate   -7          -6          -7          -4          17          
-Substrate   3           -10         3           -11         10          
-Substrate   10          19          10          23          13          
-Substrate   11          15          10          15          6           
-Substrate   1           15          4           21          11          
-Enzyme      -14         2           -13         5           8           
-Substrate   4           2           0           4           5           
-Product     -5          -7          -3          -12         15          
-Substrate   12          -4          17          -5          15          
-Substrate   0           0           3           -4          14          
-Substrate   -19         11          -19         12          8           
-Substrate   13          -2          5           -5          15          
-Substrate   -3          -5          -7          -5          11          
-Enzyme      -2          -10         -4          -10         8           
-Substrate   3           12          5           17          15          
-Substrate   5           -10         7           -12         11          
-Substrate   2           6           2           4           13          
-Substrate   -11         7           -8          11          9           
-Enzyme      -3          0           -6          1           15          
-Product     -2          -2          1           -2          9           
-Substrate   11          3           11          0           11          
-Enzyme      -16         3           -18         5           12          
-Substrate   10          16          8           18          11          
-Substrate   5           16          5           15          9           
-Substrate   -4          -5          -3          -3          7           
-Enzyme      -6          6           -6          10          16          
-Substrate   -12         5           -18         0           17          
-Substrate   4           -6          3           -4          7           
-ES          -10         5           -8          7           13          
-ES          -12         8           -14         10          12          
-ES          4           5           6           11          13          
-Substrate   1           9           -4          10          10          
-Substrate   17          9           18          9           13          
-Enzyme      1           8           -1          7           14          
-Substrate   -3          2           -5          2           13          
-Substrate   22          -4          25          -7          17          
-Substrate   14          2           15          2           15          
-Substrate   6           3           7           0           9           
-Substrate   -3          1           1           6           9           
-Substrate   12          -1          12          -1          18          
-Substrate   8           7           6           11          13          
-Substrate   3           -3          8           -7          14          
-Substrate   4           3           2           3           12          
-ES          4           -7          4           -10         8           
-Substrate   3           6           0           6           8           
-Substrate   -11         -6          -13         -8          9           
-Substrate   -4          -1          -6          -6          10          
-Substrate   -6          11          -6          14          14          
-Substrate   16          12          17          6           16          
-Enzyme      4           -2          4           -2          0           
-Substrate   5           4           8           5           10          
-Enzyme      2           0           2           0           0           
-Substrate   -5          -8          -4          -6          8           
-Substrate   -10         0           -6          4           16          
-Substrate   2           4           1           6           14          
-Substrate   -2          0           0           -6          14          
-Substrate   -2          3           -4          7           18          
-Substrate   4           -6          3           -12         14          
-Substrate   16          9           11          7           14          
-Substrate   -4          -5          -11         1           17          
-Substrate   -1          -1          -1          2           10          
-Substrate   -7          -7          -4          -5          13          
-Substrate   -6          2           -3          1           12          
-Substrate   4           6           5           8           9           
-ES          6           12          10          12          15          
-ES          -6          13          0           12          17          
-Substrate   -6          -4          -6          -3          7           
-Product     -10         0           -6          0           12          
-Enzyme      -9          11          -9          11          18          
-Substrate   1           -7          -1          -7          3           
-ES          4           1           -2          -3          15          
-Product     -1          13          -1          12          14          
-Substrate   5           -14         7           -18         10          
-Substrate   7           4           5           5           7           
-Substrate   -12         -7          -12         -7          9           
-Substrate   2           6           -3          7           14          
-Substrate   -1          14          0           13          7           
-Substrate   2           0           1           -1          1           
-Substrate   0           9           -1          4           15          
-Substrate   -8          -6          -8          -6          5           
-Substrate   -4          -16         -4          -17         10          
-ES          -7          -5          -5          -5          13          
-ES          2           4           -2          2           9           
-Substrate   -5          -3          -7          -2          9           
-Substrate   -14         -7          -15         -4          15          
-Substrate   -17         -2          -17         -2          12          
-Substrate   3           0           -2          -2          16          
-Enzyme      0           -1          0           -1          0           
-Substrate   -1          5           -11         -1          21          
-Substrate   -17         3           -15         3           11          
-Substrate   -8          9           -8          8           7           
-ES          -10         7           -12         4           4           
-Substrate   6           4           3           -1          12          
-Substrate   3           2           7           2           13          
-Substrate   13          -2          16          0           19          
-Substrate   -17         -11         -13         -9          9           
-Substrate   -3          -6          -9          -4          14          
-Substrate   -2          1           -3          1           15          
-Substrate   1           11          3           15          12          
-Substrate   -5          4           -2          2           11          
-Substrate   -1          -15         3           -14         9           
-Product     4           -9          -2          -9          13          
-Substrate   2           8           4           15          15          
-Substrate   5           -3          3           -8          11          
-Substrate   -3          1           -1          -1          16          
-Substrate   -3          -6          -6          -2          11          
-Substrate   10          1           8           2           11          
-Substrate   3           4           4           2           19          
-Product     -19         1           -14         1           14          
-ES          -13         -5          -12         -1          10          
-Substrate   14          -6          13          -6          12          
-Substrate   5           -12         13          -19         17          
-ES          6           -2          8           -2          18          
-Substrate   0           0           3           0           9           
-ES          -6          6           -7          11          11          
-Substrate   15          -11         11          -13         10          
-ES          -3          -1          -6          2           13          
-Substrate   10          -12         10          -11         13          
-Substrate   9           1           7           1           7           
-ES          -2          8           -1          5           16          
-Product     -1          0           -1          0           0           
-Enzyme      -8          -7          -7          -5          9           
-Product     -17         18          -17         17          14          
-Substrate   -5          8           -6          7           11          
-Substrate   13          -12         11          -10         10          
-Substrate   -18         2           -20         0           11          
-Substrate   1           -1          1           3           9           
-Enzyme      -9          7           -10         9           8           
-Enzyme      -6          -12         -8          -12         8           
-Enzyme      -2          -4          -4          -2          5           
-Substrate   -9          -1          -8          -6          9           
-Substrate   -5          -4          -2          -7          7           
-Enzyme      -1          0           -1          1           1           
-ES          -7          0           -8          4           11          
-Substrate   -3          -14         -1          -18         18          
-Substrate   -10         2           -8          -2          10          
-Substrate   -1          -8          3           -5          20          
-Substrate   -7          6           -3          5           14          
-Substrate   -10         -6          -9          -7          12          
-Substrate   2           7           0           14          17          
-ES          2           -9          -3          -10         13          
-Enzyme      -1          3           -3          0           11          
-Enzyme      0           10          0           9           13          
-Substrate   -6          4           -11         3           10          
-Substrate   -16         7           -21         5           12          
-ES          10          2           12          -1          4           
-Substrate   12          -1          14          1           12          
-Substrate   11          -3          8           -4          17          
-Product     -5          5           -3          7           3           
-Substrate   -10         -1          -15         -4          12          
-Substrate   5           -1          9           1           9           
-Enzyme      7           -2          5           -1          12          
-Substrate   -15         7           -17         7           5           
-ES          14          -1          15          1           15          
-Substrate   -17         -7          -14         -5          13          
-Product     -9          19          -10         22          10          
-Enzyme      -7          6           -5          5           14          
-Substrate   -15         -3          -12         -5          13          
-Substrate   14          3           10          0           8           
-Substrate   2           9           4           12          12          
-Enzyme      -4          12          -3          10          12          
-Product     1           3           4           2           6           
-Substrate   6           5           11          2           11          
-Substrate   -3          -1          -2          2           11          
-ES          -5          -7          -4          -11         11          
-Enzyme      -2          4           -7          1           8           
-Substrate   -4          3           -5          3           14          
-Substrate   3           -3          0           -2          16          
-Product     6           4           10          8           13          
-Substrate   1           -4          1           -3          17          
-Enzyme      -4          -9          -1          -16         19          
-Substrate   -13         -1          -14         0           10          
-ES          -2          0           -3          1           1           
-Substrate   -3          -1          -1          0           2           
-Product     0           6           1           8           5           
-Substrate   -14         3           -13         2           9           
-Substrate   -3          -13         -4          -12         10          
-Substrate   0           -16         2           -17         6           
-Product     -6          8           -2          7           19          
-Product     -10         1           -8          -2          3           
-Substrate   -2          1           -1          -1          11          
-Substrate   3           -4          2           -1          13          
-ES          8           -2          9           -5          9           
-Enzyme      6           -12         11          -9          9           
+type        x           y           dx_actual   dy_actual   dx_ideal    dy_ideal    collisions  
+Substrate   0           12          17          8           16          3           8           
+ES          0           36          9           3           9           8           16          
+Substrate   0           47          3           -3          3           -3          13          
+Substrate   0           49          5           6           7           5           6           
+Substrate   0           105         -8          0           -9          -1          16          
+ES          0           111         6           -9          11          -10         11          
+Substrate   0           117         1           9           -2          15          11          
+Substrate   1           5           4           -2          -3          -1          13          
+Enzyme      1           24          -20         0           -20         1           7           
+Substrate   1           29          -5          -1          -7          0           11          
+Substrate   1           34          7           1           6           0           13          
+Substrate   1           71          -3          14          -6          15          15          
+Substrate   2           15          15          15          11          15          10          
+ES          2           20          -4          -6          -3          -9          10          
+Substrate   2           29          -3          1           -1          5           8           
+Product     2           32          -3          1           -3          1           0           
+Substrate   2           44          1           4           1           10          10          
+Substrate   2           68          6           -16         9           -18         10          
+Substrate   2           110         8           3           8           0           12          
+ES          3           7           7           3           9           7           15          
+Substrate   3           28          7           -2          4           -8          15          
+Substrate   3           85          3           -9          0           -8          16          
+Substrate   3           93          -6          1           -8          0           15          
+Substrate   4           37          8           5           1           4           14          
+ES          4           48          -5          -6          0           -6          14          
+Substrate   4           51          6           32          9           35          13          
+Substrate   4           110         6           2           4           -2          10          
+Enzyme      4           127         -7          -4          -5          -8          9           
+Substrate   5           13          10          16          11          19          17          
+Enzyme      5           50          -18         14          -16         15          15          
+Substrate   5           105         -6          9           -11         7           13          
+ES          5           116         -5          -8          -2          -8          16          
+Enzyme      5           121         5           3           -1          1           13          
+Enzyme      6           12          12          -15         6           -15         13          
+Substrate   6           42          6           3           9           4           18          
+Substrate   6           78          -5          1           -1          1           5           
+Enzyme      6           118         3           7           3           8           5           
+Substrate   7           2           -2          -2          -2          -2          15          
+Substrate   7           6           1           -1          -2          -3          15          
+ES          8           22          -2          14          -8          14          10          
+Substrate   8           31          -4          -8          -1          -6          16          
+ES          8           75          -4          -15         -5          -16         13          
+Substrate   8           94          -14         -7          -12         -10         14          
+Substrate   8           99          -7          -17         -13         -21         15          
+Substrate   9           28          10          -1          9           -4          7           
+Substrate   9           30          -3          18          -3          21          10          
+Substrate   9           33          6           9           6           13          9           
+Substrate   9           35          2           -4          4           0           6           
+Substrate   9           37          13          -1          11          -1          13          
+Substrate   9           71          1           10          -3          11          13          
+ES          9           97          0           6           0           8           14          
+Enzyme      10          17          1           4           -1          -1          18          
+Substrate   10          29          3           -5          4           -6          7           
+Enzyme      10          71          10          4           9           2           8           
+Substrate   11          1           -6          9           -6          8           10          
+Substrate   11          22          -6          4           -8          7           13          
+Product     11          30          0           4           0           2           7           
+Substrate   11          31          -14         4           -9          3           11          
+Substrate   11          50          5           16          1           16          9           
+Enzyme      11          51          -1          9           -2          10          12          
+Substrate   11          60          -8          -12         -9          -12         12          
+Substrate   11          102         20          13          22          11          6           
+Substrate   12          17          5           -5          7           -5          13          
+Substrate   12          25          3           -4          2           -2          16          
+Substrate   12          40          -6          -1          -5          -6          12          
+Product     12          101         -1          -8          -3          -11         10          
+Substrate   12          104         -3          2           -3          6           14          
+Substrate   12          118         -1          -5          1           -3          11          
+Enzyme      13          54          -6          -4          -5          -5          4           
+Enzyme      13          65          2           -1          3           0           3           
+Product     13          77          3           1           3           0           1           
+ES          13          88          -5          -16         -6          -21         14          
+Substrate   13          89          -1          -6          2           -5          10          
+Enzyme      14          29          7           -6          5           -8          8           
+Substrate   14          55          2           9           0           5           12          
+Substrate   14          73          3           -9          3           -8          8           
+Substrate   14          89          6           -5          5           -6          9           
+ES          14          124         9           -8          8           -5          19          
+Substrate   15          24          3           -4          2           -4          12          
+Substrate   15          78          -7          3           -14         3           16          
+Substrate   15          88          6           -5          5           -3          14          
+Substrate   15          116         0           -3          3           -4          13          
+Enzyme      15          126         -1          -4          -1          -5          2           
+ES          16          14          -4          5           -5          3           14          
+ES          16          32          1           -2          5           1           14          
+Enzyme      16          36          5           -8          4           -7          9           
+Substrate   16          53          -22         -7          -19         -3          14          
+Product     16          84          1           -1          1           -1          0           
+Substrate   16          93          6           3           0           5           15          
+Enzyme      16          119         4           -3          4           -4          1           
+Substrate   17          50          2           5           0           -1          16          
+Substrate   17          55          2           13          7           18          9           
+Substrate   17          60          11          5           12          10          14          
+Substrate   18          14          0           0           10          0           13          
+Enzyme      18          15          7           -4          9           -7          7           
+ES          18          30          -18         -3          -14         -3          11          
+Substrate   18          47          6           0           6           4           14          
+Substrate   18          53          -8          7           -6          9           9           
+Substrate   18          61          -7          4           -10         5           17          
+Substrate   18          71          19          15          19          15          10          
+Substrate   18          105         -3          3           -5          6           9           
+Substrate   18          125         9           2           11          4           11          
+ES          19          16          3           -5          1           -6          11          
+Enzyme      19          25          -6          4           -8          3           12          
+Substrate   19          37          -9          3           0           4           16          
+Substrate   19          73          -4          -3          -4          -2          8           
+Product     19          80          -13         -18         -12         -15         12          
+Substrate   19          81          0           -2          1           -1          2           
+Product     19          82          14          -2          15          -2          12          
+ES          20          38          17          -3          22          -4          12          
+Substrate   20          63          -5          6           -7          10          15          
+Substrate   20          67          -11         6           -13         8           12          
+Substrate   20          85          -10         -1          -11         -3          2           
+Substrate   20          95          4           1           6           0           6           
+Substrate   20          119         -6          0           -9          4           16          
+Substrate   20          123         1           1           0           0           1           
+Substrate   21          25          -24         18          -29         14          12          
+Substrate   21          53          8           -3          6           -3          14          
+Substrate   21          94          -9          -1          -6          0           19          
+Substrate   21          102         -4          9           -2          13          18          
+Substrate   21          109         -3          -6          -5          -11         14          
+ES          22          6           6           -5          7           -2          18          
+Substrate   22          19          -5          -3          -3          -3          9           
+Substrate   22          21          -19         -6          -17         -3          14          
+Substrate   22          40          2           0           3           -1          1           
+Enzyme      22          60          -5          4           -9          2           9           
+Enzyme      22          65          17          -1          19          7           19          
+ES          22          89          1           1           4           0           3           
+Substrate   23          20          8           -8          2           -6          14          
+Substrate   23          46          15          -11         17          -10         13          
+ES          23          85          -9          -8          -13         -5          15          
+Substrate   23          90          -3          -3          -7          -5          15          
+Substrate   23          106         -5          -13         -9          -14         9           
+Substrate   24          7           5           2           6           -1          11          
+Substrate   24          29          10          -1          11          -3          9           
+Substrate   24          50          4           7           7           7           14          
+Substrate   24          51          18          12          16          12          10          
+ES          24          52          10          -6          12          -5          4           
+Substrate   24          62          2           4           -4          1           12          
+Enzyme      24          64          0           0           1           -1          16          
+Substrate   24          67          -5          -11         1           -5          20          
+Substrate   24          95          -9          -4          -7          -10         9           
+Enzyme      24          98          -5          -3          -4          -2          12          
+Substrate   25          79          -5          2           -8          -2          11          
+Substrate   25          99          5           2           -1          -1          12          
+ES          25          106         -12         -1          -12         -4          9           
+Substrate   26          1           7           17          11          14          13          
+Substrate   26          2           2           3           5           -1          11          
+Enzyme      26          7           -7          -4          -8          -8          7           
+Enzyme      26          21          -8          8           -9          5           11          
+Substrate   26          23          -6          9           -7          8           6           
+Substrate   26          26          -2          7           -2          9           16          
+ES          26          27          -6          -11         -6          -13         11          
+Substrate   26          30          -1          -9          2           -6          21          
+Substrate   26          42          6           -1          9           5           18          
+Enzyme      26          127         0           -5          -3          -4          17          
+Substrate   27          10          7           -2          9           -4          14          
+Substrate   27          15          9           -2          12          0           7           
+Substrate   27          26          2           -4          6           -7          14          
+ES          27          30          3           -7          -1          -7          11          
+Substrate   27          53          -1          -1          0           0           7           
+Product     27          84          -1          11          1           10          18          
+Enzyme      28          19          -9          4           -6          3           12          
+Substrate   28          47          7           4           8           0           14          
+Enzyme      28          87          3           -1          6           3           13          
+Substrate   28          88          15          -2          19          -7          20          
+Substrate   29          23          5           5           7           3           13          
+Substrate   29          26          -1          6           -3          5           11          
+Substrate   29          32          -2          6           3           2           19          
+ES          29          63          11          -6          9           -6          10          
+Enzyme      29          96          8           -3          10          3           12          
+Substrate   30          126         -6          4           -3          6           10          
+ES          31          9           2           0           -1          3           14          
+ES          31          15          4           -6          4           -4          11          
+Substrate   31          33          1           -15         0           -12         8           
+Product     31          61          -1          1           -1          1           0           
+Substrate   31          103         -2          5           -2          9           13          
+Substrate   31          105         1           -15         4           -16         10          
+Substrate   31          107         -14         1           -18         1           10          
+Enzyme      32          3           -8          3           -7          8           11          
+Substrate   32          69          9           10          10          13          7           
+Substrate   32          90          1           4           1           9           11          
+ES          32          121         -5          7           -1          5           15          
+Substrate   32          122         1           10          2           7           13          
+Substrate   33          7           -4          -4          -2          -4          11          
+Substrate   33          29          -3          -8          0           -10         8           
+Substrate   33          32          -6          16          -10         17          12          
+Substrate   33          36          15          4           20          3           17          
+Substrate   33          42          15          14          10          11          11          
+Substrate   33          48          0           -1          -1          -2          2           
+Substrate   33          73          5           -8          11          -14         13          
+Substrate   33          83          4           4           3           4           4           
+ES          34          28          -2          -3          -6          -6          11          
+Substrate   34          34          -16         1           -17         0           9           
+Enzyme      34          38          4           4           5           6           14          
+Product     34          43          5           -10         4           -17         13          
+Substrate   34          73          -21         6           -21         11          19          
+Substrate   34          77          6           -5          0           -3          13          
+ES          34          100         -7          1           -2          3           10          
+Substrate   35          3           -5          -7          -6          0           10          
+Substrate   35          12          1           -2          7           -1          15          
+Enzyme      35          39          -2          0           -2          0           0           
+Enzyme      35          86          -15         7           -15         10          11          
+Substrate   35          94          -6          4           -12         8           14          
+Substrate   35          109         -7          2           -9          -3          10          
+Enzyme      36          19          0           5           -1          3           3           
+Substrate   36          73          -4          3           0           6           17          
+Product     36          119         7           5           6           5           6           
+Product     37          27          -2          6           0           9           12          
+Substrate   37          36          -12         1           -11         3           17          
+ES          37          47          12          4           13          1           9           
+Substrate   38          25          -15         -9          -17         -11         17          
+Substrate   38          44          0           0           0           -1          8           
+Substrate   38          73          -1          -2          -1          -1          1           
+Substrate   38          86          -11         -4          -7          1           10          
+Substrate   38          87          -3          -9          -1          -9          12          
+ES          38          97          7           9           4           9           12          
+Substrate   38          110         7           -2          13          0           13          
+Substrate   39          55          -13         15          -17         13          10          
+Substrate   39          76          -9          9           -12         13          14          
+ES          39          89          -7          0           -3          1           15          
+ES          39          109         -3          1           -5          1           9           
+Substrate   39          122         -4          3           -9          8           11          
+Substrate   40          26          1           4           1           4           11          
+Substrate   40          50          -1          11          -5          12          10          
+Substrate   40          72          2           2           6           -1          15          
+ES          40          95          5           -2          12          -3          12          
+Enzyme      40          98          10          1           9           2           7           
+Substrate   40          101         1           -10         3           -11         19          
+Substrate   40          117         24          12          25          12          16          
+Enzyme      41          49          -5          -4          -3          -3          14          
+Substrate   41          59          -14         -7          -17         -10         11          
+Substrate   41          91          7           -6          8           -7          14          
+Substrate   41          103         -7          -3          -8          -5          11          
+Product     41          125         -9          4           -8          3           15          
+Enzyme      42          69          0           4           0           4           6           
+ES          42          86          -6          -4          -1          -2          15          
+Enzyme      42          87          -1          -6          -3          -9          18          
+Substrate   42          110         3           3           4           5           8           
+ES          43          69          -7          21          -5          18          14          
+Substrate   43          101         10          -8          11          -9          9           
+Enzyme      43          109         0           0           0           0           0           
+Substrate   43          114         3           2           1           6           12          
+Product     44          19          2           3           5           3           14          
+Enzyme      44          102         -5          8           -4          7           10          
+Substrate   45          0           10          -1          9           -2          15          
+Substrate   45          19          8           9           11          10          12          
+Product     45          32          4           -4          4           -2          3           
+Substrate   45          86          -13         0           -11         0           9           
+Substrate   45          94          1           2           -1          1           14          
+Substrate   45          115         -13         2           -10         -3          17          
+Enzyme      46          38          0           2           1           4           2           
+Substrate   46          56          9           7           12          1           15          
+Substrate   46          103         3           4           6           5           8           
+Substrate   46          105         -13         3           -16         3           8           
+Enzyme      46          115         0           -14         1           -10         12          
+Substrate   47          16          0           -13         3           -11         11          
+Substrate   47          45          1           -3          7           -9          16          
+Enzyme      47          59          1           1           1           1           0           
+Product     47          69          0           4           -7          2           22          
+Substrate   47          78          0           12          -3          9           10          
+Substrate   48          9           -9          -20         -6          -21         12          
+Substrate   48          15          -4          -11         -6          -9          10          
+Substrate   48          17          -12         14          -8          16          13          
+Substrate   48          83          9           7           12          5           9           
+Substrate   48          101         -2          2           -2          -2          16          
+Substrate   48          108         4           1           5           1           5           
+Substrate   48          116         -7          6           -7          4           14          
+Substrate   48          120         -1          10          -3          9           12          
+Product     48          124         15          11          17          11          10          
+Substrate   48          125         16          18          12          17          14          
+ES          49          41          -11         -1          -11         -1          12          
+Substrate   49          61          -6          -10         -3          -10         7           
+Product     49          102         -3          -4          -4          -2          9           
+ES          49          118         12          8           14          6           12          
+Substrate   50          22          6           -1          4           2           10          
+Substrate   50          75          -11         -12         -7          -10         13          
+ES          50          101         -6          -1          -9          2           10          
+Enzyme      51          67          0           -9          4           -5          12          
+Substrate   51          79          -4          -27         -5          -26         9           
+ES          51          108         4           2           10          2           9           
+Substrate   51          119         4           9           8           6           9           
+Substrate   51          121         2           21          2           21          14          
+Substrate   52          0           -1          -8          -1          -7          13          
+Substrate   52          4           -11         -13         -7          -13         17          
+Substrate   52          31          0           4           -1          7           11          
+Substrate   52          44          11          -9          6           -14         11          
+ES          52          52          -12         20          -12         16          11          
+Enzyme      52          79          4           0           -1          0           15          
+Product     52          103         -3          1           -3          1           0           
+Enzyme      53          34          -2          11          -5          12          9           
+Enzyme      54          20          -4          -2          -3          -4          4           
+Enzyme      54          61          -4          -10         -4          -10         3           
+Substrate   55          39          5           6           5           7           7           
+Product     55          41          2           -8          5           -7          10          
+Substrate   55          52          11          4           14          5           12          
+Enzyme      55          95          -5          10          -2          14          15          
+Enzyme      56          16          -2          4           4           4           14          
+Substrate   56          38          0           -6          -2          -5          14          
+Substrate   56          54          -4          -4          -5          1           15          
+Substrate   56          77          1           -4          -1          -1          15          
+ES          56          101         11          0           10          1           15          
+Substrate   56          107         -19         5           -16         2           14          
+Substrate   57          10          1           11          2           11          15          
+Product     57          16          -13         1           -15         1           6           
+ES          57          53          -6          -7          -9          -5          11          
+Substrate   57          54          -8          -4          -8          -4          15          
+Substrate   57          56          -17         -3          -18         -5          8           
+Substrate   58          6           14          13          8           13          14          
+Substrate   58          58          3           -3          6           0           7           
+Substrate   58          73          -6          -12         -14         -9          16          
+Substrate   58          74          12          -11         14          -11         10          
+Enzyme      58          92          -7          2           -14         6           12          
+Enzyme      58          107         8           -5          8           -5          9           
+Substrate   58          109         2           -8          2           -12         12          
+Substrate   59          2           -1          1           -5          2           12          
+Substrate   59          82          3           -6          -1          -8          15          
+Substrate   59          94          -2          15          -3          15          14          
+Substrate   59          110         -10         -14         -17         -14         14          
+Substrate   59          114         -6          19          -8          16          15          
+Substrate   60          9           -10         3           -12         1           9           
+ES          60          23          -2          -12         -2          -14         11          
+Enzyme      60          39          1           -2          1           -7          15          
+Enzyme      60          43          0           7           1           8           8           
+Substrate   60          61          7           -1          8           -5          16          
+Substrate   60          89          4           -3          8           -3          11          
+Substrate   61          35          -17         13          -20         14          15          
+Substrate   61          46          3           -14         5           -16         11          
+Substrate   61          76          -7          -6          -11         -7          17          
+ES          61          82          -9          -10         -9          -6          11          
+Substrate   61          102         2           3           -1          5           11          
+Substrate   62          17          -4          0           1           4           14          
+Substrate   62          18          0           -3          -2          -3          4           
+Substrate   62          19          1           4           1           5           10          
+Substrate   62          50          -4          -3          -9          -4          12          
+Enzyme      62          51          0           5           1           4           4           
+Substrate   62          64          -16         6           -14         5           8           
+Product     62          70          4           1           0           1           4           
+Enzyme      62          87          8           0           5           -2          8           
+Substrate   62          97          1           -1          -1          -1          9           
+Substrate   62          100         -8          -10         -9          -17         13          
+Enzyme      62          124         -3          1           -9          8           10          
+Substrate   63          3           6           -8          6           -4          19          
+Enzyme      63          21          9           5           7           7           14          
+ES          63          31          12          -14         6           -16         10          
+Substrate   63          36          -9          1           -6          5           12          
+Substrate   63          42          -2          -3          -1          -1          14          
+Substrate   63          65          -3          -8          1           -10         12          
+Substrate   63          73          -6          -7          -6          -5          9           
+Enzyme      63          77          9           9           13          6           8           
+Substrate   63          101         -4          9           -7          10          11          
+Enzyme      64          7           -16         2           -13         1           8           
+Substrate   64          35          7           5           3           7           7           
+Substrate   64          57          0           2           -1          3           16          
+Substrate   64          97          -6          -8          -3          -10         11          
+Enzyme      64          108         -3          -7          2           -9          14          
+Product     65          11          -2          1           -3          0           1           
+Product     65          12          1           -1          1           -1          0           
+Substrate   65          48          5           5           6           6           11          
+Substrate   65          65          6           1           7           1           4           
+Substrate   65          85          0           -4          -2          -3          10          
+Enzyme      65          105         -6          2           -8          2           10          
+ES          66          67          -16         4           -16         6           8           
+Substrate   66          76          11          2           11          -1          12          
+Enzyme      67          8           0           -11         -6          -8          12          
+Substrate   67          30          -12         -14         -12         -9          13          
+Substrate   67          36          -1          11          -2          14          13          
+Substrate   67          40          -9          -1          -14         -2          7           
+Substrate   67          97          0           -12         3           -12         10          
+Substrate   67          99          -4          -14         -7          -13         9           
+Substrate   67          117         1           -5          1           -6          9           
+Substrate   68          49          4           4           -6          6           15          
+Product     68          80          3           2           0           -2          4           
+Product     68          84          -5          8           -4          11          15          
+ES          68          112         8           8           8           7           6           
+Substrate   69          21          10          -4          5           -9          11          
+Substrate   69          24          -5          1           -4          3           12          
+Substrate   69          33          -10         11          -8          11          7           
+Substrate   69          36          7           -3          10          -2          13          
+Enzyme      69          48          4           3           5           3           4           
+Substrate   69          58          -5          1           -5          3           6           
+Substrate   69          60          9           -6          6           1           12          
+Substrate   69          89          -4          -13         -4          -11         9           
+Substrate   69          115         5           15          6           15          7           
+Substrate   70          3           17          4           16          5           14          
+Substrate   70          17          0           12          5           14          19          
+Substrate   70          25          -13         3           -15         0           11          
+Substrate   70          28          -11         -6          -5          -7          10          
+Substrate   70          40          -3          1           -6          6           8           
+ES          70          42          -9          -17         -10         -22         16          
+Enzyme      70          49          1           -11         0           -15         11          
+Substrate   70          55          -6          3           -8          2           16          
+Substrate   70          98          -5          -8          -7          -8          4           
+Enzyme      70          108         -1          -9          -5          -6          9           
+Product     71          13          -2          -2          -2          -5          4           
+Substrate   71          18          -4          -2          -4          -2          11          
+ES          71          20          -5          9           -3          7           17          
+Substrate   71          56          13          5           12          5           10          
+Substrate   71          60          6           19          6           19          14          
+Substrate   71          75          0           -2          -2          2           18          
+Substrate   71          91          -4          7           -1          7           11          
+Substrate   71          113         6           -4          5           1           8           
+Substrate   71          121         -5          1           -1          1           16          
+ES          72          16          6           2           10          1           17          
+Enzyme      72          25          4           -14         6           -15         14          
+Substrate   72          31          -1          2           -9          6           14          
+Substrate   72          32          3           -7          6           -5          13          
+Enzyme      72          67          3           0           3           0           2           
+Substrate   72          97          -8          -13         -12         -16         10          
+Substrate   72          125         -15         1           -16         2           6           
+Enzyme      73          6           2           -2          3           -2          1           
+Substrate   73          34          5           2           4           3           15          
+ES          73          42          13          -1          15          -2          13          
+Substrate   73          44          -5          4           -9          4           13          
+Substrate   73          55          -9          2           -10         3           2           
+Substrate   73          75          -10         4           -10         0           12          
+Enzyme      73          78          10          -3          14          -4          13          
+Product     73          84          -10         -13         -7          -14         11          
+Substrate   73          101         19          7           21          4           16          
+ES          74          25          -1          -1          1           3           9           
+Substrate   74          33          -2          -1          -3          0           5           
+Substrate   74          35          11          -10         10          -11         11          
+ES          74          43          4           3           12          4           21          
+Enzyme      74          96          6           2           6           1           11          
+Substrate   74          109         -9          -9          -14         -6          7           
+Substrate   74          127         -14         -5          -16         -7          10          
+Substrate   75          5           -1          5           -2          6           9           
+ES          75          16          1           -16         4           -16         8           
+Substrate   75          23          5           -12         7           -11         13          
+Enzyme      75          39          6           8           5           9           1           
+Substrate   75          97          1           9           -2          12          12          
+Substrate   75          112         8           5           7           3           7           
+ES          76          20          11          1           10          -1          7           
+Substrate   76          104         -8          2           -9          7           10          
+Substrate   76          120         -9          2           -9          7           8           
+Substrate   77          14          0           16          5           8           12          
+Substrate   77          54          6           16          8           17          13          
+Product     77          97          0           8           2           8           4           
+ES          77          102         -2          -2          -1          2           14          
+ES          78          15          0           6           -1          8           15          
+Substrate   78          36          -16         -2          -20         -4          15          
+Substrate   78          42          2           4           0           5           13          
+Substrate   78          58          -5          -23         -11         -26         11          
+Substrate   78          63          -6          -6          -6          -6          13          
+Substrate   78          121         -3          2           -4          8           18          
+Enzyme      79          21          -3          8           -3          4           12          
+Substrate   79          26          -12         8           -13         7           11          
+Substrate   79          78          -3          2           -3          5           11          
+Substrate   79          91          7           13          2           17          8           
+Substrate   79          98          -16         -10         -22         -7          14          
+Substrate   79          115         19          10          20          14          5           
+Product     80          16          5           9           4           11          10          
+Substrate   80          42          5           -4          0           -8          9           
+Enzyme      80          44          2           5           1           5           16          
+Substrate   80          47          4           -8          3           -10         9           
+Substrate   80          52          12          -17         11          -14         12          
+Substrate   80          103         -8          15          -7          12          9           
+Substrate   80          111         3           3           0           5           20          
+ES          81          24          8           8           11          7           10          
+Substrate   81          38          14          -4          13          -6          11          
+Enzyme      81          98          13          2           18          1           11          
+Substrate   81          110         -5          2           -3          5           11          
+ES          81          119         -7          -6          -9          -7          15          
+Enzyme      81          126         19          -5          17          -4          9           
+Enzyme      82          11          1           -1          1           -2          1           
+Substrate   82          39          1           -1          -1          0           3           
+ES          82          78          8           0           9           1           8           
+Substrate   82          80          2           -9          4           -8          9           
+Enzyme      82          89          -4          5           -3          4           1           
+Substrate   82          118         -7          -18         -11         -15         11          
+Substrate   83          6           11          -6          10          -4          11          
+Substrate   83          34          -12         -6          -11         -3          15          
+Substrate   83          37          1           -5          2           -3          15          
+ES          83          40          -6          3           -6          5           8           
+ES          83          41          -1          7           1           12          11          
+Substrate   83          56          -8          3           -6          3           7           
+Substrate   83          83          11          1           13          1           12          
+ES          83          123         -8          -1          -8          3           11          
+Enzyme      83          124         -7          -2          -6          -5          10          
+ES          84          7           -14         12          -12         12          14          
+Product     84          36          3           -2          2           -1          1           
+Substrate   84          41          2           -1          -2          1           10          
+Substrate   84          56          1           3           1           2           7           
+Substrate   84          77          -2          2           -6          2           13          
+Enzyme      84          94          15          22          13          13          14          
+Enzyme      85          4           -9          -9          -8          -6          4           
+ES          85          8           5           -9          3           -13         15          
+Enzyme      85          13          12          9           8           13          18          
+Substrate   85          28          4           -8          6           -5          10          
+Substrate   85          43          12          -7          9           -6          9           
+Substrate   85          70          -8          9           -9          12          14          
+Substrate   85          83          5           -4          10          -5          11          
+ES          85          107         0           3           -2          0           10          
+Substrate   85          116         -4          11          1           10          10          
+Substrate   86          14          -7          -2          -7          0           8           
+Substrate   86          34          11          -4          13          1           9           
+Substrate   86          69          8           -9          6           -4          15          
+Substrate   86          93          3           -4          7           1           13          
+Substrate   87          7           -6          4           -4          2           6           
+Enzyme      87          37          -11         -4          -13         0           12          
+Substrate   87          57          -13         6           -15         3           8           
+Substrate   87          64          -11         7           -7          7           17          
+Substrate   87          77          -11         9           -8          11          14          
+ES          87          78          -14         13          -14         16          9           
+Substrate   87          107         6           -3          9           -3          13          
+Product     88          4           6           13          7           14          21          
+Substrate   88          23          5           6           8           7           8           
+ES          88          49          -22         6           -29         2           14          
+Substrate   88          67          -7          3           -7          1           9           
+ES          88          69          -1          2           -5          3           14          
+Substrate   88          94          0           -10         -1          -13         7           
+Product     88          109         12          7           9           8           12          
+Substrate   88          127         3           -2          5           -7          17          
+Substrate   89          11          -10         -5          -8          -9          11          
+Product     89          65          -1          4           -2          3           10          
+Product     89          103         -1          2           1           0           9           
+Substrate   90          46          5           7           13          8           18          
+Enzyme      90          56          4           3           5           5           10          
+Substrate   90          81          -14         19          -13         20          8           
+Product     91          29          3           8           8           8           12          
+Substrate   91          41          7           -11         10          -10         17          
+Enzyme      91          68          -6          1           -5          -3          7           
+Substrate   91          79          -9          -8          -10         -10         13          
+Substrate   91          96          -16         -20         -18         -15         8           
+Substrate   92          48          -3          -1          -1          -2          8           
+Substrate   92          57          -9          -4          -10         -6          16          
+Substrate   93          17          4           2           4           0           14          
+Substrate   93          36          -6          0           -6          -3          13          
+Substrate   93          39          -4          6           -6          5           6           
+Enzyme      93          107         11          -3          8           -4          10          
+Substrate   94          12          0           0           1           1           1           
+ES          94          52          -14         -3          -13         -3          11          
+Enzyme      94          84          -2          -3          2           -5          7           
+Substrate   94          113         -2          -3          0           0           15          
+ES          94          124         -2          7           -5          10          13          
+Enzyme      94          126         -5          -3          -3          -2          11          
+Substrate   95          13          6           -1          5           3           12          
+Enzyme      95          32          13          -9          13          -5          10          
+Substrate   95          57          1           0           2           -1          2           
+Enzyme      95          64          -8          3           -5          2           10          
+Substrate   95          76          7           -2          10          -4          14          
+Substrate   95          92          -7          -6          -7          -4          17          
+Substrate   95          106         3           -10         3           -11         10          
+Substrate   96          52          10          19          10          23          13          
+Substrate   96          67          11          15          10          15          6           
+Substrate   96          113         1           15          4           21          11          
+Enzyme      97          11          -14         2           -13         5           8           
+Substrate   97          18          4           2           0           4           5           
+Product     97          71          -5          -7          -3          -12         15          
+Substrate   97          73          12          -4          17          -5          15          
+Substrate   97          113         0           0           3           -4          14          
+Substrate   98          107         -19         11          -19         12          8           
+Substrate   99          65          13          -2          5           -5          15          
+Substrate   99          93          -3          -5          -7          -5          11          
+Enzyme      100         7           -2          -10         -4          -10         8           
+Substrate   100         16          3           12          5           17          15          
+Substrate   100         32          5           -10         7           -12         11          
+Substrate   100         61          2           6           2           4           13          
+Substrate   100         80          -11         7           -8          11          9           
+Enzyme      100         122         -3          0           -6          1           15          
+Product     101         28          -2          -2          1           -2          9           
+Substrate   101         83          11          3           11          0           11          
+Enzyme      102         6           -16         3           -18         5           12          
+Substrate   102         38          10          16          8           18          11          
+Substrate   102         87          5           16          5           15          9           
+Substrate   102         107         -4          -5          -3          -3          7           
+Enzyme      102         125         -6          6           -6          10          16          
+Substrate   103         10          -12         5           -18         0           17          
+Substrate   103         15          4           -6          3           -4          7           
+ES          103         16          -10         5           -8          7           13          
+ES          103         31          -12         8           -14         10          12          
+ES          103         105         4           5           6           11          13          
+Substrate   104         2           1           9           -4          10          10          
+Substrate   104         18          17          9           18          9           13          
+Enzyme      104         28          1           8           -1          7           14          
+Substrate   104         34          -3          2           -5          2           13          
+Substrate   104         46          22          -4          25          -7          17          
+Substrate   104         48          14          2           15          2           15          
+Substrate   104         58          6           3           7           0           9           
+Substrate   104         76          -3          1           1           6           9           
+Substrate   104         78          12          -1          12          -1          18          
+Substrate   104         123         8           7           6           11          13          
+Substrate   105         48          3           -3          8           -7          14          
+Substrate   105         82          4           3           2           3           12          
+ES          105         84          4           -7          4           -10         8           
+Substrate   105         109         3           6           0           6           8           
+Substrate   106         34          -11         -6          -13         -8          9           
+Substrate   106         41          -4          -1          -6          -6          10          
+Substrate   106         70          -6          11          -6          14          14          
+Substrate   106         123         16          12          17          6           16          
+Enzyme      107         37          4           -2          4           -2          0           
+Substrate   107         39          5           4           8           5           10          
+Enzyme      107         67          2           0           2           0           0           
+Substrate   107         76          -5          -8          -4          -6          8           
+Substrate   107         80          -10         0           -6          4           16          
+Substrate   107         99          2           4           1           6           14          
+Substrate   108         4           -2          0           0           -6          14          
+Substrate   108         51          -2          3           -4          7           18          
+Substrate   108         58          4           -6          3           -12         14          
+Substrate   108         80          16          9           11          7           14          
+Substrate   108         97          -4          -5          -11         1           17          
+Substrate   109         26          -1          -1          -1          2           10          
+Substrate   109         30          -7          -7          -4          -5          13          
+Substrate   109         41          -6          2           -3          1           12          
+Substrate   109         51          4           6           5           8           9           
+ES          109         52          6           12          10          12          15          
+ES          109         54          -6          13          0           12          17          
+Substrate   109         65          -6          -4          -6          -3          7           
+Product     109         89          -10         0           -6          0           12          
+Enzyme      109         92          -9          11          -9          11          18          
+Substrate   109         115         1           -7          -1          -7          3           
+ES          109         126         4           1           -2          -3          15          
+Product     110         5           -1          13          -1          12          14          
+Substrate   110         40          5           -14         7           -18         10          
+Substrate   110         59          7           4           5           5           7           
+Substrate   110         68          -12         -7          -12         -7          9           
+Substrate   111         8           2           6           -3          7           14          
+Substrate   111         10          -1          14          0           13          7           
+Substrate   111         43          2           0           1           -1          1           
+Substrate   111         122         0           9           -1          4           15          
+Substrate   112         22          -8          -6          -8          -6          5           
+Substrate   112         42          -4          -16         -4          -17         10          
+ES          112         47          -7          -5          -5          -5          13          
+ES          112         82          2           4           -2          2           9           
+Substrate   112         88          -5          -3          -7          -2          9           
+Substrate   112         123         -14         -7          -15         -4          15          
+Substrate   113         34          -17         -2          -17         -2          12          
+Substrate   113         39          3           0           -2          -2          16          
+Enzyme      113         74          0           -1          0           -1          0           
+Substrate   113         79          -1          5           -11         -1          21          
+Substrate   113         85          -17         3           -15         3           11          
+Substrate   113         90          -8          9           -8          8           7           
+ES          113         108         -10         7           -12         4           4           
+Substrate   113         116         6           4           3           -1          12          
+Substrate   113         121         3           2           7           2           13          
+Substrate   114         30          13          -2          16          0           19          
+Substrate   114         33          -17         -11         -13         -9          9           
+Substrate   114         95          -3          -6          -9          -4          14          
+Substrate   114         99          -2          1           -3          1           15          
+Substrate   114         104         1           11          3           15          12          
+Substrate   115         67          -5          4           -2          2           11          
+Substrate   115         72          -1          -15         3           -14         9           
+Product     115         104         4           -9          -2          -9          13          
+Substrate   115         109         2           8           4           15          15          
+Substrate   115         117         5           -3          3           -8          11          
+Substrate   116         2           -3          1           -1          -1          16          
+Substrate   116         24          -3          -6          -6          -2          11          
+Substrate   116         26          10          1           8           2           11          
+Substrate   116         43          3           4           4           2           19          
+Product     116         75          -19         1           -14         1           14          
+ES          116         76          -13         -5          -12         -1          10          
+Substrate   116         91          14          -6          13          -6          12          
+Substrate   116         107         5           -12         13          -19         17          
+ES          117         26          6           -2          8           -2          18          
+Substrate   117         36          0           0           3           0           9           
+ES          117         43          -6          6           -7          11          11          
+Substrate   117         85          15          -11         11          -13         10          
+ES          117         87          -3          -1          -6          2           13          
+Substrate   117         109         10          -12         10          -11         13          
+Substrate   117         116         9           1           7           1           7           
+ES          117         120         -2          8           -1          5           16          
+Product     118         5           -1          0           -1          0           0           
+Enzyme      118         14          -8          -7          -7          -5          9           
+Product     118         16          -17         18          -17         17          14          
+Substrate   118         27          -5          8           -6          7           11          
+Substrate   118         75          13          -12         11          -10         10          
+Substrate   118         122         -18         2           -20         0           11          
+Substrate   119         14          1           -1          1           3           9           
+Enzyme      119         56          -9          7           -10         9           8           
+Enzyme      119         58          -6          -12         -8          -12         8           
+Enzyme      119         78          -2          -4          -4          -2          5           
+Substrate   119         91          -9          -1          -8          -6          9           
+Substrate   119         96          -5          -4          -2          -7          7           
+Enzyme      119         110         -1          0           -1          1           1           
+ES          120         11          -7          0           -8          4           11          
+Substrate   120         30          -3          -14         -1          -18         18          
+Substrate   120         44          -10         2           -8          -2          10          
+Substrate   121         1           -1          -8          3           -5          20          
+Substrate   121         8           -7          6           -3          5           14          
+Substrate   121         16          -10         -6          -9          -7          12          
+Substrate   121         36          2           7           0           14          17          
+ES          121         43          2           -9          -3          -10         13          
+Enzyme      121         49          -1          3           -3          0           11          
+Enzyme      121         57          0           10          0           9           13          
+Substrate   121         61          -6          4           -11         3           10          
+Substrate   121         101         -16         7           -21         5           12          
+ES          121         102         10          2           12          -1          4           
+Substrate   121         116         12          -1          14          1           12          
+Substrate   121         124         11          -3          8           -4          17          
+Product     122         14          -5          5           -3          7           3           
+Substrate   122         54          -10         -1          -15         -4          12          
+Substrate   122         55          5           -1          9           1           9           
+Enzyme      122         113         7           -2          5           -1          12          
+Substrate   122         119         -15         7           -17         7           5           
+ES          122         125         14          -1          15          1           15          
+Substrate   123         52          -17         -7          -14         -5          13          
+Product     123         54          -9          19          -10         22          10          
+Enzyme      123         74          -7          6           -5          5           14          
+Substrate   123         84          -15         -3          -12         -5          13          
+Substrate   123         94          14          3           10          0           8           
+Substrate   124         28          2           9           4           12          12          
+Enzyme      124         31          -4          12          -3          10          12          
+Product     124         35          1           3           4           2           6           
+Substrate   124         43          6           5           11          2           11          
+Substrate   124         48          -3          -1          -2          2           11          
+ES          124         82          -5          -7          -4          -11         11          
+Enzyme      124         86          -2          4           -7          1           8           
+Substrate   124         98          -4          3           -5          3           14          
+Substrate   124         101         3           -3          0           -2          16          
+Product     125         7           6           4           10          8           13          
+Substrate   125         44          1           -4          1           -3          17          
+Enzyme      125         62          -4          -9          -1          -16         19          
+Substrate   125         73          -13         -1          -14         0           10          
+ES          125         97          -2          0           -3          1           1           
+Substrate   125         99          -3          -1          -1          0           2           
+Product     126         26          0           6           1           8           5           
+Substrate   126         28          -14         3           -13         2           9           
+Substrate   126         29          -3          -13         -4          -12         10          
+Substrate   126         51          0           -16         2           -17         6           
+Product     126         89          -6          8           -2          7           19          
+Product     126         102         -10         1           -8          -2          3           
+Substrate   127         15          -2          1           -1          -1          11          
+Substrate   127         52          3           -4          2           -1          13          
+ES          127         67          8           -2          9           -5          9           
+Enzyme      127         122         6           -12         11          -9          9           

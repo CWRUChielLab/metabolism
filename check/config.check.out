@@ -1,4 +1,4 @@
-version v0.3.5
+version v0.3.5-24-g123a92a
 seed 42
 iters 100
 x 128

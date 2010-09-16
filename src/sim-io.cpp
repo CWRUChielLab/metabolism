@@ -474,6 +474,8 @@ Sim::writeDiffusion()
    out[ Options::FILE_DIFFUSION ]->flags(std::ios::left);
    *(out[ Options::FILE_DIFFUSION ]) << std::setw(colwidth) <<
       "type" << std::setw(colwidth) <<
+      "x" << std::setw(colwidth) <<
+      "y" << std::setw(colwidth) <<
       "dx_actual" << std::setw(colwidth) <<
       "dy_actual" << std::setw(colwidth) <<
       "dx_ideal" << std::setw(colwidth) <<
@@ -488,6 +490,8 @@ Sim::writeDiffusion()
             Atom* thisAtom = world[ getWorldIndex(x,y) ];
             *(out[ Options::FILE_DIFFUSION ]) << std::setw(colwidth) <<
                thisAtom->getType()->getName().c_str() << std::setw(colwidth) <<
+               thisAtom->x << std::setw(colwidth) <<
+               thisAtom->y << std::setw(colwidth) <<
                thisAtom->dx_actual << std::setw(colwidth) <<
                thisAtom->dy_actual << std::setw(colwidth) <<
                thisAtom->dx_ideal << std::setw(colwidth) <<
