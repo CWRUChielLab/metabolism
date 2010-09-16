@@ -101,11 +101,11 @@ An Example Simulation and Analysis
 Once compiled, try running the following from the
 metabolism/src directory:
 
-   ./metabolism --gui-off --load ../load/mm.load --iters 2000 
+   ./metabolism --gui-off --load ../load/michaelismenten.load --iters 2000 
 
 or on Mac:
 
-   metabolism.app/Contents/MacOS/metabolism --gui-off --load ../load/mm.load --iters 2000
+   metabolism.app/Contents/MacOS/metabolism --gui-off --load ../load/michaelismenten.load --iters 2000
 
 This will run a quick simulation of the Michaelis-Menten
 enzyme kinetics system. Data is output to the files
@@ -133,13 +133,13 @@ rate than expected (in particular, note the rate of
 be "mixed" or "stirred" to maximize the rate of collisions
 between reactants. Now try:
 
-   ./metabolism --gui-off --load ../load/mm.load --iters 2000 --shuffle
+   ./metabolism --gui-off --load ../load/michaelismenten.load --iters 2000 --shuffle
    ../scripts/kinetics.R pdf true config.out census.out plots-shuffle
    evince plots-shuffle.pdf
 
 or on Mac:
 
-   metabolism.app/Contents/MacOS/metabolism --gui-off --load ../load/mm.load --iters 2000 --shuffle
+   metabolism.app/Contents/MacOS/metabolism --gui-off --load ../load/michaelismenten.load --iters 2000 --shuffle
    ../scripts/kinetics.R pdf true config.out census.out plots-shuffle
    open plots-shuffle.pdf
 

@@ -36,7 +36,7 @@ BUILD = build
 
 
 # File locations used for 'make bless' and 'make check'
-CHECK_LOAD      = ../load/mm.load
+CHECK_LOAD      = ../load/michaelismenten.load
 CHECK_CONFIG    = ../check/config.check.out
 CHECK_CENSUS    = ../check/census.check.out
 CHECK_DIFFUSION = ../check/diffusion.check.out
