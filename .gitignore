@@ -12,6 +12,7 @@ data
 *.out
 *.pdf
 *.png
+*.svg
 *.tex
 .Rhistory
 
