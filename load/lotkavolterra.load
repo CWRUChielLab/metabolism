@@ -1,9 +1,9 @@
 ele Prey R teal 0.15
 ele Predator F darkorange 0.15
 
-rxn 0.1 Prey -> 2 Prey
-rxn 1.0 Prey + Predator -> 2 Predator
-rxn 0.6 Predator -> *
+rxn 0.04 Prey -> 2 Prey
+rxn 1.00 Prey + Predator -> 2 Predator
+rxn 0.30 Predator -> *
 
 extinct 1 Predator
 
