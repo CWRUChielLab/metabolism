@@ -76,7 +76,7 @@ profile: metabolism-debug
 # Target for removing all files and directories created by
 # 'make'
 clean:
-	rm -rf metabolism* $(BUILD)/ qt-makefile* *.out *.pdf *.png *.tex *~
+	rm -rf metabolism* $(BUILD)/ qt-makefile* *.out *.pdf *.png *.svg *.tex *~
 
 
 
