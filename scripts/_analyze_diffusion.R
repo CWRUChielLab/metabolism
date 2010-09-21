@@ -65,6 +65,7 @@ stats_data[["x"]] = x
 stats_data[["y"]] = y
 stats_data[["samples"]] = samples
 stats_data[["density"]] = samples / (x*y)
+stats_data[["iters"]] = iters
 stats_data[["alpha"]] = alpha
 stats_data[["expected_mean"]] = expected_mean
 stats_data[["expected_var"]]  = expected_var
