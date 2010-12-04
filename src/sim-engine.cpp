@@ -422,7 +422,7 @@ Sim::generateRandNums()
 void
 Sim::shufflePositions()
 {
-   unsigned int i, highest, lowest, range, rand, temp;
+   unsigned int i, size, range, rand, temp;
 
    // Fill the array of random numbers
    generateRandNums();
@@ -433,13 +433,12 @@ Sim::shufflePositions()
       positions[i] = i;
    }
 
-   // Shuffle the positions array
-   highest = o->worldX * o->worldY - 1;
-   for( i = 0; i < highest; i++ )
+   // Shuffle the positions array (Fisher-Yates algorithm)
+   size = o->worldX * o->worldY;
+   for( i = 0; i < size; i++ )
    {
-      lowest = i + 1;
-      range = highest - lowest + 1;
-      rand = ( randNums[i] % range ) + lowest;
+      range = size - i;
+      rand = ( randNums[i] % range ) + i; // [i, size-1]
       temp = positions[i];
       positions[i] = positions[rand];
       positions[rand] = temp;
