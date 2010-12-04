@@ -242,6 +242,7 @@ Sim::loadChemistry()
                catch( std::ifstream::failure e )
                {
                   o->loadFile.clear();
+                  n = 1;
                }
                o->loadFile >> word;
                for( int i = 0; i < n; i++ )
@@ -293,6 +294,7 @@ Sim::loadChemistry()
                catch( std::ifstream::failure e )
                {
                   o->loadFile.clear();
+                  n = 1;
                }
                o->loadFile >> word;
                for( int i = 0; i < n; i++ )
