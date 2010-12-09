@@ -754,7 +754,7 @@ Sim::executeRxns()
    {
       for( int x = 0; x < o->worldX; x++ )
       {
-         if( claimed[ getWorldIndex(x,y) ] == 1)
+         if( claimed[ getWorldIndex(x,y) ] == 1 )
          // If something is encountered that has not been processed yet
          // and could undergo a reaction
          {
@@ -766,7 +766,7 @@ Sim::executeRxns()
             else
             // Else solvent is encountered
             {
-               thisAtom = new Atom( solventEle, x, y);
+               thisAtom = new Atom( solventEle, x, y );
             }
 
             // Determine which neighbor to attempt to react with, if any
@@ -825,6 +825,11 @@ Sim::executeRxns()
                // could undergo a reaction
                   range = rxnTable.equal_range( thisAtom->getType()->getKey() *
                                             neighborAtom->getType()->getKey() );
+               else
+               // Else the neighbor has been processes already or
+               // has too many claims on it, so initialize the range
+               // with an empty set
+                  range = rxnTable.equal_range( -1 );
             // Find the n'th Reaction with the matching set of
             // reactants, where n is a random number between 0 and
             // MAX_RXNS_PER_SET_OF_REACTANTS
