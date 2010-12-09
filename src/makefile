@@ -10,6 +10,7 @@
 #    all                                                     #
 #    bless                                                   #
 #    check                                                   #
+#    debug-check                                             #
 #    profile                                                 #
 #    clean                                                   #
 ##############################################################
@@ -58,6 +59,16 @@ bless: metabolism
 # deviations should be found if the simulation is producing
 # identical results across tested systems
 check: metabolism-minimal
+	./$< --load $(CHECK_CONFIG)
+	@echo "config.out:   " `diff -I version config.out $(CHECK_CONFIG) | wc -l` "deviations"
+	@echo "census.out:   " `diff census.out $(CHECK_CENSUS) | wc -l` "deviations"
+	@echo "diffusion.out:" `diff diffusion.out $(CHECK_DIFFUSION) | wc -l` "deviations"
+	@echo "rand.out:     " `diff rand.out $(CHECK_RAND) | wc -l` "deviations"
+
+
+# Target for running 'make check' using metabolism-debug
+# instead of metabolism-minimal
+debug-check: metabolism-debug
 	./$< --load $(CHECK_CONFIG)
 	@echo "config.out:   " `diff -I version config.out $(CHECK_CONFIG) | wc -l` "deviations"
 	@echo "census.out:   " `diff census.out $(CHECK_CENSUS) | wc -l` "deviations"
@@ -150,7 +161,8 @@ QT_PROJECT = qt-project.pro
 # used by the random number generator
 GIT_TAG := $(shell git describe --tags)
 DEFINES = MEXP=132049
-FLAGS   = -pipe -O3 -Wall -W
+FLAGS   = -pipe -Wall -W
+LFLAGS  =
 LIBS    =
 INCPATH = ..
 
@@ -161,7 +173,6 @@ OS        := $(shell sh -c 'uname -s 2>/dev/null || echo not')
 PROCESSOR := $(shell sh -c 'uname -p 2>/dev/null || echo not')
 ifeq ($(OS),Linux)             # Linux
   DEFINES += BLR_USELINUX HAVE_SSE2
-  LFLAGS = -Wl,-O1
   SPEC = linux-g++
 endif
 ifeq ($(OS),Darwin)            # Mac
@@ -182,20 +193,31 @@ endif
 # will pass through additional parsers, such as 'qmake', and
 # the quotation marks must be preserved
 metabolism: DEFINES+=HAVE_QT HAVE_NCURSES GIT_TAG=\\\\\\\"$(GIT_TAG)\\\\\\\"
+metabolism: FLAGS+=-O3
+metabolism: LFLAGS+=-Wl,-O1
 metabolism: LIBS+=-lncurses
 metabolism: QMAKETARGET=metabolism
 
 metabolism-qt: DEFINES+=HAVE_QT GIT_TAG=\\\\\\\"$(GIT_TAG)\\\\\\\"
+metabolism-qt: FLAGS+=-O3
+metabolism-qt: LFLAGS+=-Wl,-O1
+metabolism-qt: LIBS+=
 metabolism-qt: QMAKETARGET=metabolism-qt
 
 metabolism-ncurses: DEFINES+=HAVE_NCURSES GIT_TAG=\"$(GIT_TAG)\"
+metabolism-ncurses: FLAGS+=-O3
+metabolism-ncurses: LFLAGS+=-Wl,-O1
 metabolism-ncurses: LIBS+=-lncurses
 
 metabolism-minimal: DEFINES+=GIT_TAG=\"$(GIT_TAG)\"
+metabolism-minimal: FLAGS+=-O3
+metabolism-minimal: LFLAGS+=-Wl,-O1
+metabolism-minimal: LIBS+=
 
-metabolism-debug: DEFINES+=GIT_TAG=\"$(GIT_TAG)\"
-metabolism-debug: FLAGS+=-g -pg
-metabolism-debug: LFLAGS+=-g -pg
+metabolism-debug: DEFINES+=GIT_TAG=\"$(GIT_TAG)\" _GLIBCXX_DEBUG
+metabolism-debug: FLAGS+=-O0 -g -pg
+metabolism-debug: LFLAGS+=-Wl,-O0 -g -pg
+metabolism-debug: LIBS+=
 
 
 # Specify the dependencies and build rules for the
