@@ -343,10 +343,6 @@ Sim::initRNG( int initSeed )
    // Set the seed
    init_gen_rand( (uint32_t)(initSeed) );
 
-   static bool allocated = false;
-//   if( !allocated )
-//   {
-      allocated = true;
       free( randNums );
 
       // The array randNums will be treated by the
@@ -388,7 +384,6 @@ Sim::initRNG( int initSeed )
 #endif
       assert( rc == 0 );
       assert( randNums );
-//   }
 }
 
 
