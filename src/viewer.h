@@ -20,8 +20,6 @@ class Viewer : public QGLWidget
 
    public slots:
       void adjustPaintRegion();
-      void startPaint();
-      void resetPaint();
 
    protected:
       void mousePressEvent( QMouseEvent *event );
@@ -32,7 +30,6 @@ class Viewer : public QGLWidget
    private:
       Options* o;
       Sim* sim;
-      bool running;
       int minX;
       int minY;
       int maxX;

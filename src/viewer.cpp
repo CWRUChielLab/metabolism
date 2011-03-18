@@ -15,17 +15,13 @@ Viewer::Viewer( Options* initOptions, Sim* initSim, QWidget *parent )
    o = initOptions;
    sim = initSim;
 
-   // Let the GUI know that the simulation is
-   // not yet running
-   running = false;
-
    // Degrees to rotate the coordinate space
    // counterclockwise around the associated axis
    rotationX = 0.0;
    rotationY = 0.0;
    rotationZ = 0.0;
 
-   if( 0 )
+   if( false )
    {
       zoomXRange  = 64;    // lattice sqaures wide
       zoomYRange  = 64;    // lattice squares high
@@ -60,24 +56,6 @@ Viewer::adjustPaintRegion()
 }
 
 
-// Set the gui to viewer mode
-void
-Viewer::startPaint()
-{
-   running = true;
-   updateGL();
-}
-
-
-// Set the gui to previewer mode
-void
-Viewer::resetPaint()
-{
-   running = false;
-   updateGL();
-}
-
-
 // Mark an Atom as tracked when the mouse is
 // pressed on or near its position
 void
@@ -86,18 +64,6 @@ Viewer::mousePressEvent( QMouseEvent *event )
    int mouseX, mouseY, x, y;
    mouseX = event->x() * ( zoomXRange ) / ( zoomXWindow ) + minX;
    mouseY = ( zoomYWindow - 1 - event->y() ) * ( zoomYRange ) / ( zoomYWindow ) + minY;
-
-   /*
-   if( !running )
-   {
-      event->ignore();
-      return;
-   } else {
-   */
-      event->accept();
-   /*
-   }
-   */
 
    x = mouseX;
    y = mouseY;
@@ -130,6 +96,7 @@ Viewer::mousePressEvent( QMouseEvent *event )
    if( sim->world[ sim->getWorldIndex( x, y ) ] != NULL )
    {
       sim->world[ sim->getWorldIndex( x, y ) ]->setTracked( true );
+      event->accept();
    } else {
       event->ignore();
    }
@@ -238,60 +205,51 @@ Viewer::paintGL()
    double trackedAtomRadiusX   = trackedAtomDiameterX / 2.0;         // in percentage of the window
    double trackedAtomRadiusY   = trackedAtomDiameterY / 2.0;         // in percentage of the window
 
-   // Realtime world visualization
-   //if( running )
-   if( true )
+   // Start specifying points as vertices
+   glBegin( GL_POINTS );
+
+   for( int y = minY; y < maxY; y++ )
    {
-      // Start specifying points as vertices
-      glBegin( GL_POINTS );
-
-      for( int y = minY; y < maxY; y++ )
+      for( int x = minX; x < maxX; x++ )
       {
-         for( int x = minX; x < maxX; x++ )
+         if( x >= 0 && x < o->worldX && y >= 0 && y < o->worldY )
          {
-            if( x >= 0 && x < o->worldX && y >= 0 && y < o->worldY )
+            if( sim->world[ sim->getWorldIndex( x, y ) ] != NULL )
             {
-               if( sim->world[ sim->getWorldIndex( x, y ) ] != NULL )
-               {
-                  // Set the pen color to the Atom's Element's color
-                  qglColor( QColor( sim->world[ sim->getWorldIndex( x, y ) ]->getType()->getColor().c_str() ) );
+               // Set the pen color to the Atom's Element's color
+               qglColor( QColor( sim->world[ sim->getWorldIndex( x, y ) ]->getType()->getColor().c_str() ) );
 
-                  // Create a vertex for the Atom
-                  if( sim->world[ sim->getWorldIndex( x, y ) ]->isTracked() )
+               // Create a vertex for the Atom
+               if( sim->world[ sim->getWorldIndex( x, y ) ]->isTracked() )
+               {
+                  // Tracked ions
+                  for( double xOff = -trackedAtomRadiusX; xOff < trackedAtomRadiusX; xOff += 1.0 / (double)zoomXWindow )
                   {
-                     // Tracked ions
-                     for( double xOff = -trackedAtomRadiusX; xOff < trackedAtomRadiusX; xOff += 1.0 / (double)zoomXWindow )
+                     for( double yOff = -trackedAtomRadiusY; yOff < trackedAtomRadiusY; yOff += 1.0 / (double)zoomYWindow )
                      {
-                        for( double yOff = -trackedAtomRadiusY; yOff < trackedAtomRadiusY; yOff += 1.0 / (double)zoomYWindow )
-                        {
-                           glVertex3f( (GLfloat)( ( x + 1 - minX ) / (double)zoomXRange + xOff ),
-                                       (GLfloat)( ( y + 1 - minY ) / (double)zoomYRange + yOff ),
-                                       (GLfloat)0.0 );
-                        }
+                        glVertex3f( (GLfloat)( ( x + 1 - minX ) / (double)zoomXRange + xOff ),
+                                    (GLfloat)( ( y + 1 - minY ) / (double)zoomYRange + yOff ),
+                                    (GLfloat)0.0 );
                      }
-                  } else {
-                     // Nontracked ions
-                     for( double xOff = -atomRadiusX; xOff < atomRadiusX; xOff += 1.0 / (double)zoomXWindow )
+                  }
+               } else {
+                  // Nontracked ions
+                  for( double xOff = -atomRadiusX; xOff < atomRadiusX; xOff += 1.0 / (double)zoomXWindow )
+                  {
+                     for( double yOff = -atomRadiusY; yOff < atomRadiusY; yOff += 1.0 / (double)zoomYWindow )
                      {
-                        for( double yOff = -atomRadiusY; yOff < atomRadiusY; yOff += 1.0 / (double)zoomYWindow )
-                        {
-                           glVertex3f( (GLfloat)( ( x + 1 - minX ) / (double)zoomXRange + xOff ),
-                                       (GLfloat)( ( y + 1 - minY ) / (double)zoomYRange + yOff ),
-                                       (GLfloat)0.0 );
-                        }
+                        glVertex3f( (GLfloat)( ( x + 1 - minX ) / (double)zoomXRange + xOff ),
+                                    (GLfloat)( ( y + 1 - minY ) / (double)zoomYRange + yOff ),
+                                    (GLfloat)0.0 );
                      }
                   }
                }
             }
          }
       }
-      // Finish specifying points as vertices
-      glEnd();
    }
-   else
-   // World preview visualization
-   {
-   }
+   // Finish specifying points as vertices
+   glEnd();
 }
 
 #endif /* HAVE_QT */

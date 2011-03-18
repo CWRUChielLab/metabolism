@@ -218,9 +218,9 @@ Window::createCtrl()
    {
       eleLayout->addWidget( removeEleBtns[ i ], i, 0 );
       eleLayout->addWidget( colorChips[ i ], i, 1 );
-      eleLayout->addWidget( eleNames[ i ], i , 2 );
-      eleLayout->addWidget( concSliders[ i ], i , 3 );
-      eleLayout->addWidget( concVals[ i ], i , 4 );
+      eleLayout->addWidget( eleNames[ i ], i, 2 );
+      eleLayout->addWidget( concSliders[ i ], i, 3 );
+      eleLayout->addWidget( concVals[ i ], i, 4 );
    }
    ctrlLayout->addLayout( eleLayout );
 
@@ -376,6 +376,9 @@ Window::startPauseResume()
    switch( stackedBtnLayout->currentIndex() )
    {
       case 0: // startBtn
+         plot->startup();
+         // no break
+      case 2: // resumeBtn
          simStarted = true;
          simPaused = false;
 
@@ -405,8 +408,6 @@ Window::startPauseResume()
 
          stackedBtnLayout->setCurrentWidget( pauseBtn );
 
-         viewer->startPaint();
-         plot->startup();
          runSim();
 
          break;
@@ -423,19 +424,6 @@ Window::startPauseResume()
 
          if( o->progress )
             sim->forceProgressReport();
-
-         break;
-      case 2: // resumeBtn
-         simStarted = true;
-         simPaused = false;
-
-         itersLbl->setEnabled( false );
-         itersSlider->setEnabled( false );
-         itersVal->setEnabled( false );
-
-         stackedBtnLayout->setCurrentWidget( pauseBtn );
-
-         runSim();
 
          break;
       default:
