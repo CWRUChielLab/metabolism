@@ -186,9 +186,9 @@ Window::createCtrl()
 
          eleNames.push_back( new QLineEdit( thisEle->getName().c_str() ) );
          eleNames[ i ]->setMinimumWidth( 100 );
-         eleNames[ i ]->setValidator( new QRegExpValidator( QRegExp( "\\S+" ), this ) );
+         eleNames[ i ]->setValidator( new QRegExpValidator( QRegExp( "^[A-Za-z]+\\S*$|^$" ), this ) );
 
-         connect( eleNames[ i ], SIGNAL( textChanged( QString ) ), eleNameMapper, SLOT( map() ) );
+         connect( eleNames[ i ], SIGNAL( editingFinished() ), eleNameMapper, SLOT( map() ) );
          eleNameMapper->setMapping( eleNames[ i ], i );
 
          concSliders.push_back( new QSlider( Qt::Horizontal ) );
@@ -333,8 +333,8 @@ Window::runSim()
 }
 
 
-// Called when the gui window is closed;
-// ensures a clean exit
+// Called when the gui window is closed; ensures a
+// clean exit
 void
 Window::closeEvent( QCloseEvent* event )
 {
@@ -512,15 +512,78 @@ Window::updateEleColor( int eleIndex )
 }
 
 
-// ...
+// Handle Element name changes by updating the
+// periodicTable with the new valid name or
+// warning the user about invalid names
 void
 Window::updateEleName( int eleIndex )
 {
-   std::string newName = eleNames[ eleIndex ]->text().toStdString();
-   Element* thisEle = eles[ eleIndex ];
-   sim->periodicTable.erase( thisEle->getName() );
-   thisEle->setName( newName );
-   sim->periodicTable[ thisEle->getName() ] = thisEle;
+   bool nameIsValid = true;
+
+   // If the contents of the text box no longer match
+   // the Element's name or the contents of the text
+   // box were changed (to the Element's name from
+   // some invalid name)...
+   if( eleNames[ eleIndex ]->text().toStdString() != eles[ eleIndex ]->getName()
+         || eleNames[ eleIndex ]->isModified() )
+   {
+      std::string newName = eleNames[ eleIndex ]->text().toStdString();
+
+      // Warn about use of the name "Solvent"
+      if( newName == "Solvent" )
+      {
+         statusLbl->setText( "WARNING: \"Solvent\" is a reserved name!" );
+         nameIsValid = false;
+      }
+
+      // Warn about empty names
+      if( newName == "" )
+      {
+         statusLbl->setText( "WARNING: All elements require names!" );
+         nameIsValid = false;
+      }
+
+      // Check for duplicated names
+      for( unsigned int i = 0; i < eles.size(); i++ )
+      {
+         if( i != (unsigned int)eleIndex )
+         {
+            if( newName == eles[ i ]->getName() )
+            {
+               // Warn about duplicate names
+               statusLbl->setText( "WARNING: Element names must be unique!" );
+               nameIsValid = false;
+            }
+         }
+      }
+
+      if( nameIsValid )
+      {
+         // If the new name is valid, fix the status bar and
+         // update the periodicTable
+         statusLbl->setText("Ready");
+         Element* thisEle = eles[ eleIndex ];
+         sim->periodicTable.erase( thisEle->getName() );
+         thisEle->setName( newName );
+         sim->periodicTable[ thisEle->getName() ] = thisEle;
+      } else {
+         // If the new name is invalid, return focus and
+         // highlight the invalid name (if the Start button
+         // was not pressed) or change the name back to the
+         // last known valid name
+         if( !simStarted )
+         {
+            eleNames[ eleIndex ]->setFocus();
+            eleNames[ eleIndex ]->selectAll();
+         } else {
+            eleNames[ eleIndex ]->setText( QString( eles[ eleIndex ]->getName().c_str() ) );
+         }
+      }
+
+      // Mark the text box as no longer modified (i.e.,
+      // processed)
+      eleNames[ eleIndex ]->setModified( false );
+   }
 }
 
 
