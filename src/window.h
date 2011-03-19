@@ -30,6 +30,7 @@ class Window : public QMainWindow
       void updateHeight( int newVal );
       void updateSeed( QString newVal );
       void generateSeed();
+      void toggleShuffle( bool newSetting );
       void removeElement( int eleIndex );
       void updateEleColor( int eleIndex );
       void updateEleName( int eleIndex );
@@ -66,6 +67,8 @@ class Window : public QMainWindow
       QLabel* seedLbl;
       QLineEdit* seedVal;
       QPushButton* seedBtn;
+
+      QCheckBox* shuffleBox;
 
       std::vector<Element*> eles;
       std::vector<QPushButton*> removeEleBtns;

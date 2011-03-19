@@ -155,6 +155,15 @@ Window::createCtrl()
    connect( seedVal, SIGNAL( textChanged( QString ) ), this, SLOT( updateSeed( QString ) ) );
    connect( seedBtn, SIGNAL( clicked() ), this, SLOT( generateSeed() ) );
 
+   // Shuffling controller
+   shuffleBox = new QCheckBox( "Enable Sh&uffling" );
+   shuffleBox->setChecked( o->doShuffle );
+   shuffleBox->setToolTip( "Shuffle the positions of all particles each iteration." );
+
+   ctrlLayout->addWidget( shuffleBox );
+
+   connect( shuffleBox, SIGNAL( toggled( bool ) ), this, SLOT( toggleShuffle( bool ) ) );
+
    // Element controllers
    QSignalMapper* removeEleBtnMapper = new QSignalMapper();
    QSignalMapper* colorChipMapper = new QSignalMapper();
@@ -398,6 +407,8 @@ Window::startPauseResume()
          seedVal->setEnabled( false );
          seedBtn->setEnabled( false );
 
+         shuffleBox->setEnabled( false );
+
          for( unsigned int i = 0; i < eles.size(); i++ )
          {
             removeEleBtns[ i ]->setEnabled( false );
@@ -483,6 +494,14 @@ void
 Window::generateSeed()
 {
    seedVal->setText( QString::number( time(NULL) ) );
+}
+
+
+// Handle toggling of the shuffling controller
+void
+Window::toggleShuffle( bool newSetting )
+{
+   o->doShuffle = newSetting;
 }
 
 
