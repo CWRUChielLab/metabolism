@@ -385,7 +385,7 @@ Window::startPauseResume()
    switch( stackedBtnLayout->currentIndex() )
    {
       case 0: // startBtn
-         plot->startup();
+         plot->update();
          // no break
       case 2: // resumeBtn
          simStarted = true;

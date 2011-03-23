@@ -20,7 +20,6 @@ class Plot : public QwtPlot
    public:
       // Constructor
       Plot( Options* initOptions, Sim* initSim, QWidget* parent = 0 );
-      void startup();
 
    public slots:
       void update();
@@ -28,9 +27,12 @@ class Plot : public QwtPlot
    private:
       Options* o;
       Sim* sim;
+      int arrayLength;
       double* iterData;
       DensityMap density;
       CurveMap curves;
+
+      void growArrays();
 };
 
 #endif /* HAVE_QT */
