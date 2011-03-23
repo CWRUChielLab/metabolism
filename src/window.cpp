@@ -116,12 +116,12 @@ Window::createCtrl()
    ySlider->setMinimumWidth( 100 );
    ySlider->setRange( 1, 500 );
    ySlider->setPageStep( 100 );
-   ySlider->setValue( o->worldX );
+   ySlider->setValue( o->worldY );
    ySlider->setToolTip( "Height" );
 
    yLbl->setBuddy( ySlider );
 
-   yVal = new QLabel( QString::number( o->worldX ) );
+   yVal = new QLabel( QString::number( o->worldY ) );
    yVal->setAlignment( Qt::AlignRight );
    yVal->setMinimumSize( itersVal->sizeHint() );
 
