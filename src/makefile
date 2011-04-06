@@ -49,6 +49,7 @@ CHECK_RAND      = ../check/rand.check.out
 # run by the code maintainer when a part of the simulation
 # algorithm or data dumping procedures has been changed such
 # that one would expect it to affect the results
+.PHONY: bless
 bless: metabolism
 	./$< --gui-off --load $(CHECK_LOAD) --iters 100 -x 128 -y 128 --seed 42 --shuffle \
 		--files $(CHECK_CONFIG) $(CHECK_CENSUS) $(CHECK_DIFFUSION) $(CHECK_RAND)
@@ -58,6 +59,7 @@ bless: metabolism
 # comparing the results on a different machine; zero
 # deviations should be found if the simulation is producing
 # identical results across tested systems
+.PHONY: check
 check: metabolism-minimal
 	./$< --load $(CHECK_CONFIG)
 	@echo "config.out:   " `diff -I version config.out $(CHECK_CONFIG) | wc -l` "deviations"
@@ -68,6 +70,7 @@ check: metabolism-minimal
 
 # Target for running 'make check' using metabolism-debug
 # instead of metabolism-minimal
+.PHONY: debug-check
 debug-check: metabolism-debug
 	./$< --load $(CHECK_CONFIG)
 	@echo "config.out:   " `diff -I version config.out $(CHECK_CONFIG) | wc -l` "deviations"
@@ -78,10 +81,11 @@ debug-check: metabolism-debug
 
 # Target for running a simulation and analyzing profiling
 # data to assist with optimization
+.PHONY: profile
 profile: metabolism-debug
 	./$< --iters 50 -x 1000 -y 1000
 	gprof $< > gprof.out
-	cat gprof.out | less
+	less gprof.out
 
 
 # Target for removing all files and directories created by
