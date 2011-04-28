@@ -1,6 +1,7 @@
 # Ignore output files
 *~
 *.swp
+*.pyc
 qt-makefile*
 metabolism*
 

@@ -92,7 +92,7 @@ profile: metabolism-debug
 # 'make'
 .PHONY: clean
 clean:
-	rm -rf $(APPS) $(BUILD)/ qt-makefile* *.out *.pdf *.png *.svg *.tex *~
+	rm -rf $(APPS) $(BUILD)/ qt-makefile* *.pyc *.out *.pdf *.png *.svg *.tex *~
 
 
 
