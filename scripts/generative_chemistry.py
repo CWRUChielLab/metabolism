@@ -5,130 +5,138 @@
 ############################################################
 
 
-def dotProduct(v1, v2):
-   """Find the dot product of two vectors."""
+def dot(v1, v2):
+   """Find the dot product of two vectors of equal length."""
+
    assert(len(v1) == len(v2))
-   return sum([x*y for x,y in zip(v1,v2)])
+
+   return sum(x*y for x,y in zip(v1,v2))
 
 ############################################################
 
-def printEles(names, mass, charge, gibbs):
-   """Print the element table.
-      names:  a list of strings.
-      mass:   a list of molecular weights.
-      charge: a list of valences.
-      gibbs:  a list of free energy values."""
+from itertools import product
 
-   assert(len(names) == len(mass) == len(charge) == len(gibbs))
+def coef(n, max_rxn_order = 2):
+   """Construct a list of all n-tuples of stochiometric coefficients with
+   positive sums less than or equal to max_rxn_order.
+      n: the length of each tuple.
+      max_rxn_order: the maximum allowable sum for a tuple."""
+
+   return [x for x in product(range(max_rxn_order+1),repeat=n) if 0<sum(x)<=max_rxn_order]
+
+############################################################
+
+def buildRxns(names, mass, gibbs):
+   """Construct the set of all valid reactions from the given element parameters,
+   and return the reactant and product petri net matrices.
+      names: a list of strings.
+      mass:  a list of molecular weights.
+      gibbs: a list of free energy values."""
+
+   assert(len(names) == len(mass) == len(gibbs))
+
+   # Construct a list of all tuples of stochiometric
+   # coefficients with positive sums less than or equal to 2
+   coefficients = coef(len(names))
+
+   # Check every combination of reactants and products, and
+   # store those combinations that meet the requirements of
+   # representing a reaction in the simulation: the
+   # reactants and products differ, and mass is conserved
+   r = []
+   p = []
+   for reactants in coefficients:
+      for products in coefficients:
+         if reactants != products:
+            reactantMass = dot(mass, reactants)
+            productMass  = dot(mass, products)
+            if reactantMass == productMass:
+               r.append(reactants)
+               p.append(products)
+
+   return r, p
+
+############################################################
+
+def printEles(names, mass, gibbs):
+   """Print the element table.
+      names: a list of strings.
+      mass:  a list of molecular weights.
+      gibbs: a list of free energy values."""
+
+   assert(len(names) == len(mass) == len(gibbs))
 
    for i in range(len(names)):
-      print("%s\tMass: %d \tCharge: %d \tFree Energy: %d" % (names[i], mass[i], charge[i], gibbs[i]))
+      print("%s\tMass: %d \tFree Energy: %d" % (names[i], mass[i], gibbs[i]))
 
 ############################################################
 
-def printRxn(names, gibbs, reactants, products):
-   """Print the reaction equation. Chemicals named "Solvent" are ignored.
+def printRxns(names, gibbs, reactants, products):
+   """Print the reaction table.
       names: a list of strings.
       gibbs: a list of free energy values.
-      reactants and products: lists of stocheometic coefficients."""
+      reactants, products: matrices of stocheometric coefficients."""
 
-   assert(len(names) == len(gibbs) == len(reactants) == len(products))
+   assert(len(names) == len(gibbs) == len(x) for x in reactants + products)
+   assert(len(reactants) == len(products))
 
-   # Find the indices of all reactants with coefficients > 0
-   r = [i for i,n in enumerate(reactants) if n > 0]
+   for i in range(len(reactants)):
+      # Find the indices of all reactants with coefficients > 0
+      r = [index for index,n in enumerate(reactants[i]) if n>0]
 
-   # Print the reactants
-   for i in r:
-      if names[i] != "Solvent":
-         if reactants[i] == 1:
-            print("%s" % names[i], end="")
-         elif reactants[i] > 1:
-            print("%d %s" % (reactants[i], names[i]), end="")
-         if i != r[-1]:
+      # Print the reactants
+      for j in r:
+         if reactants[i][j] == 1:
+            print("%s" % names[j], end="")
+         else:
+            print("%d %s" % (reactants[i][j], names[j]), end="")
+         if j != r[-1]:
             print(" + ", end="")
 
-   print(" -> ", end="")
+      print(" -> ", end="")
 
-   # Find the indices of all products with coefficients > 0
-   p = [i for i,n in enumerate(products) if n > 0]
+      # Find the indices of all products with coefficients > 0
+      p = [index for index,n in enumerate(products[i]) if n>0]
 
-   # Print the products
-   for i in p:
-      if names[i] != "Solvent":
-         if products[i] == 1:
-            print("%s" % names[i], end="")
-         elif products[i] > 1:
-            print("%d %s" % (products[i], names[i]), end="")
-         if i != p[-1]:
+      # Print the products
+      for j in p:
+         if products[i][j] == 1:
+            print("%s" % names[j], end="")
+         else:
+            print("%d %s" % (products[i][j], names[j]), end="")
+         if j != p[-1]:
             print(" + ", end="")
 
-   # Calculate and print the free energy change
-   deltag = dotProduct(gibbs, products) - dotProduct(gibbs, reactants)
-   print("\t  ΔG = %d" % deltag)
-
-############################################################
-
-def buildRxns(names, mass, charge, gibbs):
-   """List all valid reactions.
-      names:  a list of strings.
-      mass:   a list of molecular weights.
-      charge: a list of valences.
-      gibbs:  a list of free energy values."""
-
-   assert(len(names) == len(mass) == len(charge) == len(gibbs))
-
-   # Construct a matrix of combinations of stochiometic
-   # coefficients with the constraints that rows are unique
-   # and add up to 2
-   #
-   # e.g. if len(names)==3, then
-   #      matrix = [[ 2, 0, 0 ],
-   #                [ 1, 1, 0 ],
-   #                [ 1, 0, 1 ],
-   #                [ 0, 2, 0 ],
-   #                [ 0, 1, 1 ],
-   #                [ 0, 0, 2 ]]
-   matrix = []
-   for i in range(0, len(names)):
-      for j in range(i, len(names)):
-         row = [0]*len(names)
-         row[i] += 1
-         row[j] += 1
-         matrix.append(row)
-
-   # Check every unique combination of reactants and
-   # products, and print out only those combinations that
-   # conserve mass and charge
-   for reactants in matrix:
-      for products in matrix:
-         if reactants != products:
-            reactantMass = dotProduct(mass, reactants)
-            productMass  = dotProduct(mass, products)
-            if reactantMass == productMass:
-               reactantCharge = dotProduct(charge, reactants)
-               productCharge  = dotProduct(charge, products)
-               if reactantCharge == productCharge:
-                  printRxn(names, gibbs, reactants, products)
+      # Calculate and print the free energy change
+      deltag = dot(gibbs, products[i]) - dot(gibbs, reactants[i])
+      print("\t  ΔG = %d" % deltag)
 
 ############################################################
 
 if __name__ == "__main__":
-   #names  = ["Solvent", "A", "B", "C", "D"]
-   #mass   = [0, 1, 2, 3, 4]
-   #charge = [0, 0, 0, 0, 0]
-   #gibbs  = [0, 0, 0, 0, 0]
 
-   names  = ["Solvent", "A", "B", "C", "D", "X", "Y", "Z"]
-   mass   = [0, 3, 7, 10, 6, 9, 1, 4]
-   charge = [0, 0, 0, 1, 0, 0, -1, 0]
-   #charge = [0, 0, 0, 0, 0, 0, 0, 0]
-   gibbs  = [0, 1, 4, 10, 11, 15, 30, 8]
+   import random
+   from math import trunc
+   from time import time
+
+   seed = trunc(time())
+   random.seed(seed)
+   print(":: SEED = %d ::" % seed)
+
+   n = random.randint(3,7)
+   names = [a for i,a in enumerate("ABCDEFGHIJKLM") if i<n]
+   mass  = []
+   gibbs = []
+   for i in range(n):
+      mass.append(random.randint(1,30))
+      gibbs.append(random.randint(1,100))
+   reactants, products = buildRxns(names, mass, gibbs)
 
    print(":: ELEMENT TABLE ::")
-   printEles(names, mass, charge, gibbs)
+   printEles(names, mass, gibbs)
    print()
    print(":: REACTION TABLE ::")
-   buildRxns(names, mass, charge, gibbs)
+   printRxns(names, gibbs, reactants, products)
 
 
 # End
