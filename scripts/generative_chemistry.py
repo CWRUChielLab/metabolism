@@ -16,75 +16,126 @@ def dot(v1, v2):
 
 from itertools import product
 
-def coef(n, max_rxn_order = 2):
-   """Construct a list of all n-tuples of stochiometric coefficients with
-   positive sums less than or equal to max_rxn_order.
-      n: the length of each tuple.
-      max_rxn_order: the maximum allowable sum for a tuple."""
+def coefs(n, max_rxn_order=2):
+   """Construct a matrix of all legal combinations of reactant or product
+   stoichiometric coefficients for a system.
+   Takes as arguments
+      n: the number of species in the system
+      max_rxn_order: the greatest possible reaction order in the system
+   Returns
+      a matrix of stoichiometric coefficients; rows are legal tuples and
+         columns are species"""
 
    return [x for x in product(range(max_rxn_order+1),repeat=n) if 0<sum(x)<=max_rxn_order]
 
 ############################################################
 
-def buildRxns(names, mass, gibbs):
-   """Construct the set of all valid reactions from the given element parameters,
-   and return the reactant and product petri net matrices.
-      names: a list of strings.
-      mass:  a list of molecular weights.
-      gibbs: a list of free energy values."""
+def buildRxns(names, mass):
+   """Construct the set of all valid reactions from the given species parameters.
+   Takes as arguments
+      names: the names of the species
+      mass:  the molecular weights of the species
+   Returns
+      reactants, products: matrices of stoichiometric coefficients; rows are
+         reactions and columns are species"""
 
-   assert(len(names) == len(mass) == len(gibbs))
+   assert(len(names) == len(mass))
+   n = len(names)
 
-   # Construct a list of all tuples of stochiometric
-   # coefficients with positive sums less than or equal to 2
-   coefficients = coef(len(names))
+   # Construct a list of all legal combinations of
+   # stoichiometric coefficients for a system of n species
+   # with a maximum order of reaction of 2
+   coefficients = coefs(n, 2)
 
-   # Check every combination of reactants and products, and
-   # store those combinations that meet the requirements of
-   # representing a reaction in the simulation: the
-   # reactants and products differ, and mass is conserved
-   r = []
-   p = []
-   for reactants in coefficients:
-      for products in coefficients:
-         if reactants != products:
-            reactantMass = dot(mass, reactants)
-            productMass  = dot(mass, products)
+   # Check every legal combination of reactants and
+   # products, and store those combinations that meet the
+   # requirements of representing a reaction in the
+   # system: the reactants and products differ, and mass is
+   # conserved
+   reactants = []
+   products  = []
+   for r in coefficients:
+      for p in coefficients:
+         if r != p:
+            reactantMass = dot(mass, r)
+            productMass  = dot(mass, p)
             if reactantMass == productMass:
-               r.append(reactants)
-               p.append(products)
+               reactants.append(r)
+               products.append(p)
 
-   return r, p
+   return reactants, products
+
+############################################################
+
+import random
+from math import trunc
+from time import time
+
+def randChem(n=None, seed=None):
+   """Create a complete chemistry with randomly assigned species mass and free
+   energy values.
+   Takes as arguments
+      n: the number of species
+      seed: the seed for the random number generator
+   Returns
+      names: the names of the species
+      mass:  the molecular weights of the species
+      gibbs: the free energy values of the species
+      reactants, products: matrices of stoichiometric coefficients; rows are
+         reactions and columns are species
+      seed: the seed used by the random number generator"""
+
+   if seed == None:
+      seed = trunc(time())
+   random.seed(seed)
+   if n == None:
+      n = random.randint(3,7)
+
+   names = list("ABCDEFGHIJKLM")[0:n]
+   mass  = []
+   gibbs = []
+   for i in range(n):
+      mass.append(random.randint(1,30))
+      gibbs.append(random.randint(1,100))
+   reactants, products = buildRxns(names, mass)
+
+   return names, mass, gibbs, reactants, products, seed
 
 ############################################################
 
 def printEles(names, mass, gibbs):
-   """Print the element table.
-      names: a list of strings.
-      mass:  a list of molecular weights.
-      gibbs: a list of free energy values."""
+   """Print the table of species.
+   Takes as arguments
+      names: the names of the species
+      mass:  the molecular weights of the species
+      gibbs: the free energy values of the species"""
 
    assert(len(names) == len(mass) == len(gibbs))
+   n = len(names)
 
-   for i in range(len(names)):
+   for i in range(n):
       print("%s\tMass: %d \tFree Energy: %d" % (names[i], mass[i], gibbs[i]))
 
 ############################################################
 
 def printRxns(names, gibbs, reactants, products):
-   """Print the reaction table.
-      names: a list of strings.
-      gibbs: a list of free energy values.
-      reactants, products: matrices of stocheometric coefficients."""
+   """Print the table of reactions.
+   Takes as arguments
+      names: the names of the species
+      gibbs: the free energy values of the species
+      reactants, products: matrices of stoichiometric coefficients; rows are
+         reactions and columns are species"""
 
    assert(len(names) == len(gibbs) == len(x) for x in reactants + products)
    assert(len(reactants) == len(products))
+   n_rxns = len(reactants)
 
-   for i in range(len(reactants)):
-      # Find the indices of all reactants with coefficients > 0
-      r = [index for index,n in enumerate(reactants[i]) if n>0]
+   for i in range(n_rxns):
+      # Find the indices of all reactants with positive
+      # stoichiometric coefficients
+      r = [index for index,coef in enumerate(reactants[i]) if coef>0]
 
-      # Print the reactants
+      # Print each reactant
       for j in r:
          if reactants[i][j] == 1:
             print("%s" % names[j], end="")
@@ -95,10 +146,11 @@ def printRxns(names, gibbs, reactants, products):
 
       print(" -> ", end="")
 
-      # Find the indices of all products with coefficients > 0
-      p = [index for index,n in enumerate(products[i]) if n>0]
+      # Find the indices of all products with positive
+      # stoichiometric coefficients
+      p = [index for index,coef in enumerate(products[i]) if coef>0]
 
-      # Print the products
+      # Print each product
       for j in p:
          if products[i][j] == 1:
             print("%s" % names[j], end="")
@@ -115,28 +167,16 @@ def printRxns(names, gibbs, reactants, products):
 
 if __name__ == "__main__":
 
-   import random
-   from math import trunc
-   from time import time
+   names, mass, gibbs, reactants, products, seed = randChem()
 
-   seed = trunc(time())
-   random.seed(seed)
-   print(":: SEED = %d ::" % seed)
-
-   n = random.randint(3,7)
-   names = [a for i,a in enumerate("ABCDEFGHIJKLM") if i<n]
-   mass  = []
-   gibbs = []
-   for i in range(n):
-      mass.append(random.randint(1,30))
-      gibbs.append(random.randint(1,100))
-   reactants, products = buildRxns(names, mass, gibbs)
-
+   print("seed = %d" % seed)
+   print()
    print(":: ELEMENT TABLE ::")
    printEles(names, mass, gibbs)
    print()
    print(":: REACTION TABLE ::")
    printRxns(names, gibbs, reactants, products)
+   print()
 
 
 # End
