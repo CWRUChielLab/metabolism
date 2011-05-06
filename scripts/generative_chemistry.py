@@ -78,9 +78,10 @@ def randChem(n=None, seed=None):
       n: the number of species
       seed: the seed for the random number generator
    Returns
-      names: the names of the species
-      mass:  the molecular weights of the species
-      gibbs: the free energy values of the species
+      names:  the names of the species
+      colors: the colors of the species
+      mass:   the molecular weights of the species
+      gibbs:  the free energy values of the species
       reactants, products: matrices of stoichiometric coefficients; rows are
          reactions and columns are species
       seed: the seed used by the random number generator"""
@@ -91,30 +92,35 @@ def randChem(n=None, seed=None):
    if n == None:
       n = random.randint(3,7)
 
-   names = list("ABCDEFGHIJKLM")[0:n]
-   mass  = []
-   gibbs = []
+   assert(n <= 10)
+
+   names  = list("ABCDEFGHIJ")[0:n]
+   colors = ['teal','darkorange','hotpink','yellow','red','blue','lime','fuchsia','blueviolet','maroon'][0:n]
+   mass   = []
+   gibbs  = []
    for i in range(n):
       mass.append(random.randint(1,30))
       gibbs.append(random.randint(1,100))
    reactants, products = buildRxns(names, mass)
 
-   return names, mass, gibbs, reactants, products, seed
+   return names, colors, mass, gibbs, reactants, products, seed
 
 ############################################################
 
-def printEles(names, mass, gibbs):
+def printEles(names, colors, mass, gibbs):
    """Print the table of species.
    Takes as arguments
-      names: the names of the species
-      mass:  the molecular weights of the species
-      gibbs: the free energy values of the species"""
+      names:  the names of the species
+      colors: the colors of the species
+      mass:   the molecular weights of the species
+      gibbs:  the free energy values of the species"""
 
-   assert(len(names) == len(mass) == len(gibbs))
+   assert(len(names) == len(colors) == len(mass) == len(gibbs))
    n = len(names)
 
    for i in range(n):
-      print("%s\tMass: %d \tFree Energy: %d" % (names[i], mass[i], gibbs[i]))
+      print("ele %s %s %s %.2f" % (names[i], names[i], colors[i], random.uniform(0,1)))
+      #print("%s\tMass: %d \tFree Energy: %d" % (names[i], mass[i], gibbs[i]))
 
 ############################################################
 
@@ -131,6 +137,8 @@ def printRxns(names, gibbs, reactants, products):
    n_rxns = len(reactants)
 
    for i in range(n_rxns):
+      print("rxn %.2f " % random.uniform(0,1), end="")
+
       # Find the indices of all reactants with positive
       # stoichiometric coefficients
       r = [index for index,coef in enumerate(reactants[i]) if coef>0]
@@ -161,20 +169,21 @@ def printRxns(names, gibbs, reactants, products):
 
       # Calculate and print the free energy change
       deltag = dot(gibbs, products[i]) - dot(gibbs, reactants[i])
-      print("\t  ΔG = %d" % deltag)
+      #print("\t  ΔG = %d" % deltag)
+      print()
 
 ############################################################
 
 if __name__ == "__main__":
 
-   names, mass, gibbs, reactants, products, seed = randChem()
+   names, colors, mass, gibbs, reactants, products, seed = randChem()
 
-   print("seed = %d" % seed)
+   #print("seed = %d" % seed)
+   #print()
+   #print(":: ELEMENT TABLE ::")
+   printEles(names, colors, mass, gibbs)
    print()
-   print(":: ELEMENT TABLE ::")
-   printEles(names, mass, gibbs)
-   print()
-   print(":: REACTION TABLE ::")
+   #print(":: REACTION TABLE ::")
    printRxns(names, gibbs, reactants, products)
    print()
 
