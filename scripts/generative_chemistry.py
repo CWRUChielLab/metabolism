@@ -100,7 +100,7 @@ def randChem(n=None, seed=None):
    gibbs  = []
    for i in range(n):
       mass.append(random.randint(1,30))
-      gibbs.append(random.randint(1,100))
+      gibbs.append(random.randint(1,4000))
    reactants, products = buildRxns(names, mass)
 
    return names, colors, mass, gibbs, reactants, products, seed
@@ -120,7 +120,6 @@ def printEles(names, colors, mass, gibbs):
 
    for i in range(n):
       print("ele %s %s %s %.2f" % (names[i], names[i], colors[i], random.uniform(0,1)))
-      #print("%s\tMass: %d \tFree Energy: %d" % (names[i], mass[i], gibbs[i]))
 
 ############################################################
 
@@ -137,7 +136,9 @@ def printRxns(names, gibbs, reactants, products):
    n_rxns = len(reactants)
 
    for i in range(n_rxns):
-      print("rxn %.2f " % random.uniform(0,1), end="")
+      # Calculate and print the free energy change
+      deltag = dot(gibbs, products[i]) - dot(gibbs, reactants[i])
+      print("rxn %.2f " % deltag, end="")
 
       # Find the indices of all reactants with positive
       # stoichiometric coefficients
@@ -151,8 +152,8 @@ def printRxns(names, gibbs, reactants, products):
             print("%d %s" % (reactants[i][j], names[j]), end="")
          if j != r[-1]:
             print(" + ", end="")
-
-      print(" -> ", end="")
+         else:
+            print(" -> ", end="")
 
       # Find the indices of all products with positive
       # stoichiometric coefficients
@@ -166,11 +167,8 @@ def printRxns(names, gibbs, reactants, products):
             print("%d %s" % (products[i][j], names[j]), end="")
          if j != p[-1]:
             print(" + ", end="")
-
-      # Calculate and print the free energy change
-      deltag = dot(gibbs, products[i]) - dot(gibbs, reactants[i])
-      #print("\t  ΔG = %d" % deltag)
-      print()
+         else:
+            print()
 
 ############################################################
 
@@ -186,6 +184,17 @@ if __name__ == "__main__":
    #print(":: REACTION TABLE ::")
    printRxns(names, gibbs, reactants, products)
    print()
+
+   # Determine probabilities of reaction
+   from math import exp
+   temp = 298
+   R = 8.3145
+   probs = []
+   for r,p in zip(reactants, products):
+      deltag = dot(gibbs, p) - dot(gibbs, r)
+      activation_energy = max(0, deltag)
+      probs.append(exp(-activation_energy / temp / R))
+   #print(" ".join("%.2f" % x for x in probs))
 
 
 # End
