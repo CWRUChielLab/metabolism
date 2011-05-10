@@ -107,19 +107,16 @@ def randChem(n=None, seed=None):
 
 ############################################################
 
-def printEles(names, colors, mass, gibbs):
+def printEles(names, colors):
    """Print the table of species.
    Takes as arguments
       names:  the names of the species
-      colors: the colors of the species
-      mass:   the molecular weights of the species
-      gibbs:  the free energy values of the species"""
+      colors: the colors of the species"""
 
-   assert(len(names) == len(colors) == len(mass) == len(gibbs))
-   n = len(names)
+   assert(len(names) == len(colors))
 
-   for i in range(n):
-      print("ele %s %s %s %.2f" % (names[i], names[i], colors[i], random.uniform(0,1)))
+   for name,color in zip(names, colors):
+      print("ele %s %s %s %.2f" % (name, name, color, random.uniform(0,1)))
 
 ############################################################
 
@@ -133,39 +130,35 @@ def printRxns(names, gibbs, reactants, products):
 
    assert(len(names) == len(gibbs) == len(x) for x in reactants + products)
    assert(len(reactants) == len(products))
-   n_rxns = len(reactants)
 
-   for i in range(n_rxns):
+   for r,p in zip(reactants, products):
       # Calculate and print the free energy change
-      deltag = dot(gibbs, products[i]) - dot(gibbs, reactants[i])
+      deltag = dot(gibbs, p) - dot(gibbs, r)
       print("rxn %.2f " % deltag, end="")
 
-      # Find the indices of all reactants with positive
-      # stoichiometric coefficients
-      r = [index for index,coef in enumerate(reactants[i]) if coef>0]
+      # Find the name-coefficient pairs of all reactants and
+      # products with positive stoichiometric coefficients
+      r = [(name,coef) for name,coef in zip(names, r) if coef>0]
+      p = [(name,coef) for name,coef in zip(names, p) if coef>0]
 
       # Print each reactant
-      for j in r:
-         if reactants[i][j] == 1:
-            print("%s" % names[j], end="")
+      for name,coef in r:
+         if coef == 1:
+            print("%s" % name, end="")
          else:
-            print("%d %s" % (reactants[i][j], names[j]), end="")
-         if j != r[-1]:
+            print("%d %s" % (coef,name), end="")
+         if (name,coef) != r[-1]:
             print(" + ", end="")
          else:
             print(" -> ", end="")
 
-      # Find the indices of all products with positive
-      # stoichiometric coefficients
-      p = [index for index,coef in enumerate(products[i]) if coef>0]
-
       # Print each product
-      for j in p:
-         if products[i][j] == 1:
-            print("%s" % names[j], end="")
+      for name,coef in p:
+         if coef == 1:
+            print("%s" % name, end="")
          else:
-            print("%d %s" % (products[i][j], names[j]), end="")
-         if j != p[-1]:
+            print("%d %s" % (coef,name), end="")
+         if (name,coef) != p[-1]:
             print(" + ", end="")
          else:
             print()
@@ -179,7 +172,7 @@ if __name__ == "__main__":
    #print("seed = %d" % seed)
    #print()
    #print(":: ELEMENT TABLE ::")
-   printEles(names, colors, mass, gibbs)
+   printEles(names, colors)
    print()
    #print(":: REACTION TABLE ::")
    printRxns(names, gibbs, reactants, products)
