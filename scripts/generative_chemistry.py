@@ -30,17 +30,15 @@ def coefs(n, max_rxn_order=2):
 
 ############################################################
 
-def buildRxns(names, mass):
+def buildRxns(mass):
    """Construct the set of all valid reactions from the given species parameters.
    Takes as arguments
-      names: the names of the species
       mass:  the molecular weights of the species
    Returns
       reactants, products: matrices of stoichiometric coefficients; rows are
          reactions and columns are species"""
 
-   assert(len(names) == len(mass))
-   n = len(names)
+   n = len(mass)
 
    # Construct a list of all legal combinations of
    # stoichiometric coefficients for a system of n species
@@ -92,7 +90,7 @@ def randChem(n=None, seed=None):
    if n == None:
       n = random.randint(3,7)
 
-   assert(n <= 10)
+   assert(0<=n<=10)
 
    names  = list("ABCDEFGHIJ")[0:n]
    colors = ['teal','darkorange','hotpink','yellow','red','blue','lime','fuchsia','blueviolet','maroon'][0:n]
@@ -101,7 +99,7 @@ def randChem(n=None, seed=None):
    for i in range(n):
       mass.append(random.randint(1,30))
       gibbs.append(random.randint(1,4000))
-   reactants, products = buildRxns(names, mass)
+   reactants, products = buildRxns(mass)
 
    return names, colors, mass, gibbs, reactants, products, seed
 
@@ -169,12 +167,8 @@ if __name__ == "__main__":
 
    names, colors, mass, gibbs, reactants, products, seed = randChem()
 
-   #print("seed = %d" % seed)
-   #print()
-   #print(":: ELEMENT TABLE ::")
    printEles(names, colors)
    print()
-   #print(":: REACTION TABLE ::")
    printRxns(names, gibbs, reactants, products)
    print()
 
@@ -185,9 +179,10 @@ if __name__ == "__main__":
    probs = []
    for r,p in zip(reactants, products):
       deltag = dot(gibbs, p) - dot(gibbs, r)
-      activation_energy = max(0, deltag)
+      activation_energy = max(0, deltag)  # intermediates pose no energy barrier;
+                                          # prob = 1 when deltag <= 0
       probs.append(exp(-activation_energy / temp / R))
-   #print(" ".join("%.2f" % x for x in probs))
+   #print("RXN PROBS at T =", temp, "K:", " ".join("%.2f" % x for x in probs))
 
 
 # End
