@@ -185,6 +185,19 @@ Sim::loadChemistry()
    {
       while( o->loadFile.good() )
       {
+         // Remove line breaks before checking for comments
+         while( o->loadFile.peek() == '\n' )
+         {
+            o->loadFile.ignore(1);
+         }
+
+         // Ignore the line if it begins with a '#' character
+         if( o->loadFile.peek() == '#' )
+         {
+            o->loadFile.ignore(1024,'\n');
+            continue;
+         }
+
          o->loadFile >> keyword;
 
          // Read in Elements

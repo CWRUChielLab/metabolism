@@ -117,7 +117,21 @@ Options::Options( int argc, char* argv[] )
             }
             while( loadFile.good() )
             {
+               // Remove line breaks before checking for comments
+               while( loadFile.peek() == '\n' )
+               {
+                  loadFile.ignore(1);
+               }
+
+               // Ignore the line if it begins with a '#' character
+               if( loadFile.peek() == '#' )
+               {
+                  loadFile.ignore(1024,'\n');
+                  continue;
+               }
+
                loadFile >> keyword;
+
                if( keyword == "version" || keyword == "ele" || keyword == "rxn" || keyword == "extinct" )
                {
                   loadFile.ignore(1024,'\n');
